@@ -15,7 +15,6 @@ from ..utils.exceptions import ThreadStopped
 
 
 @dp.callback_query_handler(kb.cb_agree.filter(), is_admin=False)
-@dp.throttled(rate=3)
 async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     thread_id = int(callback_data['thread_id'])
     try:
@@ -39,6 +38,7 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
     try:
         await add_worker_to_thread(user, thread, msg.message_id, msg.bot)
     except IntegrityError:
+        await msg.delete()
         logger.info("user {user} try to be worker in thread {thread} but he already worker in that thread",
                     user=user.id, thread=thread_id)
         return await callback_query.answer("Ошибка, Вы уже подписаны?", show_alert=True, cache_time=3600)
