@@ -1,0 +1,8 @@
+version: '3.2'
+
+services:
+
+  bot:
+    restart: always
+    build: .
+    env_file: .env

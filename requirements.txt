@@ -1,0 +1,5 @@
+aiogram
+loguru
+python-dotenv
+tortoise-orm
+python-dateutil
