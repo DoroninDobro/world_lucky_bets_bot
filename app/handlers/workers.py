@@ -8,9 +8,7 @@ from tortoise.exceptions import DoesNotExist, IntegrityError
 from app.misc import dp
 
 from . import keyboards as kb
-from app.services.work_threads import (
-     thread_not_found,
-)
+from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread
 from ..services.workers import add_worker_to_thread, get_worker_in_thread, get_bet_and_odd, save_new_betting_odd
 from ..utils.exceptions import ThreadStopped
@@ -34,13 +32,26 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
             caption="Вы подписаны на это"
         )
     except (BotBlocked, CantInitiateConversation, Unauthorized):
+        logger.info("user {user} try to be worker in thread {thread} but he don't start conversation with bot",
+                    user=user.id, thread=thread_id)
         return await callback_query.answer("Сначала напишите мне что-то в личку", show_alert=True)
 
     try:
         await add_worker_to_thread(user, thread, msg.message_id, msg.bot)
     except IntegrityError:
-        await callback_query.answer("Ошибка, Вы уже подписаны?", show_alert=True, cache_time=3600)
+        logger.info("user {user} try to be worker in thread {thread} but he already worker in that thread",
+                    user=user.id, thread=thread_id)
+        return await callback_query.answer("Ошибка, Вы уже подписаны?", show_alert=True, cache_time=3600)
+
     await callback_query.answer("успешно")
+    logger.info("user {user} now worker in thread {thread}", user=user.id, thread=thread_id)
+
+
+@dp.callback_query_handler(kb.cb_agree.filter())
+async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+    await callback_query.answer("Админ не может участвовать в работе!", show_alert=True, cache_time=3600)
+    thread_id = int(callback_data['thread_id'])
+    logger.info("admin {user}, try to be worker in thread {thread}", user=user.id, thread=thread_id)
 
 
 @dp.message_handler(is_admin=False, is_reply=True, chat_type=types.ChatType.PRIVATE)
