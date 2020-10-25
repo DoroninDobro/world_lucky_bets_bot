@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters import BoundFilter
 from aiogram.dispatcher.handler import ctx_data
 
 from app import config
-from app.models import Chat
+from app.models import User
 
 
 @dataclass
@@ -14,5 +14,5 @@ class IsAdminFilter(BoundFilter):
 
     async def check(self, obj) -> bool:
         data = ctx_data.get()
-        chat: Chat = data["chat"]
-        return (chat.id in config.admins_list) == self.is_admin
+        user: User = data["user"]
+        return (user.id in config.admins_list) == self.is_admin
