@@ -73,7 +73,10 @@ async def get_stats(thread: WorkThread) -> thread_results:
         for bet in await worker.bets:
             money_sum += bet.money
             win_sum += bet.money * bet.odd
-        average_odd = win_sum / money_sum
+        try:
+            average_odd = win_sum / money_sum
+        except ZeroDivisionError:
+            average_odd = 0.0
         results.append((user, money_sum, average_odd))
     return results
 
@@ -86,8 +89,13 @@ def format_results_thread(results: thread_results, thread_id: int) -> str:
         text += f"\n{user.mention_link} общая сумма {money_sum}, средний кэф {average_odd:.2f}"
         total_sum += money_sum
         total_win_sum += money_sum * average_odd
-    total_odd = total_win_sum / total_sum
-    text += f"\n\nИтого за матч: общая сумма {total_sum}, средний кэф {total_odd:.2f}"
+    text += f"\n\nИтого за матч: общая сумма {total_sum}"
+    try:
+        total_odd = total_win_sum / total_sum
+    except ZeroDivisionError:
+        text += "."
+    else:
+        text += f", средний кэф {total_odd:.2f}."
     return text
 
 

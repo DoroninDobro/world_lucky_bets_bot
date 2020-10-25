@@ -17,7 +17,7 @@ class WorkerInThread(Model):
 
     class Meta:
         table = "workers_in_threads"
-        unique = ("worker", "work_thread")
+        unique_together = (("worker", "work_thread"),)
 
     def __repr__(self):
         return f"<WorkerInThread id={self.id}>"

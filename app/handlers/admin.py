@@ -17,13 +17,13 @@ from app.services.work_threads import (
     get_workers_from_thread,
 )
 from app import config
-from app.models import User, WorkThread, AdditionalText, SendWorkers
+from app.models import User, AdditionalText, SendWorkers
 from ..services.additional_text import new_additional_text, create_send_workers, get_workers, get_enable_workers, \
     change_disinformation, change_worker, mark_additional_text_as_send
 from ..services.remove_message import delete_message
 
 
-@dp.message_handler(is_admin=True, is_reply=False, content_types=types.ContentType.PHOTO)
+@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False, content_types=types.ContentType.PHOTO)
 @dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread ", user=message.from_user.id)
@@ -39,7 +39,7 @@ async def new_send(message: types.Message, user: User):
     await delete_message(message)
 
 
-@dp.message_handler(is_admin=True, is_reply=True)
+@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=True)
 async def add_new_info(message: types.Message, user: User, reply: types.Message):
     try:
         thread = await get_thread(reply.message_id)
