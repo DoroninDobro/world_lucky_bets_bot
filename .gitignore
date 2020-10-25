@@ -134,3 +134,6 @@ dmypy.json
 
 # logs
 /log
+
+# IDE stuff
+.idea/
