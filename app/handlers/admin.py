@@ -80,7 +80,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
-async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_disinformation(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
     is_disinformation = bool(int(callback_data['is_disinformation']))
@@ -91,7 +91,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 
 
 @dp.callback_query_handler(kb.cb_workers.filter())
-async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_addressee_workers(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
     worker = await SendWorkers.get(id=int(callback_data["send_worker_id"]))
     enable = bool(int(callback_data["enable"]))
