@@ -9,7 +9,6 @@ RUN apt update -y \
     && apt autoclean -y \
     && apt autoremove -y \
     && rm -rf /var/lib/apt/lists/*
-WORKDIR "."
 EXPOSE 3000
 COPY app app
-ENTRYPOINT ["python3", "-m", "app"]
+ENTRYPOINT ["python3", "-m", "app", "-p"]
