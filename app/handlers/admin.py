@@ -2,6 +2,7 @@ import asyncio
 import typing
 
 from aiogram import types
+from aiogram.dispatcher.handler import CancelHandler
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
@@ -63,7 +64,8 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
     except DoesNotExist:
         logger.info("admin {user} try send message without thread", user=user.id)
         await callback_query.answer("Это какая-то странная кнопка, я удалю от греха подальше", show_alert=True)
-        return await callback_query.message.edit_text("Тут было какое-то старое сообщение с невалидными кнопками")
+        await callback_query.message.edit_text("Тут было какое-то старое сообщение с невалидными кнопками")
+        raise CancelHandler
     else:
         return a_t, thread
 
