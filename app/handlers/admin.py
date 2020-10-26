@@ -24,7 +24,8 @@ from ..services.additional_text import new_additional_text, create_send_workers,
 from ..services.remove_message import delete_message
 
 
-@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False, content_types=types.ContentType.PHOTO)
+@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
+                    content_types=types.ContentType.PHOTO)
 @dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread ", user=message.from_user.id)
@@ -52,6 +53,7 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
     a_t = await new_additional_text(message.text, thread)
     workers = await create_send_workers(await get_workers_from_thread(thread), a_t)
     await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
+    await message.delete()
 
 
 async def get_additional_text(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
@@ -76,7 +78,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
     workers = await get_enable_workers(a_t)
     await mark_additional_text_as_send(a_t)
     asyncio.create_task(start_mailing(thread, workers, a_t.text, callback_query.bot))
-    await callback_query.message.edit_text("Отправлено")
+    await callback_query.message.edit_text(f"Отправлено:\n{a_t.text}")
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
