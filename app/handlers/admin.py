@@ -50,7 +50,7 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         return await message.reply("Непонятно, это сообщение не направлено на стартовое")
 
     logger.info("admin {user} add new info to thread {thread} ", user=user.id, thread=thread.id)
-    a_t = await new_additional_text(message.text, thread)
+    a_t = await new_additional_text(message.html_text, thread)
     workers = await create_send_workers(await get_workers_from_thread(thread), a_t)
     await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
     await message.delete()
