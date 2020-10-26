@@ -81,7 +81,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
-async def change_disinformation(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_disinformation_handler(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
     is_disinformation = bool(int(callback_data['is_disinformation']))
