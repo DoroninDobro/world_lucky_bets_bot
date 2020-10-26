@@ -2,6 +2,7 @@ import asyncio
 import typing
 
 from aiogram import types
+from aiogram.dispatcher.handler import CancelHandler
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
@@ -23,7 +24,8 @@ from ..services.additional_text import new_additional_text, create_send_workers,
 from ..services.remove_message import delete_message
 
 
-@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False, content_types=types.ContentType.PHOTO)
+@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
+                    content_types=types.ContentType.PHOTO)
 @dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread ", user=message.from_user.id)
@@ -48,7 +50,7 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         return await message.reply("Непонятно, это сообщение не направлено на стартовое")
 
     logger.info("admin {user} add new info to thread {thread} ", user=user.id, thread=thread.id)
-    a_t = await new_additional_text(message.text, thread)
+    a_t = await new_additional_text(message.html_text, thread)
     workers = await create_send_workers(await get_workers_from_thread(thread), a_t)
     await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
 
@@ -63,7 +65,8 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
     except DoesNotExist:
         logger.info("admin {user} try send message without thread", user=user.id)
         await callback_query.answer("Это какая-то странная кнопка, я удалю от греха подальше", show_alert=True)
-        return await callback_query.message.edit_text("Тут было какое-то старое сообщение с невалидными кнопками")
+        await callback_query.message.edit_text("Тут было какое-то старое сообщение с невалидными кнопками")
+        raise CancelHandler
     else:
         return a_t, thread
 
@@ -74,11 +77,11 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
     workers = await get_enable_workers(a_t)
     await mark_additional_text_as_send(a_t)
     asyncio.create_task(start_mailing(thread, workers, a_t.text, callback_query.bot))
-    await callback_query.message.edit_text("Отправлено")
+    await callback_query.message.edit_text(f"Отправлено:\n{a_t.text}")
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
-async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_disinformation_handler(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
     is_disinformation = bool(int(callback_data['is_disinformation']))
@@ -89,7 +92,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 
 
 @dp.callback_query_handler(kb.cb_workers.filter())
-async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_addressee_workers(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
     worker = await SendWorkers.get(id=int(callback_data["send_worker_id"]))
     enable = bool(int(callback_data["enable"]))
