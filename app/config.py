@@ -20,16 +20,18 @@ tz_view = tz.gettz('Europe/Moscow')
 PRINT_LOG = "print.log"
 
 BOMZHEG_ID = 46866565
-GLOBAL_ADMIN_ID = BOMZHEG_ID
-SUPERUSERS = {GLOBAL_ADMIN_ID}
+TREE_HOUSE_TRIP_ID = 203288953
+SUPERUSERS = {BOMZHEG_ID, TREE_HOUSE_TRIP_ID}
 
-TECH_LOG_CHAT_ID = -1001170611048
-USER_LOG_CHAT_ID = -1001477659294
-WORKERS_CHAT_ID = -1001451802107
+TECH_LOG_CHAT_ID = os.getenv("TECH_LOG_CHAT_ID", -1001171895296)
+USER_LOG_CHAT_ID = os.getenv("USER_LOG_CHAT_ID", -1001350461791)
+WORKERS_CHAT_ID = os.getenv("WORKERS_CHAT_ID", -1001363065436)
 
-with open(jsons_dir / 'allow_list.json') as f:
-    allow_list = set(json.load(f))
-with open(jsons_dir / 'admins_list.json') as f:
+allow_list_path = jsons_dir / 'allow_list.json'
+ENABLE_ALLOW_LIST = bool(int(os.getenv("ENABLE_ALLOW_LIST", default=0)))
+
+admin_list_path = jsons_dir / 'admins_list.json'
+with open(admin_list_path) as f:
     admins_list = set(json.load(f))
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
