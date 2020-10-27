@@ -35,7 +35,7 @@ def get_kb_menu_send(
         callback_data=cb_send_now.new(additional_text=additional_text.id)
     ))
     kb.insert(InlineKeyboardButton(
-        "Пометить как дезу" if not additional_text.is_disinformation else "Пометить как правдивую",
+        get_disinformation_button_name(additional_text.is_disinformation),
         callback_data=cb_is_disinformation.new(
             additional_text=additional_text.id,
             is_disinformation=int(not additional_text.is_disinformation)
@@ -49,3 +49,9 @@ def get_kb_menu_send(
             )
         ))
     return kb
+
+
+def get_disinformation_button_name(now_marked_as_disinformation: bool) -> str:
+    if now_marked_as_disinformation:
+        return permissions_emoji[not now_marked_as_disinformation] + "Выключить приватный режим"
+    return permissions_emoji[not now_marked_as_disinformation] + "Включить приватный режим"
