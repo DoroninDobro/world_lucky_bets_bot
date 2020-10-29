@@ -21,7 +21,7 @@ def get_stop_kb(thread_id: int) -> InlineKeyboardMarkup:
 
 def get_agree_work(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
-    kb.insert(InlineKeyboardButton("Буду работать", callback_data=cb_agree.new(thread_id=thread_id)))
+    kb.insert(InlineKeyboardButton("Буду работать +", callback_data=cb_agree.new(thread_id=thread_id)))
     return kb
 
 

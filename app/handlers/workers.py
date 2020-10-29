@@ -7,7 +7,7 @@ from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from app.misc import dp
 
-from . import keyboards as kb
+from .. import keyboards as kb
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread
 from ..services.workers import add_worker_to_thread, get_worker_in_thread, get_bet_and_odd, save_new_betting_odd
@@ -36,7 +36,7 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
         return await callback_query.answer("Сначала напишите мне что-то в личку", show_alert=True)
 
     try:
-        await add_worker_to_thread(user, thread, msg.message_id, msg.bot)
+        await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread)
     except IntegrityError:
         await msg.delete()
         logger.info("user {user} try to be worker in thread {thread} but he already worker in that thread",

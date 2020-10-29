@@ -5,12 +5,12 @@ from aiogram import Bot
 from app import config
 from app.models import User, WorkThread, WorkerInThread, BetItem
 from app.models.bets_log import BettingOdd
+from app.models.work_thread import check_thread_running
 from app.utils.exceptions import ThreadStopped
 
 
-async def add_worker_to_thread(user: User, thread: WorkThread, message_id: int, bot: Bot):
-    if thread.stopped:
-        raise ThreadStopped(user_id=user.id)
+@check_thread_running
+async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread: WorkThread):
     await WorkerInThread.create(work_thread=thread, worker=user, message_id=message_id)
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
@@ -35,7 +35,7 @@ async def save_new_betting_odd(betting_odd: BettingOdd, worker_in_thread: Worker
     user = await worker_in_thread.worker
     thread = await worker_in_thread.work_thread
     if thread.stopped:
-        raise ThreadStopped(user_id=user.id)
+        raise ThreadStopped(user_id=user.id, thread_id=thread.id)
     bet_item = await BetItem.create(worker_thread=worker_in_thread, money=betting_odd.money, odd=betting_odd.odd)
     await bot.send_message(
         config.USER_LOG_CHAT_ID,

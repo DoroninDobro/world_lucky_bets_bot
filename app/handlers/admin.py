@@ -1,26 +1,31 @@
 import asyncio
 import typing
 
-from aiogram import types
+from aiogram import types, Bot
 from aiogram.dispatcher.handler import CancelHandler
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
 from app.misc import dp
 
-from . import keyboards as kb
 from app.services.work_threads import (
     start_new_thread,
     stop_thread,
     get_thread,
     start_mailing,
-    update_message_id, thread_not_found, get_stats, format_results_thread, send_notification_stop,
-    get_workers_from_thread,
+    thread_not_found,
+    get_stats,
+    format_results_thread,
+    send_notification_stop,
+    add_info_to_thread,
 )
-from app import config
-from app.models import User, AdditionalText, SendWorkers
-from ..services.additional_text import new_additional_text, create_send_workers, get_workers, get_enable_workers, \
-    change_disinformation, change_worker, mark_additional_text_as_send
+from app import config, keyboards as kb
+from app.models import User, AdditionalText, WorkThread
+from ..services.additional_text import (
+    get_workers,
+    change_disinformation,
+    change_worker,
+)
 from ..services.remove_message import delete_message
 
 
@@ -30,14 +35,11 @@ from ..services.remove_message import delete_message
 async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread ", user=message.from_user.id)
     photo_file_id = message.photo[-1].file_id
-    thread = await start_new_thread(photo_file_id, user.id)
-    await message.send_copy(config.WORKERS_CHAT_ID, reply_markup=kb.get_agree_work(thread.id))
-    msg = await message.reply_photo(
-        photo=photo_file_id,
-        caption=f"Сообщение отправлено, thread_id = {thread.id}",
-        reply_markup=kb.get_stop_kb(thread.id)
-    )
-    await update_message_id(thread, msg.message_id)
+    try:
+        await start_new_thread(photo_file_id, user, message.bot)
+    except Exception:
+        await message.reply("Что-то пошло не так, мы записали проблему")
+        raise
     await delete_message(message)
 
 
@@ -50,8 +52,13 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         return await message.reply("Непонятно, это сообщение не направлено на стартовое")
 
     logger.info("admin {user} add new info to thread {thread} ", user=user.id, thread=thread.id)
-    a_t = await new_additional_text(message.html_text, thread)
-    workers = await create_send_workers(await get_workers_from_thread(thread), a_t)
+    try:
+        a_t, workers = await add_info_to_thread(message.html_text, thread=thread)
+    except Exception:
+        await message.reply(
+            "Что-то пошло не так, я уверен, однажды, дела образуются, пока могу посоветовать только отправить ещё разок"
+        )
+        raise
     await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
 
 
@@ -74,14 +81,24 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
 @dp.callback_query_handler(kb.cb_send_now.filter())
 async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
-    workers = await get_enable_workers(a_t)
-    await mark_additional_text_as_send(a_t)
-    asyncio.create_task(start_mailing(thread, workers, a_t.text, callback_query.bot))
-    await callback_query.message.edit_text(f"Отправлено:\n{a_t.text}")
+    asyncio.create_task(process_mailing(callback_query, a_t, callback_query.bot, thread=thread))
+
+
+async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
+    try:
+        await start_mailing(a_text, bot, thread=thread)
+    except Exception:
+        await callback_query.answer("Произошла ошибка, мы записали, постараемся разобраться", show_alert=True)
+        raise
+    await callback_query.message.edit_text(f"Отправлено:\n{a_text.text}")
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
-async def change_disinformation_handler(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_disinformation_handler(
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        user: User
+):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
     is_disinformation = bool(int(callback_data['is_disinformation']))
@@ -92,17 +109,24 @@ async def change_disinformation_handler(callback_query: types.CallbackQuery, cal
 
 
 @dp.callback_query_handler(kb.cb_workers.filter())
-async def change_addressee_workers(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def change_addressee_workers(
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        user: User
+):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
-    worker = await SendWorkers.get(id=int(callback_data["send_worker_id"]))
+    worker_id = int(callback_data["send_worker_id"])
     enable = bool(int(callback_data["enable"]))
+    worker = await change_worker(worker_id, enable)
 
-    # noinspection PyUnresolvedReferences
-    user_id = worker.worker_id
-
-    logger.info("admin {user} {change} for worker {worker} in {thread}",
-                user=user.id, thread=thread.id, change="enable" if enable else "disable", worker=user_id)
-    await change_worker(worker, enable)
+    logger.info(
+        "admin {user} {change} text info {a_t} for worker {worker} in {thread}",
+        user=user.id,
+        change="enable" if enable else "disable",
+        a_t=a_t.id,
+        worker=worker.worker_id,
+        thread=thread.id,
+    )
     await callback_query.message.edit_reply_markup(kb.get_kb_menu_send(await get_workers(a_t), a_t))
 
 
@@ -113,20 +137,20 @@ async def stop_work_thread(callback_query: types.CallbackQuery, callback_data: t
         thread = await stop_thread(thread_id)
     except DoesNotExist:
         await thread_not_found(callback_query, thread_id)
-    else:
-        logger.info(
-            "thread {thread_id} closed successfully by admin {admin}",
-            thread_id=thread_id,
-            admin=callback_query.from_user.id
-        )
-        await callback_query.answer()
-        await callback_query.message.edit_caption(
-            f"Матч thread_id={thread_id} успешно завершён",
-            reply_markup=None
-        )
-        results = await get_stats(thread)
-        await callback_query.bot.send_message(
-            chat_id=config.USER_LOG_CHAT_ID,
-            text=format_results_thread(results, thread_id)
-        )
-        await send_notification_stop(thread, callback_query.bot)
+        return
+    logger.info(
+        "thread {thread_id} closed successfully by admin {admin}",
+        thread_id=thread.id,
+        admin=callback_query.from_user.id
+    )
+    await callback_query.answer()
+    await callback_query.message.edit_caption(
+        f"Матч thread_id={thread.id} успешно завершён",
+        reply_markup=None
+    )
+    results = await get_stats(thread=thread)
+    await callback_query.bot.send_message(
+        chat_id=config.USER_LOG_CHAT_ID,
+        text=format_results_thread(results, thread.id)
+    )
+    await send_notification_stop(thread, callback_query.bot)

@@ -27,3 +27,7 @@ class BotError(Exception):
 
 class ThreadStopped(BotError):
     notify_user = "Матч закрыт"
+
+    def __init__(self, thread_id: int = None, *args, **kwargs):
+        super(ThreadStopped, self).__init__(*args, **kwargs)
+        self.thread_id = thread_id
