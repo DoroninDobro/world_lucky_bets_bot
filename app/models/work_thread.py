@@ -35,5 +35,5 @@ def check_thread_running(func):
             # noinspection PyUnresolvedReferences
             admin_id = thread.admin_id
             raise ThreadStopped(user_id=admin_id, thread_id=thread.id)
-        await func(*args, **kwargs)
+        return await func(*args, **kwargs)
     return wrapped
