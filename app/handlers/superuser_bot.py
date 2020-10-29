@@ -14,9 +14,9 @@ async def get_log(_: types.Message):
 
 @dp.message_handler(is_superuser=True, commands='logchat')
 @dp.throttled(rate=30)
-async def get_logchat(_: types.Message):
-    log_ch = (await bot.get_chat(config.TECH_LOG_CHAT_ID)).invite_link
-    await bot.send_message(config.GLOBAL_ADMIN_ID, log_ch, disable_notification=True)
+async def get_logchat(message: types.Message):
+    log_ch = await bot.get_chat(config.TECH_LOG_CHAT_ID)
+    await message.reply(log_ch.invite_link, disable_notification=True)
 
 
 @dp.message_handler(is_superuser=True, commands='generate_invite_logchat')

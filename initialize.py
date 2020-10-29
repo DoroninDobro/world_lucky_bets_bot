@@ -1,9 +1,9 @@
-import asyncio
-from app.models.db import generate_schemas_db
+from app.models.db import generate_schemas
 
 
-async def main():
-    await generate_schemas_db()
+def main():
+    generate_schemas()
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

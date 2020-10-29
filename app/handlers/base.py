@@ -25,7 +25,7 @@ async def cmd_help(message: types.Message):
     )
 
 
-@dp.message_handler(commands='idchat', commands_prefix='!')
+@dp.message_handler(commands='idchat', commands_prefix='!/')
 @dp.throttled(rate=30)
 async def get_idchat(message: types.Message):
     text = (
