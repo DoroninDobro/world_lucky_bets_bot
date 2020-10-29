@@ -8,7 +8,7 @@ from tortoise.transactions import in_transaction
 from app import config, keyboards as kb
 from app.models import WorkThread, WorkerInThread, User, AdditionalText
 from app.models.work_thread import check_thread_running
-from app.services.additional_text import get_enable_workers, create_send_workers
+from app.services.additional_text import get_enable_workers, create_send_workers, get_disable_workers
 from app.services.msg_cleaner_on_fail import msg_cleaner
 
 
@@ -56,7 +56,7 @@ async def get_thread(message_id: int) -> WorkThread:
 async def add_info_to_thread(text: str, *, thread: WorkThread):
     async with in_transaction() as connection:
         a_t = await AdditionalText.create(text=text, thread=thread, using_db=connection)
-        workers = await create_send_workers(await get_workers_from_thread(thread), a_t, using_db=connection)
+        workers = await create_send_workers(await get_workers_from_thread(thread=thread), a_t, using_db=connection)
     return a_t, workers
 
 
@@ -80,22 +80,44 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             )
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
-        log_msg = await bot.send_message(
-            chat_id=config.ADMIN_LOG_CHAT_ID,
-            text=f"Сообщение{' является приватной инфой' if a_text.is_disinformation else ''}:\n{a_text.text}",
-            reply_to_message_id=thread.log_chat_message_id
-        )
+        workers_user = [worker for worker, _ in workers]
+        log_msg = await send_log_mailing(a_text, bot, workers_user, thread.log_chat_message_id)
         transaction_messages.append(log_msg)
         a_text.is_draft = False
         await a_text.save(using_db=conn)
 
 
+async def send_log_mailing(
+        a_text: AdditionalText,
+        bot: Bot,
+        workers: typing.List[User],
+        reply_to: int
+) -> types.Message:
+
+    enable_workers_mentions = "\n".join([worker.mention_link for worker in workers])
+    disable_workers_mention = "\n".join([worker.mention_link for worker in await get_disable_workers(a_text)])
+    text = "Сообщение"
+    text += ' ‼️является приватной инфой‼️' if a_text.is_disinformation else ''
+    text += f":\n{a_text.text}\n"
+    if enable_workers_mentions:
+        text += f"Список пользователей, получивших сообщение сразу:\n{enable_workers_mentions}\n"
+    if disable_workers_mention:
+        text += f"Список пользователей, отправка которым была отменена:\n{disable_workers_mention}\n"
+
+    return await bot.send_message(
+        chat_id=config.ADMIN_LOG_CHAT_ID,
+        text=text,
+        reply_to_message_id=reply_to
+    )
+
+
 @check_thread_running
 async def get_workers_from_thread(*, thread: WorkThread) -> typing.List[User]:
     workers_in_thread: typing.List[WorkerInThread] = await thread.workers
-    return [
-        await worker.worker for worker in workers_in_thread
-    ]
+    if workers_in_thread:
+        return [await worker.worker for worker in workers_in_thread]
+    else:
+        return []
 
 
 async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):

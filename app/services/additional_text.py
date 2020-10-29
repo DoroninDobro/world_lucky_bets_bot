@@ -24,7 +24,13 @@ async def get_enable_workers(additional_text: AdditionalText) -> typing.Iterable
     send_to_workers = await additional_text.send_to_workers.filter(send=True).all()
     users = [await send_to_worker.worker for send_to_worker in send_to_workers]
     wits = [await WorkerInThread.get(worker=user, work_thread=thread) for user in users]
-    return zip(users, [wit.message_id for wit in wits])
+    return list(zip(users, [wit.message_id for wit in wits]))
+
+
+async def get_disable_workers(additional_text: AdditionalText) -> typing.Iterable[User]:
+    send_to_workers = await additional_text.send_to_workers.filter(send=False).all()
+    users = [await send_to_worker.worker for send_to_worker in send_to_workers]
+    return users
 
 
 async def change_disinformation(additional_text: AdditionalText, is_disinformation: bool):
