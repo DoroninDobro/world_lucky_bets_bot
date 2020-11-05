@@ -36,6 +36,9 @@ with open(admin_list_path) as f:
     admins_list = set(json.load(f))
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise EnvironmentError("You have to specify BOT_TOKEN environment")
+
 secret_str = secrets.token_urlsafe(16)  # for webhook path
 
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
