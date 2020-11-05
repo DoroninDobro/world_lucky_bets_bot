@@ -27,6 +27,7 @@ from ..services.additional_text import (
     change_worker,
 )
 from ..services.remove_message import delete_message
+from ..utils.exceptions import ThreadStopped
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
@@ -54,6 +55,8 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
     logger.info("admin {user} add new info to thread {thread} ", user=user.id, thread=thread.id)
     try:
         a_t, workers = await add_info_to_thread(message.html_text, thread=thread)
+    except ThreadStopped:
+        return await message.reply("Этот матч завершён!")
     except Exception:
         await message.reply(
             "Что-то пошло не так, я уверен, однажды, дела образуются, пока могу посоветовать только отправить ещё разок"
@@ -87,6 +90,8 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
     try:
         await start_mailing(a_text, bot, thread=thread)
+    except ThreadStopped:
+        return await callback_query.answer("Матч уже завершён!", show_alert=True)
     except Exception:
         await callback_query.answer("Произошла ошибка, мы записали, постараемся разобраться", show_alert=True)
         raise
