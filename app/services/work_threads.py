@@ -23,6 +23,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         msg_to_workers = await bot.send_photo(
             chat_id=config.WORKERS_CHAT_ID,
             photo=photo_file_id,
+            caption=f"{created_thread.id}",
             reply_markup=kb.get_agree_work(created_thread.id)
         )
         transaction_messages.append(msg_to_workers)
@@ -30,7 +31,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         msg_to_admin = await bot.send_photo(
             chat_id=admin.id,
             photo=photo_file_id,
-            caption=f"Сообщение отправлено, thread_id = {created_thread.id}",
+            caption=f"{created_thread.id}. Сообщение отправлено",
             reply_markup=kb.get_stop_kb(created_thread.id)
         )
         transaction_messages.append(msg_to_admin)
@@ -38,12 +39,13 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         log_chat_message = await bot.send_photo(
             chat_id=config.ADMIN_LOG_CHAT_ID,
             photo=photo_file_id,
-            caption=f"Начат новый матч от {admin.mention_link} thread_id = {created_thread.id}"
+            caption=f"{created_thread.id}. Начат новый матч от {admin.mention_link}"
         )
         transaction_messages.append(log_chat_message)
 
         created_thread.log_chat_message_id = log_chat_message
         created_thread.start_message_id = msg_to_admin.message_id
+        created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
         return created_thread
 

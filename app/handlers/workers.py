@@ -10,6 +10,7 @@ from app.misc import dp
 from .. import keyboards as kb
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread
+from ..services.remove_message import delete_message
 from ..services.workers import add_worker_to_thread, get_worker_in_thread, get_bet_and_odd, save_new_betting_odd
 from ..utils.exceptions import ThreadStopped
 
@@ -28,7 +29,7 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
         msg = await callback_query.bot.send_photo(
             chat_id=callback_query.from_user.id,
             photo=thread.start_photo_file_id,
-            caption="Вы подписаны на это"
+            caption=f"{thread_id}. Вы подписаны на это"
         )
     except (BotBlocked, CantInitiateConversation, Unauthorized):
         logger.info("user {user} try to be worker in thread {thread} but he don't start conversation with bot",
@@ -38,7 +39,7 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
     try:
         await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread)
     except IntegrityError:
-        await msg.delete()
+        await delete_message(msg)
         logger.info("user {user} try to be worker in thread {thread} but he already worker in that thread",
                     user=user.id, thread=thread_id)
         return await callback_query.answer("Ошибка, Вы уже подписаны?", show_alert=True, cache_time=3600)

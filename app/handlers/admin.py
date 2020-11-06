@@ -165,10 +165,24 @@ async def stop_work_thread(callback_query: types.CallbackQuery, callback_data: t
         admin=callback_query.from_user.id
     )
     await callback_query.answer()
-    await callback_query.message.edit_caption(
-        f"Матч thread_id={thread.id} успешно завершён",
+    edit_kwargs = dict(
+        caption=f"{thread.id}. Матч успешно завершён",
         reply_markup=None
     )
+    try:
+        await callback_query.message.edit_caption(**edit_kwargs)
+    except BadRequest as e:
+        logger.exception(e)
+
+    try:
+        await callback_query.bot.edit_message_caption(
+            chat_id=config.WORKERS_CHAT_ID,
+            message_id=thread.workers_chat_message_id,
+            **edit_kwargs
+        )
+    except BadRequest as e:
+        logger.exception(e)
+
     results = await get_stats(thread=thread)
     await callback_query.bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
