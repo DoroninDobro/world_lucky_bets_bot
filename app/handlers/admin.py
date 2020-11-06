@@ -3,6 +3,7 @@ import typing
 
 from aiogram import types, Bot
 from aiogram.dispatcher.handler import CancelHandler
+from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
@@ -98,6 +99,21 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
     await callback_query.message.edit_text(f"Отправлено:\n{a_text.text}")
 
 
+@dp.callback_query_handler(kb.cb_update.filter())
+async def update_handler(
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        user: User
+):
+    a_t, thread = await get_additional_text(callback_query, callback_data, user)
+
+    logger.info("admin {user} update send menu for thread {thread}", user=user.id, thread=thread.id)
+    try:
+        await callback_query.message.edit_reply_markup(kb.get_kb_menu_send(await get_workers(a_t), a_t))
+    except MessageNotModified:
+        await callback_query.answer("Уже обновлено", cache_time=3)
+
+
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
 async def change_disinformation_handler(
         callback_query: types.CallbackQuery,
@@ -122,14 +138,14 @@ async def change_addressee_workers(
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
     worker_id = int(callback_data["send_worker_id"])
     enable = bool(int(callback_data["enable"]))
-    worker = await change_worker(worker_id, enable)
+    await change_worker(worker_id, enable)
 
     logger.info(
         "admin {user} {change} text info {a_t} for worker {worker} in {thread}",
         user=user.id,
         change="enable" if enable else "disable",
         a_t=a_t.id,
-        worker=worker.worker_id,
+        worker=worker_id,
         thread=thread.id,
     )
     await callback_query.message.edit_reply_markup(kb.get_kb_menu_send(await get_workers(a_t), a_t))

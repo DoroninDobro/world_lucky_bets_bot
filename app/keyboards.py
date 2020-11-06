@@ -9,6 +9,7 @@ cb_stop = CallbackData("stop_thread", "thread_id")
 cb_agree = CallbackData("agree_thread", "thread_id")
 cb_send_now = CallbackData("send_info", "additional_text")
 cb_workers = CallbackData("send_info", "additional_text", "send_worker_id", "enable")
+cb_update = CallbackData("update", "additional_text")
 cb_is_disinformation = CallbackData("send_info", "additional_text", "is_disinformation")
 permissions_emoji = {True: "✅", False: "🚫"}
 
@@ -31,8 +32,12 @@ def get_kb_menu_send(
 ) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=1)
     kb.insert(InlineKeyboardButton(
-        "Отправить!",
+        "📬Отправить!",
         callback_data=cb_send_now.new(additional_text=additional_text.id)
+    ))
+    kb.insert(InlineKeyboardButton(
+        "🔄Обновить",
+        callback_data=cb_update.new(additional_text=additional_text.id)
     ))
     kb.insert(InlineKeyboardButton(
         get_disinformation_button_name(additional_text.is_disinformation),
