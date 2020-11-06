@@ -19,6 +19,8 @@ tz_view = tz.gettz('Europe/Moscow')
 
 PRINT_LOG = "print.log"
 
+ENABLE_LOGGING_MIDDLEWARE = bool(int(os.getenv("ENABLE_LOGGING_MIDDLEWARE", default=1)))
+
 BOMZHEG_ID = 46866565
 TREE_HOUSE_TRIP_ID = 203288953
 SUPERUSERS = {BOMZHEG_ID, TREE_HOUSE_TRIP_ID}

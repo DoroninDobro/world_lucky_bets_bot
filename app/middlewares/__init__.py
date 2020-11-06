@@ -2,6 +2,7 @@
 import json
 
 from aiogram import Dispatcher
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from loguru import logger
 
 from app.middlewares.acl import ACLMiddleware
@@ -16,3 +17,7 @@ def setup(dispatcher: Dispatcher):
         with open(config.allow_list_path) as f:
             allow_list = set(json.load(f))
         dispatcher.middleware.setup(AccessControlMiddleware(allow_list))
+    if config.ENABLE_LOGGING_MIDDLEWARE:
+        logging_middleware = LoggingMiddleware()
+        logging_middleware.logger = logger
+        dispatcher.middleware.setup(logging_middleware)
