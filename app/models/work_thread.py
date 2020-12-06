@@ -26,14 +26,16 @@ class WorkThread(Model):
     def __repr__(self):
         return f"<WorkThread id={self.id}>"
 
+    def get_admin_id(self):
+        # noinspection PyUnresolvedReferences
+        return self.admin_id
+
 
 def check_thread_running(func):
     @functools.wraps(func)
     async def wrapped(*args, **kwargs):
         thread = kwargs['thread']
         if thread.stopped:
-            # noinspection PyUnresolvedReferences
-            admin_id = thread.admin_id
-            raise ThreadStopped(user_id=admin_id, thread_id=thread.id)
+            raise ThreadStopped(user_id=thread.get_admin_id(), thread_id=thread.id)
         return await func(*args, **kwargs)
     return wrapped

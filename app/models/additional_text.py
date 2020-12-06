@@ -19,3 +19,7 @@ class AdditionalText(Model):
 
     def __repr__(self):
         return f"<AdditionalText id={self.id}>"
+
+    def get_thread_id(self):
+        # noinspection PyUnresolvedReferences
+        return self.thread_id
