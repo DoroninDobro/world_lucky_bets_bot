@@ -8,7 +8,12 @@ from tortoise.transactions import in_transaction
 from app import config, keyboards as kb
 from app.models import WorkThread, WorkerInThread, User, AdditionalText
 from app.models.work_thread import check_thread_running
-from app.services.additional_text import get_enable_workers, create_send_workers, get_disable_workers
+from app.services.additional_text import (
+    get_enable_workers,
+    create_send_workers,
+    get_disable_workers,
+    get_workers
+)
 from app.services.msg_cleaner_on_fail import msg_cleaner
 
 
@@ -71,18 +76,31 @@ async def stop_thread(thread_id: int) -> WorkThread:
 @check_thread_running
 async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread):
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
-        workers = await get_enable_workers(a_text)
-        for worker, message_id in workers:
+        enable_workers = await get_enable_workers(a_text)
+        for enable_worker, worker_start_thread_message_id in enable_workers:
             msg = await bot.send_message(
-                chat_id=worker.id,
+                chat_id=enable_worker.id,
                 text=a_text.text,
-                reply_to_message_id=message_id,
+                reply_to_message_id=worker_start_thread_message_id,
             )
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
-        workers_user = [worker for worker, _ in workers]
-        log_msg = await send_log_mailing(a_text, bot, workers_user, thread.log_chat_message_id)
+        enable_workers_user = [worker for worker, _ in enable_workers]
+        log_msg = await send_log_mailing(a_text, bot, enable_workers_user, thread.log_chat_message_id)
         transaction_messages.append(log_msg)
+
+        if a_text.is_disinformation:
+            disinformation_log_msg_text = await render_disinformation_log(
+                a_text,
+                enable_workers_user,
+                [worker.worker for worker in await get_workers(a_text)]
+            )
+            disinformation_log_msg = await bot.send_message(
+                chat_id=config.USER_LOG_CHAT_ID,
+                text=disinformation_log_msg_text,
+            )
+            transaction_messages.append(disinformation_log_msg)
+
         a_text.is_draft = False
         await a_text.save(using_db=conn)
 
@@ -109,6 +127,28 @@ async def send_log_mailing(
         text=text,
         reply_to_message_id=reply_to
     )
+
+
+async def render_disinformation_log(
+        a_text: AdditionalText,
+        enable_workers: typing.List[User],
+        all_workers: typing.List[User],
+) -> str:
+    text_parts = [
+        f"Матч <b>{a_text.get_thread_id()}</b>",
+        f"Сообщние: <b>{a_text.text}</b>",
+    ]
+    if enable_workers:
+        text_parts.append("Приватно получили:")
+        for enable_worker in enable_workers:
+            text_parts.append(enable_worker.mention_link)
+    if all_workers:
+        text_parts.append("Всего участвовали на момент отправки:")
+        for worker in all_workers:
+            text_parts.append(worker.mention_link)
+    else:
+        text_parts.append("Участников на момент отправки не было")
+    return "\n".join(text_parts)
 
 
 @check_thread_running
