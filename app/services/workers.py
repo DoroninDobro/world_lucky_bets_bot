@@ -7,6 +7,7 @@ from app.models import User, WorkThread, WorkerInThread, BetItem
 from app.models.bets_log import BettingOdd
 from app.models.work_thread import check_thread_running
 from app.utils.exceptions import ThreadStopped
+OLD_MESSAGE_SEPARATOR = "\n.\n"
 
 
 @check_thread_running
@@ -18,7 +19,7 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
     )
     texts = await thread.additional_texts.filter(is_draft=False, is_disinformation=False).all()
     if texts:
-        send_text = "\n".join([text.text for text in texts])
+        send_text = OLD_MESSAGE_SEPARATOR.join([text.text for text in texts])
         await bot.send_message(chat_id=user.id, text=send_text, reply_to_message_id=message_id)
 
 
