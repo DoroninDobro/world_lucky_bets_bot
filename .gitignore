@@ -130,6 +130,11 @@ dmypy.json
 
 # database
 /db_data
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
 /jsons
 
 # logs

@@ -48,7 +48,15 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         )
         transaction_messages.append(log_chat_message)
 
-        created_thread.log_chat_message_id = log_chat_message
+        for_admins_no_usernames_message = await bot.send_photo(
+            chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+            photo=photo_file_id,
+            caption=str(created_thread.id)
+        )
+        transaction_messages.append(for_admins_no_usernames_message)
+
+        created_thread.log_chat_message_id = log_chat_message.message_id
+        created_thread.log_chat_for_admins_without_usernames_message_id = for_admins_no_usernames_message.message_id
         created_thread.start_message_id = msg_to_admin.message_id
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
@@ -88,7 +96,7 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
         enable_workers_user = [worker for worker, _ in enable_workers]
-        log_msg = await send_log_mailing(a_text, bot, enable_workers_user, thread.log_chat_message_id)
+        log_msg = await send_log_mailing(a_text, bot, enable_workers_user, thread)
         transaction_messages.append(log_msg)
 
         if a_text.is_disinformation:
@@ -111,24 +119,45 @@ async def send_log_mailing(
         a_text: AdditionalText,
         bot: Bot,
         workers: typing.List[User],
-        reply_to: int
+        thread: WorkThread
 ) -> types.Message:
 
-    enable_workers_mentions = "\n".join([worker.mention_link for worker in workers])
-    disable_workers_mention = "\n".join([worker.mention_link for worker in await get_disable_workers(a_text)])
+    text = render_log_message_caption(a_text)
+
+    # В этот чат отправляем только заголовок
+    # (информацию о приватности инфы и текст сообщения)
+    await bot.send_message(
+        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+        text=text,
+        reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id
+    )
+
+    # Добавляем к заголовку список воркеров
+    # и теперь можно отправлять и в обычный логчат
+    text += await render_workers_lists_with_caption(a_text, workers)
+    return await bot.send_message(
+        chat_id=config.ADMIN_LOG_CHAT_ID,
+        text=text,
+        reply_to_message_id=thread.log_chat_message_id
+    )
+
+
+def render_log_message_caption(a_text: AdditionalText) -> str:
     text = "Сообщение"
     text += ' ‼️является приватной инфой‼️' if a_text.is_disinformation else ''
     text += f":\n{a_text.text}\n"
+    return text
+
+
+async def render_workers_lists_with_caption(a_text: AdditionalText, workers: typing.List[User]) -> str:
+    enable_workers_mentions = "\n".join([worker.mention_link for worker in workers])
+    disable_workers_mention = "\n".join([worker.mention_link for worker in await get_disable_workers(a_text)])
+    text = ""
     if enable_workers_mentions:
         text += f"Список пользователей, получивших сообщение сразу:\n{enable_workers_mentions}\n"
     if disable_workers_mention:
         text += f"Список пользователей, отправка которым была отменена:\n{disable_workers_mention}\n"
-
-    return await bot.send_message(
-        chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=text,
-        reply_to_message_id=reply_to
-    )
+    return text
 
 
 async def render_disinformation_log(
