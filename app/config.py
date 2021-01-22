@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 app_dir: Path = Path(__file__).parent.parent
 jsons_dir = app_dir / 'jsons'
 
-load_dotenv(str(app_dir / '.env'))
+load_dotenv(str(app_dir / os.getenv("ENV_FILE", default=".env")))
 
 tz_view = tz.gettz('Europe/Moscow')
 
