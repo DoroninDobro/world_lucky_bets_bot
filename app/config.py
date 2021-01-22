@@ -12,12 +12,13 @@ from dotenv import load_dotenv
 
 app_dir: Path = Path(__file__).parent.parent
 jsons_dir = app_dir / 'jsons'
+current_bot = os.getenv("BOT_NAME", default="")
 
-load_dotenv(str(app_dir / os.getenv("ENV_FILE", default=".env")))
+load_dotenv(str(app_dir / f"{current_bot}.env"))
 
 tz_view = tz.gettz('Europe/Moscow')
 
-PRINT_LOG = "print.log"
+PRINT_LOG = f"{current_bot}.print.log"
 
 ENABLE_LOGGING_MIDDLEWARE = bool(int(os.getenv("ENABLE_LOGGING_MIDDLEWARE", default=1)))
 
@@ -31,10 +32,10 @@ ADMIN_LOG_CHAT_ID = int(os.getenv("ADMIN_LOG_CHAT_ID", -1001426455516))
 WORKERS_CHAT_ID = int(os.getenv("WORKERS_CHAT_ID", -1001243606983))
 ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID = int(os.getenv("ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID", -1001227120186))
 
-allow_list_path = jsons_dir / 'allow_list.json'
+allow_list_path = jsons_dir / current_bot / 'allow_list.json'
 ENABLE_ALLOW_LIST = bool(int(os.getenv("ENABLE_ALLOW_LIST", default=0)))
 
-admin_list_path = jsons_dir / 'admins_list.json'
+admin_list_path = jsons_dir / current_bot / 'admins_list.json'
 with open(admin_list_path) as f:
     admins_list = set(json.load(f))
 
@@ -58,7 +59,7 @@ PASSWORD_DB = os.getenv("PASSWORD_DB")
 DB_NAME = os.getenv("DB_NAME")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
-DB_PATH = os.getenv("DB_PATH", default=app_dir / "db_data" / "bot.db")
+DB_PATH = os.getenv("DB_PATH", default=app_dir / "db_data" / current_bot / "bot.db")
 
 
 PROG_NAME = "world lucky bets bot"
