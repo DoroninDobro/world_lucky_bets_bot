@@ -1,9 +1,11 @@
 import typing
+from typing import List, Dict
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from app.models import AdditionalText, SendWorkers
+from app.config.currency import Currency
+from app.models import AdditionalText, SendWorkers, User, WorkThread
 
 cb_stop = CallbackData("stop_thread", "thread_id")
 cb_agree = CallbackData("agree_thread", "thread_id")
@@ -11,6 +13,8 @@ cb_send_now = CallbackData("send_info", "additional_text")
 cb_workers = CallbackData("send_info", "additional_text", "send_worker_id", "enable")
 cb_update = CallbackData("update", "additional_text")
 cb_is_disinformation = CallbackData("send_info", "additional_text", "is_disinformation")
+cb_send_report = CallbackData("send_report", "user_id", "thread_id")
+cb_currency = CallbackData("currency", "code")
 permissions_emoji = {True: "✅", False: "🚫"}
 
 
@@ -60,3 +64,22 @@ def get_disinformation_button_name(now_marked_as_disinformation: bool) -> str:
     if now_marked_as_disinformation:
         return permissions_emoji[not now_marked_as_disinformation] + "Выключить приватный режим"
     return permissions_emoji[not now_marked_as_disinformation] + "Включить приватный режим"
+
+
+def get_kb_send_report(user: User, thread: WorkThread) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=1)
+    kb.insert(InlineKeyboardButton(
+        "Отправить отчёт",
+        callback_data=cb_send_report.new(user_id=user.id, thread_id=thread.id)
+    ))
+    return kb
+
+
+def get_kb_currency(currencies: Dict[Currency]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=4)
+    for currency in currencies.values():
+        kb.insert(InlineKeyboardButton(
+            str(Currency),
+            callback_data=cb_currency.new(code=currency.iso_code)
+        ))
+    return kb

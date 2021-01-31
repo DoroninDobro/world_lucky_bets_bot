@@ -5,13 +5,16 @@ import json
 import os
 import secrets
 from pathlib import Path
+
 from dateutil import tz
-
 from dotenv import load_dotenv
+import yaml
 
+from .currency import load_currency
 
-app_dir: Path = Path(__file__).parent.parent
-jsons_dir = app_dir / 'jsons'
+app_dir: Path = Path(__file__).parent.parent.parent
+config_path = app_dir / 'config'
+jsons_dir = config_path / 'jsons'
 current_bot = os.getenv("BOT_NAME", default="")
 
 load_dotenv(str(app_dir / f"{current_bot}.env"))
@@ -43,11 +46,14 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise EnvironmentError("You have to specify BOT_TOKEN environment")
 
+currencies = load_currency(yaml.load(config_path / "currency.yml"))
+
+
 secret_str = secrets.token_urlsafe(16)  # for webhook path
 
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 WEBHOOK_PORT = os.getenv("WEBHOOK_PORT", default=443)
-WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", default='/bot/')
+WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", default=f'/{current_bot}/')
 WEBHOOK_URL_BASE = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_PATH}"
 
 LISTEN_IP = os.getenv("LISTEN_IP", default='0.0.0.0')
