@@ -135,7 +135,7 @@ dmypy.json
 *.db-shm
 *.sqlite
 *.sqlite3
-/jsons
+/config/jsons/
 
 # logs
 /log
