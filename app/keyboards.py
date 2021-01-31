@@ -1,4 +1,5 @@
 import typing
+from functools import lru_cache
 from typing import List, Dict
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -15,7 +16,8 @@ cb_update = CallbackData("update", "additional_text")
 cb_is_disinformation = CallbackData("send_info", "additional_text", "is_disinformation")
 cb_send_report = CallbackData("send_report", "user_id", "thread_id")
 cb_currency = CallbackData("currency", "code")
-permissions_emoji = {True: "✅", False: "🚫"}
+cb_confirm_report = CallbackData("confirm", "yes")
+boolean_emoji = {True: "✅", False: "🚫"}
 
 
 def get_stop_kb(thread_id: int) -> InlineKeyboardMarkup:
@@ -37,40 +39,40 @@ def get_kb_menu_send(
     kb = InlineKeyboardMarkup(row_width=1)
     kb.insert(InlineKeyboardButton(
         "📬Отправить!",
-        callback_data=cb_send_now.new(additional_text=additional_text.id)
+        callback_data=cb_send_now.new(additional_text=additional_text.id),
     ))
     kb.insert(InlineKeyboardButton(
         "🔄Обновить",
-        callback_data=cb_update.new(additional_text=additional_text.id)
+        callback_data=cb_update.new(additional_text=additional_text.id),
     ))
     kb.insert(InlineKeyboardButton(
         get_disinformation_button_name(additional_text.is_disinformation),
         callback_data=cb_is_disinformation.new(
             additional_text=additional_text.id,
-            is_disinformation=int(not additional_text.is_disinformation)
+            is_disinformation=int(not additional_text.is_disinformation),
         )
     ))
     for worker in workers:
         kb.insert(InlineKeyboardButton(
-            permissions_emoji[worker.send] + worker.worker.fullname,
+            boolean_emoji[worker.send] + worker.worker.fullname,
             callback_data=cb_workers.new(
                 additional_text=additional_text.id, send_worker_id=worker.id, enable=int(not worker.send)
-            )
+            ),
         ))
     return kb
 
 
 def get_disinformation_button_name(now_marked_as_disinformation: bool) -> str:
     if now_marked_as_disinformation:
-        return permissions_emoji[not now_marked_as_disinformation] + "Выключить приватный режим"
-    return permissions_emoji[not now_marked_as_disinformation] + "Включить приватный режим"
+        return boolean_emoji[not now_marked_as_disinformation] + "Выключить приватный режим"
+    return boolean_emoji[not now_marked_as_disinformation] + "Включить приватный режим"
 
 
 def get_kb_send_report(user: User, thread: WorkThread) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=1)
     kb.insert(InlineKeyboardButton(
         "Отправить отчёт",
-        callback_data=cb_send_report.new(user_id=user.id, thread_id=thread.id)
+        callback_data=cb_send_report.new(user_id=user.id, thread_id=thread.id),
     ))
     return kb
 
@@ -80,6 +82,15 @@ def get_kb_currency(currencies: Dict[Currency]) -> InlineKeyboardMarkup:
     for currency in currencies.values():
         kb.insert(InlineKeyboardButton(
             str(Currency),
-            callback_data=cb_currency.new(code=currency.iso_code)
+            callback_data=cb_currency.new(code=currency.iso_code),
         ))
     return kb
+
+
+@lru_cache
+def get_kb_confirm_report() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            boolean_emoji[yes],
+            callback_data=cb_confirm_report.new(yes=yes)) for yes in (True, False)
+    ]])

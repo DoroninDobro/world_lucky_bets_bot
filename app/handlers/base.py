@@ -47,10 +47,11 @@ async def cancel_state(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     logger.info(f'Cancelling state {current_state}')
-    # Cancel state and inform user about it
     await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Диалог прекращён, данные удалены', reply_markup=types.ReplyKeyboardRemove())
+    await message.reply(
+        'Введённые во время диалога данные удалены, а сам диалог прекращён',
+        reply_markup=types.ReplyKeyboardRemove()
+    )
 
 
 @dp.message_handler(content_types=types.ContentTypes.MIGRATE_TO_CHAT_ID)
