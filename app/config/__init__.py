@@ -9,6 +9,7 @@ from pathlib import Path
 from dateutil import tz
 from dotenv import load_dotenv
 import yaml
+from yaml import SafeLoader
 
 from .currency import load_currency
 
@@ -46,7 +47,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise EnvironmentError("You have to specify BOT_TOKEN environment")
 
-currencies = load_currency(yaml.load(config_path / "currency.yml"))
+with (config_path / "currency.yml").open("r") as f:
+    currencies = load_currency(yaml.load(f, SafeLoader))
 
 
 secret_str = secrets.token_urlsafe(16)  # for webhook path

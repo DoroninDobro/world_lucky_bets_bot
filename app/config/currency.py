@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass
@@ -14,7 +13,7 @@ class Currency:
         return f"{self.fullname} {self.symbol}"
 
 
-def load_currency(dumped: dict) -> Dict[str: Currency]:
+def load_currency(dumped: dict) -> dict[str, Currency]:
     """
     :param dumped: dictionary loaded from config file
     :return: dict with key - iso code and value dataclass Currency
