@@ -7,7 +7,6 @@ from app import config
 from app.config.currency import Currency
 from app.models import User, WorkThread, WorkerInThread, BetItem
 from app.models.work_thread import check_thread_running
-from app.utils.exceptions import ThreadStopped
 OLD_MESSAGE_SEPARATOR = "\n.\n"
 
 
@@ -34,17 +33,19 @@ async def save_new_betting_odd(
         currency: Currency,
         bet: Decimal,
         result: Decimal,
+        bookmaker_id: str,
         user: User,
         bot: Bot):
-    worker_in_thread = await WorkerInThread.get(worker=user, thread_id=thread_id)
+    worker_in_thread = await WorkerInThread.get(worker=user, work_thread_id=thread_id)
     bet_item = await BetItem.create(
         worker_thread=worker_in_thread,
         bet=bet,
         result=result,
         currency=currency,
+        bookmaker_id=bookmaker_id,
     )
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} сделал ставку {BetItem} в матче {thread_id}"
+        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} сделал ставку {bet_item} в матче {thread_id}"
     )
     return bet_item

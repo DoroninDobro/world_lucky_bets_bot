@@ -21,3 +21,9 @@ GBP:
   fullname: фунт
   plural_name: фунты
   short_name: ф.
+
+CNY:
+  symbol: "¥"
+  fullname: юань
+  plural_name: юань
+  short_name: юань

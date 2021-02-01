@@ -17,6 +17,7 @@ cb_is_disinformation = CallbackData("send_info", "additional_text", "is_disinfor
 cb_send_report = CallbackData("send_report", "user_id", "thread_id")
 cb_currency = CallbackData("currency", "code")
 cb_confirm_report = CallbackData("confirm", "yes")
+cb_confirm_add_bookmaker = CallbackData("confirm_bookmaker", "yes")
 boolean_emoji = {True: "✅", False: "🚫"}
 
 
@@ -77,11 +78,11 @@ def get_kb_send_report(user: User, thread: WorkThread) -> InlineKeyboardMarkup:
     return kb
 
 
-def get_kb_currency(currencies: Dict[Currency]) -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup(row_width=4)
+def get_kb_currency(currencies: Dict[str, Currency]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=3)
     for currency in currencies.values():
         kb.insert(InlineKeyboardButton(
-            str(Currency),
+            str(currency),
             callback_data=cb_currency.new(code=currency.iso_code),
         ))
     return kb
@@ -92,5 +93,14 @@ def get_kb_confirm_report() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
             boolean_emoji[yes],
-            callback_data=cb_confirm_report.new(yes=yes)) for yes in (True, False)
+            callback_data=cb_confirm_report.new(yes=str(yes))) for yes in (True, False)
+    ]])
+
+
+@lru_cache
+def get_kb_confirm_add_bookmaker() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(
+            boolean_emoji[yes],
+            callback_data=cb_confirm_add_bookmaker.new(yes=str(yes))) for yes in (True, False)
     ]])

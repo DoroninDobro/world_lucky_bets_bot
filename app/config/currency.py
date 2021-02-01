@@ -12,6 +12,8 @@ class Currency:
     def __repr__(self):
         return f"{self.fullname} {self.symbol}"
 
+    __str__ = __repr__
+
 
 def load_currency(dumped: dict) -> dict[str, Currency]:
     """

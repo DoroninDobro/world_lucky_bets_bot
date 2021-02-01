@@ -9,6 +9,7 @@ from ..utils.exceptions import ThreadStopped
 
 class WorkThread(Model):
     id = fields.IntField(pk=True)
+    start = fields.DatetimeField(auto_now=True)
     start_photo_file_id = fields.CharField(128)
     start_message_id = fields.IntField(null=True)
     log_chat_message_id = fields.IntField(null=True)

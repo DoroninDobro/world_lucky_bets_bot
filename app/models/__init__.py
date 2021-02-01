@@ -5,6 +5,18 @@ from .work_thread import WorkThread
 from .bets_log import BetItem
 from .additional_text import AdditionalText
 from .send_to_workers import SendWorkers
+from .rate import RateItem
+from .bookmaker import Bookmaker
 
-__all__ = [Chat, ChatType, User, WorkerInThread, WorkThread, BetItem, AdditionalText, SendWorkers]
 
+__all__ = [
+    Chat, ChatType,
+    User,
+    WorkerInThread,
+    WorkThread,
+    BetItem,
+    AdditionalText,
+    SendWorkers,
+    RateItem,
+    Bookmaker,
+]

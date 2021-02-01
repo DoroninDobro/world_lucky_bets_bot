@@ -201,6 +201,7 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
 
 
 async def get_stats(thread: WorkThread) -> thread_results:
+    """ TODO Этот метод пока не используется"""
     results: thread_results = []
     for worker in await thread.workers:
         user = await worker.worker
@@ -217,7 +218,8 @@ async def get_stats(thread: WorkThread) -> thread_results:
     return results
 
 
-def format_results_thread(results: thread_results, thread_id: int) -> str:
+def format_results_thread(thread_id: int, results: thread_results) -> str:
+    """ TODO Этот метод пока не используется"""
     text = f"Результаты матча {thread_id}:"
     total_sum = 0
     total_win_sum = 0

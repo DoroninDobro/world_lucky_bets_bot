@@ -13,7 +13,7 @@ from app import config
 from app import keyboards as kb
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
-from app.models import User, WorkThread, BetItem
+from app.models import User, WorkThread, BetItem, Bookmaker
 from app.services.remove_message import delete_message
 from app.services.workers import add_worker_to_thread, save_new_betting_odd
 
@@ -21,6 +21,7 @@ from app.services.workers import add_worker_to_thread, save_new_betting_odd
 class Report(StatesGroup):
     bet = State()
     result = State()
+    bookmaker = State()
     ok = State()
 
 
@@ -96,7 +97,7 @@ async def process_bet_in_report(message: types.Message, state: FSMContext):
         return await message.reply("Это явно не число.")
     await state.update_data(bet=bet)
     await Report.next()
-    await message.answer("Введите результ:")
+    await message.answer("Введите результат:")
 
 
 @dp.message_handler(is_admin=False, chat_type=types.ChatType.PRIVATE, state=Report.result)
@@ -107,19 +108,77 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
         return await message.reply("Это явно не число.")
     await state.update_data(result=result)
     await Report.next()
+    await message.answer("Введите букмейкера:")
+
+
+@dp.message_handler(is_admin=False, chat_type=types.ChatType.PRIVATE, state=Report.bookmaker)
+async def process_result_in_report(message: types.Message, state: FSMContext):
+    try:
+        bookmaker = await Bookmaker.get(name=message.text)
+    except DoesNotExist:
+        await state.update_data(new_bookmaker=message.text)
+        return await message.reply(
+            "Этот букмейкер мне не известен, уверены, что хотите добавить нового?",
+            reply_markup=kb.get_kb_confirm_add_bookmaker(),
+        )
+    await state.update_data(bookmaker_id=bookmaker.id)
+    await Report.next()
+    await send_check_data(message, state)
+
+
+@dp.callback_query_handler(
+    kb.cb_confirm_add_bookmaker.filter(yes=str(True)),
+    is_admin=False,
+    chat_type=types.ChatType.PRIVATE,
+    state=Report.bookmaker
+)
+async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext, user: User):
+    state_data = await state.get_data()
+    try:
+        bookmaker = await Bookmaker.create(
+            name=state_data.pop('new_bookmaker'),
+            add_by=user,
+        )
+        await state.set_data(state_data)
+        await callback_query.message.edit_text("Букмейкер успешно добавлен")
+    except IntegrityError:
+        bookmaker = await Bookmaker.get(name=state_data['new_bookmaker'])
+        await callback_query.message.edit_text("Букмейкер был добавлен только что кем-то ещё")
+    await state.update_data(bookmaker_id=bookmaker.id)
+    await Report.next()
+    await send_check_data(callback_query.message, state)
+
+
+@dp.callback_query_handler(
+    kb.cb_confirm_add_bookmaker.filter(yes=str(False)),
+    is_admin=False,
+    chat_type=types.ChatType.PRIVATE,
+    state=Report.bookmaker
+)
+async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext, user: User):
+    state_data = await state.get_data()
+    state_data.pop('new_bookmaker')
+    await state.set_data(state_data)
+    await callback_query.message.edit_text(
+        "Вы отаказались добавлять нового букмейкера.\nВведите букмейкера."
+    )
+
+
+async def send_check_data(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
     current_currency_symbol = config.currencies[state_data['currency']]
-
+    bookmaker = await Bookmaker.get(id=state_data['bookmaker_id'])
     await message.answer(
         "<b>Всё верно?</b>\n\n"
+        f"Букмейкер {bookmaker.name}\n"
         f"Сделана ставка {state_data['bet']} {current_currency_symbol}\n"
-        f"Результат {result} {current_currency_symbol}\n",
+        f"Результат {state_data['result']} {current_currency_symbol}\n",
         reply_markup=kb.get_kb_confirm_report(),
     )
 
 
 @dp.callback_query_handler(
-    kb.cb_confirm_report.filter(yes=True),
+    kb.cb_confirm_report.filter(yes=str(True)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
@@ -134,8 +193,8 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
     await state.finish()
 
 
-@dp.message_handler(
-    kb.cb_confirm_report.filter(yes=False),
+@dp.callback_query_handler(
+    kb.cb_confirm_report.filter(yes=str(False)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok

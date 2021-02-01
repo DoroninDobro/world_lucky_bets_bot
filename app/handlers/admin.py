@@ -183,9 +183,9 @@ async def stop_work_thread(callback_query: types.CallbackQuery, callback_data: t
     except BadRequest as e:
         logger.exception(e)
 
-    results = await get_stats(thread=thread)
+    # results = await get_stats(thread=thread)
     await callback_query.bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
-        text=format_results_thread(results, thread.id)
+        text=f"{thread.id}. Матч успешно завершён",  # format_results_thread(thread.id)
     )
     await send_notification_stop(thread, callback_query.bot)
