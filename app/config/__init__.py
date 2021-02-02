@@ -46,6 +46,7 @@ with open(admin_list_path) as f:
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise EnvironmentError("You have to specify BOT_TOKEN environment")
+OER_TOKEN = os.getenv("OER_TOKEN")
 
 with (config_path / "currency.yml").open("r", encoding="utf-8") as f:
     currencies = load_currency(yaml.load(f, SafeLoader))
