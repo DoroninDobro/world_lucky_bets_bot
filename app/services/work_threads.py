@@ -1,15 +1,11 @@
 import asyncio
 import typing
 from contextlib import suppress
-from datetime import date
-from decimal import Decimal
-from typing import Union
 
 from aiogram import Bot, types
 from loguru import logger
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
-from openexchangerates.client import OpenExchangeRatesClient
 
 from app import config, keyboards as kb
 from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
@@ -21,7 +17,7 @@ from app.services.additional_text import (
     get_workers
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
-
+from app.services.rates import OpenExchangeRates
 
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
@@ -73,23 +69,16 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
 
 
 async def save_daily_rates(using_db=None):
-    async with OpenExchangeRatesClient(config.OER_TOKEN) as oer:
-        latest_rates = await oer.latest()
+    async with OpenExchangeRates(config.OER_TOKEN) as oer:
         with suppress(IntegrityError):
             for currency in config.currencies:
                 rate = RateItem(
-                    at=date.fromtimestamp(latest_rates['timestamp']),
+                    at=(await oer.get_updated_date()).date(),
                     currency=currency,
-                    to_eur=get_rate("EUR", currency, latest_rates),
-                    to_usd=get_rate("USD", currency, latest_rates),
+                    to_eur=await oer.get_rate("EUR", currency),
+                    to_usd=await oer.get_rate("USD", currency),
                 )
                 await rate.save(using_db=using_db)
-
-
-def get_rate(to: str, from_: str, latest: dict[str, Union[str, int, dict[str, Decimal]]]):
-    if to == from_:
-        return 1
-    return latest['rates'][to]/latest['rates'][from_]
 
 
 async def get_thread(message_id: int) -> WorkThread:

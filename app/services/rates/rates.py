@@ -48,7 +48,7 @@ class Rates(ABC):
         logger.info(f'init {self.get_source_rates()}')
 
     @abstractmethod
-    async def get_rate(self, val_char):
+    async def get_rate(self, code_to: str, code_from: str):
         pass
 
     @abstractmethod
@@ -57,6 +57,14 @@ class Rates(ABC):
 
     @abstractmethod
     def get_source_rates(self):
+        pass
+
+    @abstractmethod
+    async def __aenter__(self):
+        pass
+
+    @abstractmethod
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
     source_rates = property(get_source_rates)
