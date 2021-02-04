@@ -4,7 +4,7 @@ from tortoise import fields
 from tortoise.models import Model
 
 from .user import User
-from ..utils.exceptions import ThreadStopped
+from app.utils.exceptions import ThreadStopped
 
 
 class WorkThread(Model):

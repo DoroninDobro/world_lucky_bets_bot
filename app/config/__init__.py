@@ -78,3 +78,4 @@ PROG_DESC = (
 )
 PROG_EP = "by bomzheg"
 DESC_POLLING = "Run tg bot with polling. Default use WebHook"
+BASE_CURRENCY = "EUR"

@@ -4,7 +4,7 @@ from aiogram.utils.markdown import hpre, hbold
 from loguru import logger
 
 from app.misc import dp
-from app.models.chat import Chat
+from app.models.db.chat import Chat
 
 
 @dp.message_handler(commands=["start"], commands_prefix='!/')

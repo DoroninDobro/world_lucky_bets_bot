@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, date
+from decimal import Decimal
 
 from openexchangerates.client import OpenExchangeRatesClient
 
@@ -16,14 +17,38 @@ class OpenExchangeRates(Rates):
         latest_res = await self.r.latest()
         return datetime.fromtimestamp(latest_res['timestamp'])
 
-    async def get_rate(self, code_to: str, code_from: str):
+    async def _convert(self, code_from: str, code_to: str, value: Decimal = Decimal(1)) -> Decimal:
         if code_from == code_to:
-            return 1
+            return value
         else:
-            rates = await self.r.latest()
+            return value * await self.get_rate(code_from, code_to)
+
+    async def get_rate(self, code_to: str, code_from: str) -> Decimal:
+        if code_from == code_to:
+            return Decimal(1)
+        else:
+            rates = (await self.r.latest())['rates']
             return rates[code_to] / rates[code_from]
 
-    def get_source_rates(self):
+    async def convert(
+            self, code_from: str, code_to: str, value: Decimal = Decimal(1), day: date = None
+    ) -> Decimal:
+        if day is None:
+            return await self._convert(code_from, code_to, value)
+        if code_from == code_to:
+            return value
+        else:
+            return value * await self.get_rate_historical(code_from, code_to, day)
+
+    async def get_rate_historical(self, code_to: str, code_from: str, day: date) -> Decimal:
+        if code_from == code_to:
+            return Decimal(1)
+        else:
+            rates = (await self.r.historical(day))['rates']
+            return rates[code_to] / rates[code_from]
+
+    @property
+    def source_rates(self):
         return 'OpenExchangeRates'
 
     async def __aenter__(self):

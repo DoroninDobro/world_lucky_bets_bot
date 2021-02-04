@@ -6,7 +6,7 @@ from aiogram import Bot
 from app import config
 from app.config.currency import Currency
 from app.models import User, WorkThread, WorkerInThread, BetItem
-from app.models.work_thread import check_thread_running
+from app.models.db.work_thread import check_thread_running
 OLD_MESSAGE_SEPARATOR = "\n.\n"
 
 
@@ -41,7 +41,7 @@ async def save_new_betting_odd(
         worker_thread=worker_in_thread,
         bet=bet,
         result=result,
-        currency=currency,
+        currency=currency.iso_code,
         bookmaker_id=bookmaker_id,
     )
     await bot.send_message(

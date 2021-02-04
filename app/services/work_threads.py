@@ -9,7 +9,7 @@ from tortoise.transactions import in_transaction
 
 from app import config, keyboards as kb
 from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
-from app.models.work_thread import check_thread_running
+from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
     create_send_workers,
