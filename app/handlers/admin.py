@@ -3,6 +3,7 @@ import typing
 
 from aiogram import types, Bot
 from aiogram.dispatcher.handler import CancelHandler
+from aiogram.types import InputMediaDocument, InputFile
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
@@ -15,8 +16,6 @@ from app.services.work_threads import (
     get_thread,
     start_mailing,
     thread_not_found,
-    get_stats,
-    format_results_thread,
     send_notification_stop,
     add_info_to_thread,
 )

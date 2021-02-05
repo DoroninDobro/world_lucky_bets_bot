@@ -1,15 +1,14 @@
 from datetime import date
-from typing import Any
 
 from app import config
-from app.models import BetItem, WorkThread, RateItem
+from app.models import BetItem, WorkThread, RateItem, WorkerInThread
 from app.models.statistic.total import TotalStatistic
 from app.services.datetime_utils import get_moth_range, date_to_datetime
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 
 
-async def generate_report(month: int, year: int) -> dict[int, TotalStatistic]:
+async def generate_total_report(month: int, year: int) -> dict[int, TotalStatistic]:
     bets_log = await get_mont_bets(month, year)
     rates = await get_month_rates(month, year)
     total_statistics = {}
@@ -31,12 +30,29 @@ async def generate_report(month: int, year: int) -> dict[int, TotalStatistic]:
     return total_statistics
 
 
+async def generate_thread_users(month: int, year: int) -> dict[int, dict[int, WorkerInThread]]:
+    monthly_threads = await get_mont_threads(month, year)
+    users_statistics = {}
+    for thread in monthly_threads:
+        workers: list[WorkerInThread] = thread.workers  # noqa
+        for worker in workers:
+            try:
+                users_statistics[thread.id][worker.worker.id] = worker
+            except KeyError:
+                users_statistics[thread.id] = {worker.worker.id: worker}
+    return users_statistics
+
+
 async def get_mont_threads(month, year) -> list[WorkThread]:
     date_start, date_stop = get_moth_range(month, year)
     return await WorkThread \
         .filter(start__gte=date_to_datetime(date_start)) \
         .filter(start__lte=date_to_datetime(date_stop)) \
-        .all()
+        .prefetch_related(
+            "workers",
+            "workers__worker",
+            "workers__work_thread",
+        ).all()
 
 
 async def get_mont_bets(month, year) -> list[BetItem]:
