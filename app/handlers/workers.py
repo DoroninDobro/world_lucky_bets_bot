@@ -13,7 +13,7 @@ from app import config
 from app import keyboards as kb
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
-from app.models import User, WorkThread, BetItem, Bookmaker
+from app.models import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message
 from app.services.workers import add_worker_to_thread, save_new_betting_odd
 
@@ -155,7 +155,7 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
     chat_type=types.ChatType.PRIVATE,
     state=Report.bookmaker
 )
-async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext, user: User):
+async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     state_data.pop('new_bookmaker')
     await state.set_data(state_data)

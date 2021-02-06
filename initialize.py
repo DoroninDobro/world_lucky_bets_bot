@@ -1,4 +1,4 @@
-from app.models.db import generate_schemas
+from app.models.db.db import generate_schemas
 
 
 def main():
