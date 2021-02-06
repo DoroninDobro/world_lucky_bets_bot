@@ -145,3 +145,5 @@ dmypy.json
 
 *.xls
 *.xlsx
+
+/temp/

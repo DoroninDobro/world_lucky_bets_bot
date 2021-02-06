@@ -1,3 +1,5 @@
+from time import time
+
 from aiogram.types import InputFile
 
 from app import config
@@ -13,6 +15,6 @@ async def process_report(date_range: DataRange) -> InputFile:
     excel_writer.insert_total_report(await generate_total_report(date_range))
     excel_writer.insert_thread_users(await generate_thread_users(date_range))
     excel_writer.insert_users_reports(await generate_user_report(date_range))
-    filename = config.app_dir / "rez.xlsx"
+    filename = config.app_dir / "temp" / f"rez{date_range}___{time()}.xlsx"
     excel_writer.save(filename)
     return InputFile(filename, f"{date_range}.xlsx")

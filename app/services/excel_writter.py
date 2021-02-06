@@ -55,8 +55,8 @@ class ExcelWriter:
             _insert_row(current_user_ws, report_row.get_printable(), A1.shift(row=i))
             i += 1
 
-    def save(self, path: Path):
-        self.wb.save(path)
+    def save(self, destination):
+        self.wb.save(destination)
 
     def _remove_all_worksheets(self):
         for ws in self.wb.worksheets:
