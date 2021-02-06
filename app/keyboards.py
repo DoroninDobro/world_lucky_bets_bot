@@ -2,7 +2,7 @@ import typing
 from functools import lru_cache
 from typing import List, Dict
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
 from app.config.currency import Currency
@@ -19,6 +19,9 @@ cb_currency = CallbackData("currency", "code")
 cb_confirm_report = CallbackData("confirm", "yes")
 cb_confirm_add_bookmaker = CallbackData("confirm_bookmaker", "yes")
 boolean_emoji = {True: "✅", False: "🚫"}
+all_time_report = "Отчёт за всё время"
+last_month_report = "Отчёт за прошлый месяц"
+current_moth_report = "Отчёт за этот месяц"
 
 
 def get_stop_kb(thread_id: int) -> InlineKeyboardMarkup:
@@ -104,3 +107,15 @@ def get_kb_confirm_add_bookmaker() -> InlineKeyboardMarkup:
             boolean_emoji[yes],
             callback_data=cb_confirm_add_bookmaker.new(yes=str(yes))) for yes in (True, False)
     ]])
+
+
+@lru_cache
+def get_reply_kb_report() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        resize_keyboard=True,
+        keyboard=[[
+            KeyboardButton(all_time_report),
+            KeyboardButton(last_month_report),
+            KeyboardButton(current_moth_report),
+        ]],
+    )

@@ -5,4 +5,7 @@ T = TypeVar('T')
 
 
 def get_first_dict_value(d: dict[Any, T]) -> T:
-    return next(iter(d.values()))
+    try:
+        return next(iter(d.values()))
+    except StopIteration:
+        raise IndexError("dict doesnt have any element")

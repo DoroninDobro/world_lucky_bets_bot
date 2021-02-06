@@ -29,6 +29,17 @@ from ..services.remove_message import delete_message
 from ..utils.exceptions import ThreadStopped
 
 
+@dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=True)
+@dp.throttled(rate=3)
+async def cmd_start(message: types.Message):
+    """For start handler for not admin see base.py """
+    logger.info("User {user} start conversation with bot", user=message.from_user.id)
+    await message.reply(
+        "Привет, админ!",
+        reply_markup=kb.get_reply_kb_report(),
+    )
+
+
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
                     content_types=types.ContentType.PHOTO)
 @dp.throttled(rate=0.5)

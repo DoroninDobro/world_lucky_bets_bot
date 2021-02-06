@@ -24,3 +24,5 @@ async def get_month_rates(date_range: DataRange) -> dict[date: list[RateItem]]:
         except KeyError:
             result[rate.at] = {rate.currency: rate}
     return result
+
+
