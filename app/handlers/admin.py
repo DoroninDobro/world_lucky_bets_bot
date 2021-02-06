@@ -3,7 +3,6 @@ import typing
 
 from aiogram import types, Bot
 from aiogram.dispatcher.handler import CancelHandler
-from aiogram.types import InputMediaDocument, InputFile
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
@@ -20,7 +19,7 @@ from app.services.work_threads import (
     add_info_to_thread,
 )
 from app import config, keyboards as kb
-from app.models import User, AdditionalText, WorkThread, DataRange
+from app.models import User, AdditionalText, WorkThread
 from ..services.additional_text import (
     get_workers,
     change_disinformation,

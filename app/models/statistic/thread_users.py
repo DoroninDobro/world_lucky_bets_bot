@@ -1,7 +1,7 @@
 import typing
 from dataclasses import dataclass
 from datetime import date
-
+from typing import Union
 
 convert = {True: "+", False: "-", None: "?"}
 
@@ -22,9 +22,9 @@ class ThreadUsers:
             *self.user_names,
         ]
 
-    def get_printable(self) -> list[str]:
+    def get_printable(self) -> list[Union[str, date]]:
         return [
-            self.day.isoformat(),
+            self.day,
             self.id,
             *list(map(convert.get, self.user_has_worked))
         ]

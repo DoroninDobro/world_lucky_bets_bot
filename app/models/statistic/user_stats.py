@@ -2,6 +2,7 @@ import typing
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from typing import Union
 
 from app import config
 from app.models.db import User
@@ -40,9 +41,9 @@ class UserStat:
             self.total_result_eur_name,
         ]
 
-    def get_printable(self) -> list[str]:
+    def get_printable(self) -> list[Union[str, date]]:
         return [
-            self.day.isoformat(),
+            self.day,
             self.id,
             self.total_bet,
             self.total_payment,

@@ -27,7 +27,7 @@ A1 = CellAddress(1, 1)
 
 class ExcelWriter:
     def __init__(self):
-        self.wb = Workbook(iso_dates=True)
+        self.wb = Workbook()
         self._remove_all_worksheets()
 
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
@@ -46,11 +46,11 @@ class ExcelWriter:
         current_user = None
         current_user_ws = None  # it rewrite on first iteration, but linter don't think that
         i = None  # it rewrite on first iteration, but linter don't think that
-        for report_row in report_data:
+        for report_row in sorted(report_data, key=lambda x: x.user.id):
             if report_row.user != current_user:
-                current_user = report_data[0].user
+                current_user = report_row.user
                 current_user_ws = self.wb.create_sheet(current_user.fullname)
-                _insert_row(current_user_ws, report_data[0].get_captions(), A1)
+                _insert_row(current_user_ws, report_row.get_captions(), A1)
                 i = 1
             _insert_row(current_user_ws, report_row.get_printable(), A1.shift(row=i))
             i += 1
