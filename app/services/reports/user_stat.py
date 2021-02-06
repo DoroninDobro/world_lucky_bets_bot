@@ -1,13 +1,13 @@
 from app import config
-from app.models import UserStat, WorkThread
+from app.models import UserStat, WorkThread, DataRange
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_mont_bets, get_month_rates
 
 
-async def generate_user_report(month: int, year: int) -> list[UserStat]:
-    bets_log = await get_mont_bets(month, year)
-    rates = await get_month_rates(month, year)
+async def generate_user_report(date_range: DataRange) -> list[UserStat]:
+    bets_log = await get_mont_bets(date_range)
+    rates = await get_month_rates(date_range)
     user_statistics = []
     async with OpenExchangeRates(config.OER_TOKEN) as oer:
         for bet_item in bets_log:

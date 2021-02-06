@@ -20,7 +20,7 @@ from app.services.work_threads import (
     add_info_to_thread,
 )
 from app import config, keyboards as kb
-from app.models import User, AdditionalText, WorkThread
+from app.models import User, AdditionalText, WorkThread, DataRange
 from ..services.additional_text import (
     get_workers,
     change_disinformation,
