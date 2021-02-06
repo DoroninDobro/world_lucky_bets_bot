@@ -29,7 +29,7 @@ class TotalStatistic:
             cls.total_result_eur_name,
         ]
 
-    def get_printable(self):
+    def get_printable(self) -> list[str]:
         return [
             self.day.isoformat(),
             self.id,

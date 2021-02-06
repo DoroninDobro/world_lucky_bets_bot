@@ -9,7 +9,11 @@ from .db import (
     RateItem,
     Bookmaker
 )
-from .statistic import TotalStatistic
+from .statistic import (
+    TotalStatistic,
+    ThreadUsers,
+    UserStat,
+)
 
 
 __all__ = [
@@ -24,4 +28,6 @@ __all__ = [
     Bookmaker,
 
     TotalStatistic,
+    ThreadUsers,
+    UserStat,
 ]
