@@ -18,7 +18,7 @@ config_path = app_dir / 'config'
 jsons_dir = config_path / 'jsons'
 CURRENT_BOT = os.getenv("BOT_NAME", default="")
 
-load_dotenv(str(app_dir / f"{CURRENT_BOT}.env"))
+load_dotenv(str(config_path / f"{CURRENT_BOT}.env"))
 
 tz_view = tz.gettz('Europe/Moscow')
 
