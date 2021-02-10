@@ -20,11 +20,12 @@ async def generate_user_report(date_range: DataRange) -> list[UserStat]:
                 user=bet_item.worker_thread.worker,
                 day=day,
                 id=thread.id,
-                total_bet=f"{bet_item.bet} {bet_item.currency}",
-                total_result=f"{result + bet} {bet_item.currency}",
-                total_payment=f"{result} {bet_item.currency}",
+                total_bet=bet_item.bet,
+                total_result=bet_item.result - bet_item.bet,
+                total_payment=bet_item.result,
+                currency=config.currencies[bet_item.currency],
                 total_bet_eur=bet,
-                total_result_eur=result + bet,
+                total_result_eur=result - bet,
                 total_payment_eur=result,
             )
             user_statistics.append(user_stat)

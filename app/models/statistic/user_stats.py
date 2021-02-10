@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Union
 
 from app import config
+from app.config.currency import Currency
 from app.models.db import User
 
 
@@ -17,14 +18,15 @@ class UserStat:
     id_name: typing.ClassVar = "Номер матча"
     id: int
     total_bet_name: typing.ClassVar = f"Ставка"
-    total_bet: str
-    total_payment_name: typing.ClassVar = f"Рассчёт"
-    total_payment: str
+    total_bet: Decimal
+    total_payment_name: typing.ClassVar = f"Расчёт"
+    total_payment: Decimal
     total_result_name: typing.ClassVar = f"Профит"
-    total_result: str
+    total_result: Decimal
+    currency: Currency
     total_bet_eur_name: typing.ClassVar = f"Ставка в в {config.BASE_CURRENCY}"
     total_bet_eur: Decimal
-    total_payment_eur_name: typing.ClassVar = f"Рассчёт в {config.BASE_CURRENCY}"
+    total_payment_eur_name: typing.ClassVar = f"Расчёт в {config.BASE_CURRENCY}"
     total_payment_eur: Decimal
     total_result_eur_name: typing.ClassVar = f"Профит в {config.BASE_CURRENCY}"
     total_result_eur: Decimal

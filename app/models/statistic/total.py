@@ -15,7 +15,7 @@ class TotalStatistic:
     id: int
     total_bet_eur_name: typing.ClassVar = f"Общая сумма ставки в {config.BASE_CURRENCY}"
     total_bet_eur: Decimal
-    total_payment_eur_name: typing.ClassVar = f"Общая сумма рассчёта в {config.BASE_CURRENCY}"
+    total_payment_eur_name: typing.ClassVar = f"Общая сумма расчёта в {config.BASE_CURRENCY}"
     total_payment_eur: Decimal
     total_result_eur_name: typing.ClassVar = f"Общий плюс в {config.BASE_CURRENCY}"
     total_result_eur: Decimal

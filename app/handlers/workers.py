@@ -97,7 +97,7 @@ async def process_bet_in_report(message: types.Message, state: FSMContext):
         return await message.reply("Это явно не число.")
     await state.update_data(bet=bet)
     await Report.next()
-    await message.answer("Введите результат:")
+    await message.answer("Введите расчёт:")
 
 
 @dp.message_handler(is_admin=False, chat_type=types.ChatType.PRIVATE, state=Report.result)
@@ -171,8 +171,8 @@ async def send_check_data(message: types.Message, state: FSMContext):
     await message.answer(
         "<b>Всё верно?</b>\n\n"
         f"Букмейкер {bookmaker.name}\n"
-        f"Сделана ставка {state_data['bet']} {current_currency_symbol}\n"
-        f"Результат {state_data['result']} {current_currency_symbol}\n",
+        f"Сделана ставка: {state_data['bet']} {current_currency_symbol}\n"
+        f"Расчёт:{state_data['result']} {current_currency_symbol}\n",
         reply_markup=kb.get_kb_confirm_report(),
     )
 

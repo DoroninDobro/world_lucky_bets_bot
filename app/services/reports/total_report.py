@@ -20,8 +20,8 @@ async def generate_total_report(date_range: DataRange) -> dict[int, TotalStatist
                 day=day,
                 id=thread.id,
                 total_bet_eur=bet,
-                total_result_eur=result + bet,
-                total_payment_eur=result
+                total_result_eur=result - bet,
+                total_payment_eur=result,
             )
             append_in_statistic_in_dict(total_statistics, thread.id, total_statistic)
     return total_statistics
