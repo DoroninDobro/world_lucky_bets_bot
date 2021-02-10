@@ -1,0 +1,29 @@
+RUB:
+  symbol: ₽
+  fullname: рубль
+  plural_name: рубли
+  short_name: руб.
+
+USD:
+  symbol: $
+  fullname: доллар
+  plural_name: доллары
+  short_name: долл.
+
+EUR:
+  symbol: €
+  fullname: евро
+  plural_name: евро
+  short_name: евро
+
+GBP:
+  symbol: "£"
+  fullname: фунт
+  plural_name: фунты
+  short_name: ф.
+
+CNY:
+  symbol: "¥"
+  fullname: юань
+  plural_name: юань
+  short_name: юань

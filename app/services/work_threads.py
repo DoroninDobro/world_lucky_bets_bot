@@ -1,13 +1,15 @@
 import asyncio
 import typing
+from contextlib import suppress
 
 from aiogram import Bot, types
 from loguru import logger
+from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
 from app import config, keyboards as kb
-from app.models import WorkThread, WorkerInThread, User, AdditionalText
-from app.models.work_thread import check_thread_running
+from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
+from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
     create_send_workers,
@@ -15,7 +17,7 @@ from app.services.additional_text import (
     get_workers
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
-
+from app.services.rates import OpenExchangeRates
 
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
@@ -60,7 +62,23 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         created_thread.start_message_id = msg_to_admin.message_id
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
+
+        await save_daily_rates(using_db=connection)
+
         return created_thread
+
+
+async def save_daily_rates(using_db=None):
+    async with OpenExchangeRates(config.OER_TOKEN) as oer:
+        with suppress(IntegrityError):
+            for currency in config.currencies:
+                rate = RateItem(
+                    at=(await oer.get_updated_date()).date(),
+                    currency=currency,
+                    to_eur=await oer.get_rate("EUR", currency),
+                    to_usd=await oer.get_rate("USD", currency),
+                )
+                await rate.save(using_db=using_db)
 
 
 async def get_thread(message_id: int) -> WorkThread:
@@ -201,6 +219,7 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
 
 
 async def get_stats(thread: WorkThread) -> thread_results:
+    """ TODO Этот метод пока не используется"""
     results: thread_results = []
     for worker in await thread.workers:
         user = await worker.worker
@@ -217,7 +236,8 @@ async def get_stats(thread: WorkThread) -> thread_results:
     return results
 
 
-def format_results_thread(results: thread_results, thread_id: int) -> str:
+def format_results_thread(thread_id: int, results: thread_results) -> str:
+    """ TODO Этот метод пока не используется"""
     text = f"Результаты матча {thread_id}:"
     total_sum = 0
     total_win_sum = 0

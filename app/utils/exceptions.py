@@ -31,3 +31,13 @@ class ThreadStopped(BotError):
     def __init__(self, thread_id: int = None, *args, **kwargs):
         super(ThreadStopped, self).__init__(*args, **kwargs)
         self.thread_id = thread_id
+
+
+class ConvertError(BotError):
+    def __init__(self, code: str = None, *args, **kwargs):
+        super(ConvertError, self).__init__(*args, **kwargs)
+        self.code = code
+
+
+class CantConvertToThatCurrency(ConvertError):
+    pass

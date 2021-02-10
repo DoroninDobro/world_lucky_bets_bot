@@ -4,12 +4,13 @@ from aiogram.utils.markdown import hpre, hbold
 from loguru import logger
 
 from app.misc import dp
-from app.models.chat import Chat
+from app.models.db.chat import Chat
 
 
-@dp.message_handler(commands=["start"], commands_prefix='!/')
+@dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=False)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
+    """For start handler for admin see admin.py """
     logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
         "Привет "
@@ -47,10 +48,11 @@ async def cancel_state(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     logger.info(f'Cancelling state {current_state}')
-    # Cancel state and inform user about it
     await state.finish()
-    # And remove keyboard (just in case)
-    await message.reply('Диалог прекращён, данные удалены', reply_markup=types.ReplyKeyboardRemove())
+    await message.reply(
+        'Введённые во время диалога данные удалены, а сам диалог прекращён',
+        reply_markup=types.ReplyKeyboardRemove()
+    )
 
 
 @dp.message_handler(content_types=types.ContentTypes.MIGRATE_TO_CHAT_ID)

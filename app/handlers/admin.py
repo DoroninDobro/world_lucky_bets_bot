@@ -15,8 +15,6 @@ from app.services.work_threads import (
     get_thread,
     start_mailing,
     thread_not_found,
-    get_stats,
-    format_results_thread,
     send_notification_stop,
     add_info_to_thread,
 )
@@ -29,6 +27,17 @@ from ..services.additional_text import (
 )
 from ..services.remove_message import delete_message
 from ..utils.exceptions import ThreadStopped
+
+
+@dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=True)
+@dp.throttled(rate=3)
+async def cmd_start(message: types.Message):
+    """For start handler for not admin see base.py """
+    logger.info("User {user} start conversation with bot", user=message.from_user.id)
+    await message.reply(
+        "Привет, админ!",
+        reply_markup=kb.get_reply_kb_report(),
+    )
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
@@ -183,9 +192,9 @@ async def stop_work_thread(callback_query: types.CallbackQuery, callback_data: t
     except BadRequest as e:
         logger.exception(e)
 
-    results = await get_stats(thread=thread)
+    # results = await get_stats(thread=thread)
     await callback_query.bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
-        text=format_results_thread(results, thread.id)
+        text=f"{thread.id}. Матч успешно завершён",  # format_results_thread(thread.id)
     )
     await send_notification_stop(thread, callback_query.bot)

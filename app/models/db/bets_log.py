@@ -1,17 +1,8 @@
-from typing import NamedTuple
-
 from tortoise import fields
 from tortoise.models import Model
 
 from .workers_in_threads import WorkerInThread
-
-
-class BettingOdd(NamedTuple):
-    money: int
-    odd: float
-
-    def __repr__(self):
-        return f"{self.money} {self.odd}"
+DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 
 class BetItem(Model):
@@ -20,11 +11,15 @@ class BetItem(Model):
     # noinspection PyUnresolvedReferences
     worker_thread: fields.ForeignKeyRelation[WorkerInThread] = fields.ForeignKeyField(
         'models.WorkerInThread', related_name='bets')
-    money = fields.IntField()
-    odd = fields.FloatField()
+    bet = fields.DecimalField(**DECIMAL_CONFIG)
+    result = fields.DecimalField(**DECIMAL_CONFIG)
+    currency = fields.CharField(max_length=16)
 
     class Meta:
         table = "bets_log"
 
     def __repr__(self):
         return f"<BetItem id={self.id}>"
+
+    def __str__(self):
+        return f"{self.bet} {self.currency} и получил результат {self.result} {self.currency}"
