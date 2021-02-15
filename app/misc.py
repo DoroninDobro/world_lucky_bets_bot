@@ -17,7 +17,7 @@ def setup():
 
     middlewares.setup(dp)
     filters.setup(dp)
-    executor.setup()
+    executor.setup(config.db_config)
 
     logger.info("Configure handlers...")
     # noinspection PyUnresolvedReferences

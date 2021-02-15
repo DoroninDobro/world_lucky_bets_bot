@@ -12,6 +12,7 @@ import yaml
 from yaml import SafeLoader
 
 from .currency import load_currency
+from .db_config import DBConfig
 
 app_dir: Path = Path(__file__).parent.parent.parent
 config_path = app_dir / 'config'
@@ -62,13 +63,7 @@ WEBHOOK_URL_BASE = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_PATH}"
 LISTEN_IP = os.getenv("LISTEN_IP", default='0.0.0.0')
 LISTEN_PORT = int(os.getenv("LISTEN_PORT", default=3000))
 
-DB_TYPE = os.getenv("DB_TYPE", default='sqlite')
-LOGIN_DB = os.getenv("LOGIN_DB")
-PASSWORD_DB = os.getenv("PASSWORD_DB")
-DB_NAME = os.getenv("DB_NAME", default=CURRENT_BOT)
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_PATH = os.getenv("DB_PATH", default=app_dir / "db_data" / CURRENT_BOT / "bot.db")
+db_config = DBConfig().init_from_environment()
 
 
 PROG_NAME = "world lucky bets bot"
