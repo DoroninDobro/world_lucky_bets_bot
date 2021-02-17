@@ -1,0 +1,4 @@
+ALTER TABLE bets_log ALTER COLUMN bet type NUMERIC(20, 10) USING bet::NUMERIC;
+ALTER TABLE bets_log ALTER COLUMN result type NUMERIC(20, 10) USING result::NUMERIC;
+ALTER TABLE historical_rates ALTER COLUMN to_eur type NUMERIC(20, 10) USING to_eur::NUMERIC;
+ALTER TABLE historical_rates ALTER COLUMN to_usd type NUMERIC(20, 10) USING to_usd::NUMERIC;
