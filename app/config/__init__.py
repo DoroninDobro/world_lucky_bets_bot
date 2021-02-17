@@ -63,7 +63,8 @@ WEBHOOK_URL_BASE = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}{WEBHOOK_PATH}"
 LISTEN_IP = os.getenv("LISTEN_IP", default='0.0.0.0')
 LISTEN_PORT = int(os.getenv("LISTEN_PORT", default=3000))
 
-db_config = DBConfig().init_from_environment()
+db_config = DBConfig()
+db_config.init_from_environment(app_dir=app_dir, current_bot=CURRENT_BOT)
 
 
 PROG_NAME = "world lucky bets bot"

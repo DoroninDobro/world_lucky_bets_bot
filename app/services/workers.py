@@ -7,6 +7,8 @@ from app import config
 from app.config.currency import Currency
 from app.models import User, WorkThread, WorkerInThread, BetItem
 from app.models.db.work_thread import check_thread_running
+from app.services.datetime_utils import get_current_datetime_in_format
+
 OLD_MESSAGE_SEPARATOR = "\n.\n"
 
 
@@ -46,6 +48,6 @@ async def save_new_betting_odd(
     )
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} сделал ставку {bet_item} в матче {thread_id}"
+        f"{get_current_datetime_in_format()} - {user.mention_link} сделал ставку {bet_item} в матче {thread_id}"
     )
     return bet_item
