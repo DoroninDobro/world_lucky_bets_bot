@@ -2,6 +2,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from loguru import logger
+
 
 @dataclass
 class DBConfig:
@@ -10,16 +12,23 @@ class DBConfig:
     password: str = None
     db_name: str = None
     db_host: str = None
-    db_port: str = None
+    db_port: int = None
     db_path: str = None
 
     def init_from_environment(self, app_dir: Path, current_bot: str):
         self.db_type = os.getenv("DB_TYPE", default='sqlite')
-        self.login = os.getenv("LOGIN_DB")
-        self.password = os.getenv("PASSWORD_DB")
+        self.login = os.getenv("DB_LOGIN")
+        self.password = os.getenv("DB_PASSWORD")
         self.db_name = os.getenv("DB_NAME", default=current_bot)
-        self.db_host = os.getenv("DB_HOST")
-        self.db_port = os.getenv("DB_PORT")
+        self.db_host = os.getenv("DB_HOST", default='localhost')
+        port = os.getenv("DB_PORT")
+        if port is None:
+            if self.db_type == 'mysql':
+                self.db_port = 3306
+            elif self.db_type == 'postgres':
+                self.db_port = 5432
+        else:
+            self.db_port = int(port)
         self.db_path = os.getenv("DB_PATH", default=app_dir / "db_data" / current_bot / "bot.db")
 
     def create_url_config(self):
@@ -39,4 +48,5 @@ class DBConfig:
             )
         else:
             raise ValueError("DB_TYPE not mysql, sqlite or postgres")
+        logger.debug(db_url)
         return db_url
