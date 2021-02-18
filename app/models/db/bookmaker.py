@@ -8,7 +8,7 @@ class Bookmaker(Model):
     # noinspection PyUnresolvedReferences
     add_by: fields.ForeignKeyRelation['User'] = fields.ForeignKeyField(
         'models.User', related_name='added_bookmakers')
-    created = fields.DatetimeField(auto_now=True)
+    created = fields.DatetimeField(generated=True)
 
     class Meta:
         table = "bookmakers"

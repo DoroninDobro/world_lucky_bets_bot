@@ -7,7 +7,7 @@ DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 class BetItem(Model):
     id = fields.IntField(pk=True)
-    created = fields.DatetimeField(auto_now=True)
+    created = fields.DatetimeField(generated=True)
     # noinspection PyUnresolvedReferences
     worker_thread: fields.ForeignKeyRelation[WorkerInThread] = fields.ForeignKeyField(
         'models.WorkerInThread', related_name='bets')
