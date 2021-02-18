@@ -19,3 +19,7 @@ ALTER TABLE send_to_workers ALTER COLUMN send SET DEFAULT true;
 ALTER TABLE bookmakers ALTER COLUMN created TYPE timestamp with time zone;
 ALTER TABLE bets_log ALTER COLUMN created TYPE timestamp with time zone;
 ALTER TABLE work_threads ALTER COLUMN start TYPE timestamp with time zone;
+
+CREATE SEQUENCE send_to_workers_id_seq MINVALUE 1000 START 1000;
+ALTER TABLE send_to_workers ALTER id SET DEFAULT nextval('send_to_workers_id_seq');
+ALTER SEQUENCE send_to_workers_id_seq OWNED BY send_to_workers.id;
