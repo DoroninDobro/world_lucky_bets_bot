@@ -63,9 +63,9 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
 
-        await save_daily_rates(using_db=connection)
+    await save_daily_rates()
 
-        return created_thread
+    return created_thread
 
 
 async def save_daily_rates(using_db=None):
