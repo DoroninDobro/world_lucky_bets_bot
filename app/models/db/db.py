@@ -1,34 +1,19 @@
+from functools import partial
+
 from aiogram import Dispatcher
 from aiogram.utils.executor import Executor
 from tortoise import Tortoise, run_async
 
-from app import config
+from app.config import DBConfig
 
 
-async def on_startup(_: Dispatcher):
-    await db_init()
+async def on_startup(_: Dispatcher, db_config: DBConfig):
+    await db_init(db_config)
 
 
-async def db_init():
-    if config.DB_TYPE == 'mysql':
-        db_url = (
-            f'{config.DB_TYPE}://{config.LOGIN_DB}:{config.PASSWORD_DB}'
-            f'@{config.DB_HOST}:{config.DB_PORT}/{config.DB_NAME}'
-        )
-    elif config.DB_TYPE == 'postgres':
-        db_url = (
-            f'{config.DB_TYPE}://{config.LOGIN_DB}:{config.PASSWORD_DB}'
-            f'@{config.DB_HOST}:{config.DB_PORT}/{config.DB_NAME}'
-        )
-    elif config.DB_TYPE == 'sqlite':
-        db_url = (
-            f'{config.DB_TYPE}://{config.DB_PATH}'
-        )
-    else:
-        raise ValueError("DB_TYPE not mysql, sqlite or postgres")
-
+async def db_init(db_config: DBConfig):
     await Tortoise.init(
-        db_url=db_url,
+        db_url=db_config.create_url_config(),
         modules={'models': ['app.models']}
     )
 
@@ -37,15 +22,15 @@ async def on_shutdown(_: Dispatcher):
     await Tortoise.close_connections()
 
 
-def setup(executor: Executor):
-    executor.on_startup(on_startup)
+def setup(executor: Executor, db_config: DBConfig):
+    executor.on_startup(partial(on_startup, db_config=db_config))
     executor.on_shutdown(on_shutdown)
 
 
-async def generate_schemas_db():
-    await db_init()
+async def generate_schemas_db(db_config: DBConfig):
+    await db_init(db_config)
     await Tortoise.generate_schemas()
 
 
-def generate_schemas():
-    run_async(generate_schemas_db())
+def generate_schemas(db_config: DBConfig):
+    run_async(generate_schemas_db(db_config))
