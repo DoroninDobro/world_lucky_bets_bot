@@ -5,14 +5,16 @@ from decimal import Decimal
 from typing import Union
 
 from app import config
+from app.models import WorkThread
 
 
 @dataclass
 class TotalStatistic:
     day_name: typing.ClassVar = "Дата"
     day: date
-    id_name: typing.ClassVar = "Номер матча"
-    id: int
+    thread_id_name: typing.ClassVar = "Номер матча"
+    thread_name_name: typing.ClassVar = "Название матча"
+    thread: WorkThread
     total_bet_eur_name: typing.ClassVar = f"Общая сумма ставки в {config.BASE_CURRENCY}"
     total_bet_eur: Decimal
     total_payment_eur_name: typing.ClassVar = f"Общая сумма расчёта в {config.BASE_CURRENCY}"
@@ -24,7 +26,7 @@ class TotalStatistic:
     def get_captions(cls) -> list[str]:
         return [
             cls.day_name,
-            cls.id_name,
+            cls.thread_id_name,
             cls.total_bet_eur_name,
             cls.total_payment_eur_name,
             cls.total_result_eur_name,
@@ -33,7 +35,7 @@ class TotalStatistic:
     def get_printable(self) -> list[Union[str, date]]:
         return [
             self.day,
-            self.id,
+            self.thread.id,
             self.total_bet_eur,
             self.total_payment_eur,
             self.total_result_eur,

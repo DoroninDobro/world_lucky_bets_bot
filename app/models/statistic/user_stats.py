@@ -6,7 +6,7 @@ from typing import Union
 
 from app import config
 from app.config.currency import Currency
-from app.models.db import User
+from app.models.db import Bookmaker, User, WorkThread
 
 
 @dataclass
@@ -15,8 +15,9 @@ class UserStat:
 
     day_name: typing.ClassVar = "Дата"
     day: date
-    id_name: typing.ClassVar = "Номер матча"
-    id: int
+    thread_id_name: typing.ClassVar = "Номер матча"
+    thread_name_name: typing.ClassVar = "Название матча"
+    thread: WorkThread
     total_bet_name: typing.ClassVar = f"Ставка"
     total_bet: Decimal
     total_payment_name: typing.ClassVar = f"Расчёт"
@@ -30,11 +31,13 @@ class UserStat:
     total_payment_eur: Decimal
     total_result_eur_name: typing.ClassVar = f"Профит в {config.BASE_CURRENCY}"
     total_result_eur: Decimal
+    bookmaker_name: typing.ClassVar = "Букмекер"
+    bookmaker: Bookmaker
 
     def get_captions(self) -> list[str]:
         return [
             self.day_name,
-            self.id_name,
+            self.thread_id_name,
             self.total_bet_name,
             self.total_payment_name,
             self.total_result_name,
@@ -46,7 +49,7 @@ class UserStat:
     def get_printable(self) -> list[Union[str, date]]:
         return [
             self.day,
-            self.id,
+            self.thread.id,
             self.total_bet,
             self.total_payment,
             self.total_result,

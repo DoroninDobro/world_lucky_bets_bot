@@ -4,6 +4,7 @@ from tortoise.models import Model
 from .workers_in_threads import WorkerInThread
 from .bookmaker import Bookmaker
 
+
 DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 

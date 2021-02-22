@@ -19,7 +19,7 @@ async def generate_user_report(date_range: DataRange) -> list[UserStat]:
             user_stat = UserStat(
                 user=bet_item.worker_thread.worker,
                 day=day,
-                id=thread.id,
+                thread=thread,
                 total_bet=bet_item.bet,
                 total_result=bet_item.result - bet_item.bet,
                 total_payment=bet_item.result,
