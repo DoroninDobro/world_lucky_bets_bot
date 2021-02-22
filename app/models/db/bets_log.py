@@ -2,6 +2,8 @@ from tortoise import fields
 from tortoise.models import Model
 
 from .workers_in_threads import WorkerInThread
+from .bookmaker import Bookmaker
+
 DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 
@@ -14,6 +16,8 @@ class BetItem(Model):
     bet = fields.DecimalField(**DECIMAL_CONFIG)
     result = fields.DecimalField(**DECIMAL_CONFIG)
     currency = fields.CharField(max_length=16)
+    bookmaker: fields.ForeignKeyRelation[Bookmaker] = fields.ForeignKeyField(
+        'models.Bookmaker', related_name='bets')
 
     class Meta:
         table = "bets_log"
