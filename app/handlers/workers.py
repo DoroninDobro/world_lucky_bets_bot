@@ -15,7 +15,8 @@ from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message
-from app.services.workers import add_worker_to_thread, save_new_betting_odd
+from app.services.workers import add_worker_to_thread
+from app.services.bets_log import save_new_betting_odd
 
 
 class Report(StatesGroup):
@@ -184,13 +185,17 @@ async def send_check_data(message: types.Message, state: FSMContext):
     state=Report.ok
 )
 async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: User):
-    await callback_query.answer("Успешно сохранено", show_alert=True)
-    state_data = await state.get_data()
-    currency: Currency = config.currencies[state_data.pop('currency')]
-    betting_item = await save_new_betting_odd(user=user, bot=callback_query.bot, currency=currency, **state_data)
+    try:
+        state_data = await state.get_data()
+        currency: Currency = config.currencies[state_data.pop('currency')]
+        betting_item = await save_new_betting_odd(user=user, bot=callback_query.bot, currency=currency, **state_data)
 
-    await callback_query.message.edit_text(f"Успешно сохранено\n{betting_item}")
-    await state.finish()
+        await callback_query.message.edit_text(f"Успешно сохранено\n{betting_item}")
+        await state.finish()
+        await callback_query.answer()
+    except Exception:
+        await callback_query.answer("Произошла ошибка", show_alert=True)
+        raise
 
 
 @dp.callback_query_handler(
@@ -203,4 +208,3 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer("Сохранение отменено", show_alert=True)
     await callback_query.message.edit_text("Сохранение отменено")
     await state.finish()
-

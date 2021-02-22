@@ -1,13 +1,10 @@
 from datetime import datetime
-from decimal import Decimal
 
 from aiogram import Bot
 
 from app import config
-from app.config.currency import Currency
-from app.models import User, WorkThread, WorkerInThread, BetItem
+from app.models import User, WorkThread, WorkerInThread
 from app.models.db.work_thread import check_thread_running
-from app.services.datetime_utils import get_current_datetime_in_format
 
 OLD_MESSAGE_SEPARATOR = "\n.\n"
 
@@ -28,26 +25,3 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
 
 async def get_worker_in_thread(message_id: int, user: User):
     return await WorkerInThread.get(worker=user, message_id=message_id)
-
-
-async def save_new_betting_odd(
-        thread_id: int,
-        currency: Currency,
-        bet: Decimal,
-        result: Decimal,
-        bookmaker_id: str,
-        user: User,
-        bot: Bot):
-    worker_in_thread = await WorkerInThread.get(worker=user, work_thread_id=thread_id)
-    bet_item = await BetItem.create(
-        worker_thread=worker_in_thread,
-        bet=bet,
-        result=result,
-        currency=currency.iso_code,
-        bookmaker_id=bookmaker_id,
-    )
-    await bot.send_message(
-        config.USER_LOG_CHAT_ID,
-        f"{get_current_datetime_in_format()} - {user.mention_link} сделал ставку {bet_item} в матче {thread_id}"
-    )
-    return bet_item

@@ -4,5 +4,7 @@ from . import errors
 from . import admin
 from . import reports
 from . import workers
+from . import common
 
-__all__ = [errors, superuser_bot, base, admin, reports, workers]
+
+__all__ = [errors, superuser_bot, base, admin, reports, workers, common]
