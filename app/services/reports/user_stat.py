@@ -27,6 +27,8 @@ async def generate_user_report(date_range: DataRange) -> list[UserStat]:
                 total_bet_eur=bet,
                 total_result_eur=result - bet,
                 total_payment_eur=result,
+                bookmaker=bet_item.bookmaker,
+                bet_item=bet_item,
             )
             user_statistics.append(user_stat)
     return user_statistics
