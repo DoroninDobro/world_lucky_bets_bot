@@ -41,3 +41,7 @@ class ConvertError(BotError):
 
 class CantConvertToThatCurrency(ConvertError):
     pass
+
+
+class UserPermissionError(BotError):
+    pass

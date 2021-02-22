@@ -18,7 +18,7 @@ async def generate_total_report(date_range: DataRange) -> dict[int, TotalStatist
             result = await find_rate_and_convert(value=bet_item.result, **search_kwargs)
             total_statistic = TotalStatistic(
                 day=day,
-                id=thread.id,
+                thread=thread,
                 total_bet_eur=bet,
                 total_result_eur=result - bet,
                 total_payment_eur=result,

@@ -4,6 +4,7 @@ from tortoise.models import Model
 from .workers_in_threads import WorkerInThread
 from .bookmaker import Bookmaker
 
+
 DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 
@@ -26,4 +27,18 @@ class BetItem(Model):
         return f"<BetItem id={self.id}>"
 
     def __str__(self):
-        return f"{self.bet} {self.currency} и получил результат {self.result} {self.currency}"
+        return (
+            f"ставка: {self.bet:.2f} {self.currency} "
+            f"результат: {self.result:.2f} {self.currency}"
+        )
+
+    async def get_full_printable(self):
+        await self.fetch_related("worker_thread__worker")
+        user = self.worker_thread.worker
+        bookmaker = await self.bookmaker
+        return (
+            f"ставка от {user.mention_link} "
+            f"у букмекера \"{bookmaker.name if bookmaker else 'не известно'}\": "
+            f"{self.bet:.2f} {self.currency}, "
+            f"результат: {self.result:.2f} {self.currency}"
+        )

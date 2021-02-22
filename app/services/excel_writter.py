@@ -1,17 +1,12 @@
-import string
 from dataclasses import dataclass
-from datetime import date
-from decimal import Decimal
 from typing import Iterable
 
-import openpyxl
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import numbers
 from openpyxl.worksheet.worksheet import Worksheet
 
 from app import config
-from app.config.currency import Currency
 from app.models import TotalStatistic, UserStat
 from app.models.statistic.thread_users import ThreadUsers
 from app.services.collections_utils import get_first_dict_value
@@ -53,7 +48,7 @@ class ExcelWriter:
         _insert_row(total_ws, get_first_dict_value(report_data).get_captions(), A1)
         currencies_columns = {self.current_currency.symbol: (3, 4, 5)}
 
-        for i, report_row in enumerate(sorted(report_data.values(), key=lambda ts: ts.id), 1):
+        for i, report_row in enumerate(sorted(report_data.values(), key=lambda ts: ts.thread.id), 1):
             _insert_row(total_ws, report_row.get_printable(), A1.shift(row=i))
             self.format_rows(total_ws, A1.shift(row=i), self.date_columns, currencies_columns)
         _make_auto_width(
@@ -74,6 +69,8 @@ class ExcelWriter:
     def insert_users_reports(self, report_data: list[UserStat]):
         currencies_columns = {self.current_currency.symbol: (6, 7, 8)}
         local_currencies_columns = (3, 4, 5)
+        bookmaker_name_col = 9
+        names_cols = [bookmaker_name_col]
         column_count = len(report_data[0].get_printable())
         current_user = None
         current_user_ws = None  # it rewrite on first iteration, but linter don't think that
@@ -86,6 +83,7 @@ class ExcelWriter:
                         column_count,
                         self.date_columns,
                         currencies=currencies_columns,
+                        names=names_cols,
                     )
                 current_user = report_row.user
                 current_user_ws = self.wb.create_sheet(current_user.fullname)
@@ -104,7 +102,8 @@ class ExcelWriter:
             current_user_ws,
             column_count,
             self.date_columns,
-            currencies=currencies_columns
+            currencies=currencies_columns,
+            names=names_cols,
         )
 
     def save(self, destination):
@@ -119,15 +118,15 @@ class ExcelWriter:
             ws: Worksheet,
             first_cell: CellAddress,
             date_columns: Iterable[int],
-            currencies: dict[str, Iterable[int]]
+            currencies: dict[str, Iterable[int]],
     ):
         for i in date_columns:
             cell = ws.cell(**first_cell.replace(column=i).kwargs)
-            cell.number_format = numbers.FORMAT_DATE_DDMMYY
+            cell.number_format = numbers.FORMAT_DATE_DDMMYY  # noqa
         for currency, columns in currencies.items():
             for i in columns:
                 cell = ws.cell(**first_cell.replace(column=i).kwargs)
-                cell.number_format = self.number_format.replace("CURRENCY", currency)
+                cell.number_format = self.number_format.replace("CURRENCY", currency)  # noqa
 
 
 def _make_auto_width(
@@ -135,11 +134,14 @@ def _make_auto_width(
         count: int,
         date_columns: Iterable[int],
         currencies: dict[str, Iterable[int]],
+        names: Iterable[int] = tuple(),
 ):
     for i in range(1, count + 2):
         total_ws.column_dimensions[get_column_letter(i)].auto_size = True
     for i in date_columns:
         total_ws.column_dimensions[get_column_letter(i)].width += -3
+    for i in names:
+        total_ws.column_dimensions[get_column_letter(i)].width += 15
     if "Общая сводка матчей" in total_ws.title:
         width_add = 15
     else:

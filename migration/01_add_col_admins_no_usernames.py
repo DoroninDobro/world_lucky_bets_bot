@@ -4,7 +4,7 @@ from app import config
 
 
 def upgrade():
-    with sqlite3.connect(config.DB_PATH) as conn:
+    with sqlite3.connect(config.db_config.db_path) as conn:
         cur = conn.cursor()
         cur.execute("""
             ALTER TABLE work_threads
