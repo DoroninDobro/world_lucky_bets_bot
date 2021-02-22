@@ -7,3 +7,4 @@ aiogram~=2.11.2
 git+https://github.com/bomzheg/openexchangerates@master
 pyyaml~=5.4.1
 openpyxl~=3.0.6
+asyncpg

@@ -32,8 +32,8 @@ class DataRange:
     @classmethod
     def get_all_time_range(cls):
         first_time = date.min
-        today = datetime.now().date()
-        return cls(start=first_time, stop=today)
+        last_time = date.max
+        return cls(start=first_time, stop=last_time)
 
     def __repr__(self):
         return f"{self.start.isoformat()} - {self.stop.isoformat()}"
