@@ -2,6 +2,7 @@ import asyncio
 import typing
 
 from aiogram import types, Bot
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
@@ -202,3 +203,13 @@ async def stop_work_thread(
         text=f"{thread.id}. Матч успешно завершён",  # format_results_thread(thread.id)
     )
     await send_notification_stop(thread, callback_query.bot)
+
+
+@dp.callback_query_handler(kb.cb_rename_thread.filter(), is_admin=True)
+async def start_rename_thread_process(
+        callback_query: types.CallbackQuery,
+        callback_data: dict[str, str],
+        state: FSMContext
+):
+    thread_id = int(callback_data['thread_id'])
+
