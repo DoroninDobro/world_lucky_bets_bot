@@ -21,6 +21,7 @@ class WorkThread(Model):
     # noinspection PyUnresolvedReferences
     additional_texts: fields.ReverseRelation['AdditionalText']
     stopped: bool = fields.BooleanField(default=False)
+    name = fields.CharField(128, null=True)
 
     class Meta:
         table = "work_threads"

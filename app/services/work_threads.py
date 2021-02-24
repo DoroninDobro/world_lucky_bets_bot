@@ -39,7 +39,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=admin.id,
             photo=photo_file_id,
             caption=f"{created_thread.id}. Сообщение отправлено",
-            reply_markup=kb.get_stop_kb(created_thread.id)
+            reply_markup=kb.get_work_thread_admin_kb(created_thread.id)
         )
         transaction_messages.append(msg_to_admin)
 

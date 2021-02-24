@@ -157,11 +157,15 @@ async def change_addressee_workers(
         worker=worker_id,
         thread=thread.id,
     )
-    await callback_query.message.edit_reply_markup(kb.get_kb_menu_send(await get_workers(a_t), a_t))
+    await callback_query.message.edit_reply_markup(
+        kb.get_kb_menu_send(await get_workers(a_t), a_t))
 
 
 @dp.callback_query_handler(kb.cb_stop.filter(), is_admin=True)
-async def stop_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
+async def stop_work_thread(
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str]
+):
     thread_id = int(callback_data['thread_id'])
     try:
         thread = await stop_thread(thread_id)
