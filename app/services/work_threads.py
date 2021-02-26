@@ -261,7 +261,6 @@ async def rename_thread(thread_id: int, new_name: str):
     await thread.save()
 
 
-
 async def send_notification_stop(thread: WorkThread, bot: Bot):
     for worker in await thread.workers:
         user = await worker.worker
@@ -269,6 +268,6 @@ async def send_notification_stop(thread: WorkThread, bot: Bot):
         await asyncio.sleep(0.5)
     await bot.send_message(
         chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=f"Матч thread_id={thread.id} успешно завершён",
+        text=f"{thread.id}. Матч {thread.name if thread.name is not None else ''} успешно завершён",
         reply_to_message_id=thread.log_chat_message_id,
     )

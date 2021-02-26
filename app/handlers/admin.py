@@ -184,15 +184,13 @@ async def stop_work_thread(
         admin=callback_query.from_user.id
     )
     await callback_query.answer()
-    edit_kwargs = dict(
-        caption=f"{thread.id}. Матч успешно завершён",
-        reply_markup=None
-    )
+    caption = f"{thread.id}. " \
+              f"Матч {thread.name if thread.name is not None else ''} успешно завершён"
     try:
         # edit message in PM admin
         await callback_query.message.edit_caption(
-            **edit_kwargs,
-            reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id)
+            caption=caption,
+            reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id),
         )
     except BadRequest as e:
         logger.exception(e)
@@ -202,14 +200,15 @@ async def stop_work_thread(
         await callback_query.bot.edit_message_caption(
             chat_id=config.WORKERS_CHAT_ID,
             message_id=thread.workers_chat_message_id,
-            **edit_kwargs
+            caption=caption,
+            reply_markup=None,
         )
     except BadRequest as e:
         logger.exception(e)
 
     await callback_query.bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
-        text=f"{thread.id}. Матч успешно завершён",
+        text=caption,
     )
     await send_notification_stop(thread, callback_query.bot)
 
