@@ -37,6 +37,7 @@ A1 = CellAddress(1, 1)
 class ExcelWriter:
     number_format = r"#,##0.00\ [$CURRENCY];[Red]-#,##0.00\ [$CURRENCY]"
     date_columns = (1, )
+    name_columns = (3, )
 
     def __init__(self):
         self.wb = Workbook()
@@ -56,6 +57,7 @@ class ExcelWriter:
             len(get_first_dict_value(report_data).get_printable()),
             self.date_columns,
             currencies_columns,
+            self.name_columns,
         )
 
     def insert_thread_users(self, report_data: list[ThreadUsers]):
@@ -64,7 +66,7 @@ class ExcelWriter:
         for i, report_row in enumerate(report_data, 1):
             _insert_row(thread_users_ws, report_row.get_printable(), A1.shift(row=i))
             self.format_rows(thread_users_ws, A1.shift(row=i), self.date_columns, {})
-        _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {})
+        _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
     def insert_users_reports(self, report_data: list[UserStat]):
         currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
@@ -83,7 +85,7 @@ class ExcelWriter:
                         column_count,
                         self.date_columns,
                         currencies=currencies_columns,
-                        names=names_cols,
+                        names=[*names_cols, *self.name_columns],
                     )
                 current_user = report_row.user
                 current_user_ws = self.wb.create_sheet(current_user.fullname)
@@ -103,7 +105,7 @@ class ExcelWriter:
             column_count,
             self.date_columns,
             currencies=currencies_columns,
-            names=names_cols,
+            names=[*names_cols, *self.name_columns],
         )
 
     def save(self, destination):
