@@ -255,6 +255,13 @@ def format_results_thread(thread_id: int, results: thread_results) -> str:
     return text
 
 
+async def rename_thread(thread_id: int, new_name: str):
+    thread = await WorkThread.get(id=thread_id)
+    thread.name = new_name
+    await thread.save()
+
+
+
 async def send_notification_stop(thread: WorkThread, bot: Bot):
     for worker in await thread.workers:
         user = await worker.worker

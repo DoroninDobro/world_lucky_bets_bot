@@ -3,6 +3,7 @@ import typing
 
 from aiogram import types, Bot
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
@@ -17,7 +18,7 @@ from app.services.work_threads import (
     start_mailing,
     thread_not_found,
     send_notification_stop,
-    add_info_to_thread,
+    add_info_to_thread, rename_thread,
 )
 from app import config, keyboards as kb
 from app.models import User, AdditionalText, WorkThread
@@ -28,6 +29,10 @@ from ..services.additional_text import (
 )
 from ..services.remove_message import delete_message
 from ..utils.exceptions import ThreadStopped
+
+
+class RenameThread(StatesGroup):
+    name = State()
 
 
 @dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=True)
@@ -212,4 +217,11 @@ async def start_rename_thread_process(
         state: FSMContext
 ):
     thread_id = int(callback_data['thread_id'])
+    await state.update_data(thread_id=thread_id)
+    await RenameThread.name.set()
+    await callback_query.message.answer("Пришлите новое название для этого матча")
 
+
+@dp.message_handler(is_admin=True, state=RenameThread.name)
+async def save_new_name_process(message: types.Message, state: FSMContext):
+    await rename_thread((await state.get_data())['thread_id'], message.text)
