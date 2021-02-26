@@ -37,6 +37,7 @@ A1 = CellAddress(1, 1)
 class ExcelWriter:
     number_format = r"#,##0.00\ [$CURRENCY];[Red]-#,##0.00\ [$CURRENCY]"
     date_columns = (1, )
+    name_columns = (3, )
 
     def __init__(self):
         self.wb = Workbook()
@@ -46,7 +47,7 @@ class ExcelWriter:
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
         total_ws = self.wb.create_sheet("Общая сводка матчей")
         _insert_row(total_ws, get_first_dict_value(report_data).get_captions(), A1)
-        currencies_columns = {self.current_currency.symbol: (3, 4, 5)}
+        currencies_columns = {self.current_currency.symbol: (4, 5, 6)}
 
         for i, report_row in enumerate(sorted(report_data.values(), key=lambda ts: ts.thread.id), 1):
             _insert_row(total_ws, report_row.get_printable(), A1.shift(row=i))
@@ -56,6 +57,7 @@ class ExcelWriter:
             len(get_first_dict_value(report_data).get_printable()),
             self.date_columns,
             currencies_columns,
+            self.name_columns,
         )
 
     def insert_thread_users(self, report_data: list[ThreadUsers]):
@@ -64,12 +66,12 @@ class ExcelWriter:
         for i, report_row in enumerate(report_data, 1):
             _insert_row(thread_users_ws, report_row.get_printable(), A1.shift(row=i))
             self.format_rows(thread_users_ws, A1.shift(row=i), self.date_columns, {})
-        _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {})
+        _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
     def insert_users_reports(self, report_data: list[UserStat]):
-        currencies_columns = {self.current_currency.symbol: (6, 7, 8)}
-        local_currencies_columns = (3, 4, 5)
-        bookmaker_name_col = 9
+        currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
+        local_currencies_columns = (4, 5, 6)
+        bookmaker_name_col = 10
         names_cols = [bookmaker_name_col]
         column_count = len(report_data[0].get_printable())
         current_user = None
@@ -83,7 +85,7 @@ class ExcelWriter:
                         column_count,
                         self.date_columns,
                         currencies=currencies_columns,
-                        names=names_cols,
+                        names=[*names_cols, *self.name_columns],
                     )
                 current_user = report_row.user
                 current_user_ws = self.wb.create_sheet(current_user.fullname)
@@ -103,7 +105,7 @@ class ExcelWriter:
             column_count,
             self.date_columns,
             currencies=currencies_columns,
-            names=names_cols,
+            names=[*names_cols, *self.name_columns],
         )
 
     def save(self, destination):

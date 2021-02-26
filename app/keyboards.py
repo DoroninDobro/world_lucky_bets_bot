@@ -8,7 +8,9 @@ from aiogram.utils.callback_data import CallbackData
 from app.config.currency import Currency
 from app.models import AdditionalText, SendWorkers, User, WorkThread
 
+
 cb_stop = CallbackData("stop_thread", "thread_id")
+cb_rename_thread = CallbackData("rename_thread", "thread_id")
 cb_agree = CallbackData("agree_thread", "thread_id")
 cb_send_now = CallbackData("send_info", "additional_text")
 cb_workers = CallbackData("send_info", "additional_text", "send_worker_id", "enable")
@@ -24,10 +26,21 @@ last_month_report = "Отчёт за прошлый месяц"
 current_moth_report = "Отчёт за этот месяц"
 
 
-def get_stop_kb(thread_id: int) -> InlineKeyboardMarkup:
+def get_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     kb.insert(InlineKeyboardButton("Остановить", callback_data=cb_stop.new(thread_id=thread_id)))
+    _append_rename_button_to_kb(kb, thread_id)
     return kb
+
+
+def get_stopped_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    _append_rename_button_to_kb(kb, thread_id)
+    return kb
+
+
+def _append_rename_button_to_kb(kb: InlineKeyboardMarkup, thread_id: int):
+    kb.insert(InlineKeyboardButton("Переименовать", callback_data=cb_rename_thread.new(thread_id=thread_id)))
 
 
 def get_agree_work(thread_id: int) -> InlineKeyboardMarkup:

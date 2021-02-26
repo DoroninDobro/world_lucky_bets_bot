@@ -21,7 +21,7 @@ async def generate_thread_users(date_range: DataRange) -> list[ThreadUsers]:
             has_worked.append(True if user_id in workers else False)
         thread_users.append(ThreadUsers(
             day=thread.start.date(),
-            id=thread.id,
+            thread=thread,
             user_names=list(user_names.values()),
             user_has_worked=has_worked
         ))

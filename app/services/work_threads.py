@@ -39,7 +39,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=admin.id,
             photo=photo_file_id,
             caption=f"{created_thread.id}. Сообщение отправлено",
-            reply_markup=kb.get_stop_kb(created_thread.id)
+            reply_markup=kb.get_work_thread_admin_kb(created_thread.id)
         )
         transaction_messages.append(msg_to_admin)
 
@@ -214,7 +214,7 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
     await callback_query.answer(f"Матч thread_id={thread_id} не найдён", show_alert=True)
     await callback_query.message.edit_caption(
         f"Матч thread_id={thread_id} не найден, возможно он уже был завершён",
-        reply_markup=None
+        reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id)
     )
 
 
@@ -255,6 +255,12 @@ def format_results_thread(thread_id: int, results: thread_results) -> str:
     return text
 
 
+async def rename_thread(thread_id: int, new_name: str):
+    thread = await WorkThread.get(id=thread_id)
+    thread.name = new_name
+    await thread.save()
+
+
 async def send_notification_stop(thread: WorkThread, bot: Bot):
     for worker in await thread.workers:
         user = await worker.worker
@@ -262,6 +268,6 @@ async def send_notification_stop(thread: WorkThread, bot: Bot):
         await asyncio.sleep(0.5)
     await bot.send_message(
         chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=f"Матч thread_id={thread.id} успешно завершён",
+        text=f"{thread.id}. Матч {thread.name if thread.name is not None else ''} успешно завершён",
         reply_to_message_id=thread.log_chat_message_id,
     )

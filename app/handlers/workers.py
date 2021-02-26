@@ -109,7 +109,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
         return await message.reply("Это явно не число.")
     await state.update_data(result=result)
     await Report.next()
-    await message.answer("Введите букмейкера:")
+    await message.answer("Введите букмекера:")
 
 
 @dp.message_handler(is_admin=False, chat_type=types.ChatType.PRIVATE, state=Report.bookmaker)
@@ -119,7 +119,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
     except DoesNotExist:
         await state.update_data(new_bookmaker=message.text)
         return await message.reply(
-            "Этот букмейкер мне не известен, уверены, что хотите добавить нового?",
+            "Этот букмекер мне не известен, уверены, что хотите добавить нового?",
             reply_markup=kb.get_kb_confirm_add_bookmaker(),
         )
     await state.update_data(bookmaker_id=bookmaker.id)
@@ -141,10 +141,10 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
             add_by=user,
         )
         await state.set_data(state_data)
-        await callback_query.message.edit_text("Букмейкер успешно добавлен")
+        await callback_query.message.edit_text("Букмекер успешно добавлен")
     except IntegrityError:
         bookmaker = await Bookmaker.get(name=state_data['new_bookmaker'])
-        await callback_query.message.edit_text("Букмейкер был добавлен только что кем-то ещё")
+        await callback_query.message.edit_text("Букмекер был добавлен только что кем-то ещё")
     await state.update_data(bookmaker_id=bookmaker.id)
     await Report.next()
     await send_check_data(callback_query.message, state)
@@ -161,19 +161,19 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
     state_data.pop('new_bookmaker')
     await state.set_data(state_data)
     await callback_query.message.edit_text(
-        "Вы отаказались добавлять нового букмейкера.\nВведите букмейкера."
+        "Вы отказались добавлять нового букмекера.\nВведите букмекера."
     )
 
 
 async def send_check_data(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
-    current_currency_symbol = config.currencies[state_data['currency']]
+    current_currency_symbol = config.currencies[state_data['currency']].symbol
     bookmaker = await Bookmaker.get(id=state_data['bookmaker_id'])
     await message.answer(
         "<b>Всё верно?</b>\n\n"
-        f"Букмейкер {bookmaker.name}\n"
+        f"Букмекер {bookmaker.name}\n"
         f"Сделана ставка: {state_data['bet']} {current_currency_symbol}\n"
-        f"Расчёт:{state_data['result']} {current_currency_symbol}\n",
+        f"Расчёт: {state_data['result']} {current_currency_symbol}\n",
         reply_markup=kb.get_kb_confirm_report(),
     )
 

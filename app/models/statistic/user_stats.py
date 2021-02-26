@@ -41,6 +41,7 @@ class UserStat:
         return [
             self.day_name,
             self.thread_id_name,
+            self.thread_name_name,
             self.total_bet_name,
             self.total_payment_name,
             self.total_result_name,
@@ -55,6 +56,7 @@ class UserStat:
         return [
             self.day,
             self.thread.id,
+            self.thread.name,
             self.total_bet,
             self.total_payment,
             self.total_result,
