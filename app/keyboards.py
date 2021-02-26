@@ -29,8 +29,18 @@ current_moth_report = "Отчёт за этот месяц"
 def get_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     kb.insert(InlineKeyboardButton("Остановить", callback_data=cb_stop.new(thread_id=thread_id)))
-    kb.insert(InlineKeyboardButton("Переименовать", callback_data=cb_rename_thread.new(thread_id=thread_id)))
+    _append_rename_button_to_kb(kb, thread_id)
     return kb
+
+
+def get_stopped_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    _append_rename_button_to_kb(kb, thread_id)
+    return kb
+
+
+def _append_rename_button_to_kb(kb: InlineKeyboardMarkup, thread_id: int):
+    kb.insert(InlineKeyboardButton("Переименовать", callback_data=cb_rename_thread.new(thread_id=thread_id)))
 
 
 def get_agree_work(thread_id: int) -> InlineKeyboardMarkup:

@@ -214,7 +214,7 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
     await callback_query.answer(f"Матч thread_id={thread_id} не найдён", show_alert=True)
     await callback_query.message.edit_caption(
         f"Матч thread_id={thread_id} не найден, возможно он уже был завершён",
-        reply_markup=None
+        reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id)
     )
 
 

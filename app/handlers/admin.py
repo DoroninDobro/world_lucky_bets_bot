@@ -189,11 +189,16 @@ async def stop_work_thread(
         reply_markup=None
     )
     try:
-        await callback_query.message.edit_caption(**edit_kwargs)
+        # edit message in PM admin
+        await callback_query.message.edit_caption(
+            **edit_kwargs,
+            reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id)
+        )
     except BadRequest as e:
         logger.exception(e)
 
     try:
+        # edit message in workers chat
         await callback_query.bot.edit_message_caption(
             chat_id=config.WORKERS_CHAT_ID,
             message_id=thread.workers_chat_message_id,
@@ -202,10 +207,9 @@ async def stop_work_thread(
     except BadRequest as e:
         logger.exception(e)
 
-    # results = await get_stats(thread=thread)
     await callback_query.bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
-        text=f"{thread.id}. Матч успешно завершён",  # format_results_thread(thread.id)
+        text=f"{thread.id}. Матч успешно завершён",
     )
     await send_notification_stop(thread, callback_query.bot)
 
@@ -216,6 +220,7 @@ async def start_rename_thread_process(
         callback_data: dict[str, str],
         state: FSMContext
 ):
+    await callback_query.answer()
     thread_id = int(callback_data['thread_id'])
     await state.update_data(thread_id=thread_id)
     await RenameThread.name.set()
@@ -225,3 +230,5 @@ async def start_rename_thread_process(
 @dp.message_handler(is_admin=True, state=RenameThread.name)
 async def save_new_name_process(message: types.Message, state: FSMContext):
     await rename_thread((await state.get_data())['thread_id'], message.text)
+    await state.finish()
+    await message.reply("Сохранено!")
