@@ -46,7 +46,7 @@ class ExcelWriter:
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
         total_ws = self.wb.create_sheet("Общая сводка матчей")
         _insert_row(total_ws, get_first_dict_value(report_data).get_captions(), A1)
-        currencies_columns = {self.current_currency.symbol: (3, 4, 5)}
+        currencies_columns = {self.current_currency.symbol: (4, 5, 6)}
 
         for i, report_row in enumerate(sorted(report_data.values(), key=lambda ts: ts.thread.id), 1):
             _insert_row(total_ws, report_row.get_printable(), A1.shift(row=i))
@@ -67,9 +67,9 @@ class ExcelWriter:
         _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {})
 
     def insert_users_reports(self, report_data: list[UserStat]):
-        currencies_columns = {self.current_currency.symbol: (6, 7, 8)}
-        local_currencies_columns = (3, 4, 5)
-        bookmaker_name_col = 9
+        currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
+        local_currencies_columns = (4, 5, 6)
+        bookmaker_name_col = 10
         names_cols = [bookmaker_name_col]
         column_count = len(report_data[0].get_printable())
         current_user = None

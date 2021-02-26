@@ -27,6 +27,7 @@ class TotalStatistic:
         return [
             cls.day_name,
             cls.thread_id_name,
+            cls.thread_name_name,
             cls.total_bet_eur_name,
             cls.total_payment_eur_name,
             cls.total_result_eur_name,
@@ -36,6 +37,7 @@ class TotalStatistic:
         return [
             self.day,
             self.thread.id,
+            self.thread.name,
             self.total_bet_eur,
             self.total_payment_eur,
             self.total_result_eur,
