@@ -188,7 +188,12 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
     try:
         state_data = await state.get_data()
         currency: Currency = config.currencies[state_data.pop('currency')]
-        betting_item = await save_new_betting_odd(user=user, bot=callback_query.bot, currency=currency, **state_data)
+        betting_item = await save_new_betting_odd(
+            user=user,
+            bot=callback_query.bot,
+            currency=currency,
+            **state_data
+        )
 
         await callback_query.message.edit_text(f"Успешно сохранено\n{betting_item}")
         await state.finish()
