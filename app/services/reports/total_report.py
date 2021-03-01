@@ -1,11 +1,11 @@
 from app import config
-from app.models import TotalStatistic, WorkThread, DataRange
+from app.models import TotalStatistic, WorkThread, DataTimeRange
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_mont_bets, get_month_rates
 
 
-async def generate_total_report(date_range: DataRange) -> dict[int, TotalStatistic]:
+async def generate_total_report(date_range: DataTimeRange) -> dict[int, TotalStatistic]:
     bets_log = await get_mont_bets(date_range)
     rates = await get_month_rates(date_range)
     total_statistics = {}
