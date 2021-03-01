@@ -7,7 +7,7 @@ from app.models.data_range import date_to_datetime
 async def get_mont_bets(date_range: DataRange) -> list[BetItem]:
     return await BetItem \
         .filter(worker_thread__work_thread__start__gte=date_to_datetime(date_range.start)) \
-        .filter(worker_thread__work_thread__start__lte=date_to_datetime(date_range.stop)) \
+        .filter(worker_thread__work_thread__start__lt=date_to_datetime(date_range.stop)) \
         .prefetch_related(
             "bookmaker",
             "worker_thread",

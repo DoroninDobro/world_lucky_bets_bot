@@ -14,7 +14,7 @@ class DataRange:
     @classmethod
     def get_month_range(cls, month: int, year: int):
         start = date(year, month, 1)
-        stop = date(year, month + 1, 1) - timedelta(days=1)
+        stop = date(year, month + 1, 1)
         return cls(start=start, stop=stop)
 
     @classmethod
