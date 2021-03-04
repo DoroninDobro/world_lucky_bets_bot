@@ -3,9 +3,9 @@ from datetime import date, timedelta, datetime, time
 
 
 @dataclass
-class DataRange:
-    start: date
-    stop: date
+class DataTimeRange:
+    start: datetime
+    stop: datetime
 
     def __post_init__(self):
         if self.start > self.stop:
@@ -14,8 +14,11 @@ class DataRange:
     @classmethod
     def get_month_range(cls, month: int, year: int):
         start = date(year, month, 1)
-        stop = date(year, month + 1, 1) - timedelta(days=1)
-        return cls(start=start, stop=stop)
+        if month == 12:
+            stop = date(year + 1, 1, 1)
+        else:
+            stop = date(year, month + 1, 1)
+        return cls(start=date_to_datetime(start), stop=date_to_datetime(stop))
 
     @classmethod
     def get_last_month_range(cls):
@@ -33,10 +36,11 @@ class DataRange:
     def get_all_time_range(cls):
         first_time = date.min
         last_time = date.max
-        return cls(start=first_time, stop=last_time)
+        return cls(start=date_to_datetime(first_time), stop=date_to_datetime(last_time))
 
     def __repr__(self):
-        return f"{self.start.isoformat()} - {self.stop.isoformat()}"
+        return f"{self.start.date().isoformat()} - " \
+               f"{(self.stop.date() - timedelta(days=1)).isoformat()}"
 
 
 def date_to_datetime(day: date) -> datetime:
