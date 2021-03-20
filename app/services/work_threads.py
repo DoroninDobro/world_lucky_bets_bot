@@ -266,8 +266,17 @@ async def send_notification_stop(thread: WorkThread, bot: Bot):
         user = await worker.worker
         await bot.send_message(user.id, f"Матч {thread.id} закончен", reply_to_message_id=worker.message_id)
         await asyncio.sleep(0.5)
+    notify_text = f"{thread.id}. Матч {thread.name if thread.name is not None else ''} успешно завершён"
     await bot.send_message(
         chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=f"{thread.id}. Матч {thread.name if thread.name is not None else ''} успешно завершён",
+        text=notify_text,
         reply_to_message_id=thread.log_chat_message_id,
+    )
+    await bot.send_message(
+        chat_id=config.USER_LOG_CHAT_ID,
+        text=notify_text,
+    )
+    await bot.send_message(
+        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+        text=notify_text,
     )

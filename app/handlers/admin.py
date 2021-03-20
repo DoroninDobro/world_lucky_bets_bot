@@ -205,11 +205,6 @@ async def stop_work_thread(
         )
     except BadRequest as e:
         logger.exception(e)
-
-    await callback_query.bot.send_message(
-        chat_id=config.USER_LOG_CHAT_ID,
-        text=caption,
-    )
     await send_notification_stop(thread, callback_query.bot)
 
 
