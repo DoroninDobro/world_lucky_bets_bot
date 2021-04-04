@@ -50,13 +50,15 @@ async def cmd_start(message: types.Message):
                     content_types=types.ContentType.PHOTO)
 @dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
-    logger.info("admin {user} start new thread ", user=message.from_user.id)
     photo_file_id = message.photo[-1].file_id
     try:
-        await start_new_thread(photo_file_id, user, message.bot)
+        thread = await start_new_thread(photo_file_id, user, message.bot)
     except Exception:
         await message.reply("Что-то пошло не так, мы записали проблему")
+        logger.error("admin {user} try start new thread, but failed")
         raise
+    logger.info("admin {user} start new thread {thread}",
+                user=message.from_user.id, thread=thread.id)
     await delete_message(message)
 
 
@@ -68,16 +70,20 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         logger.info("admin {user} send message as reply but without thread", user=user.id)
         return await message.reply("Непонятно, это сообщение не направлено на стартовое")
 
-    logger.info("admin {user} add new info to thread {thread} ", user=user.id, thread=thread.id)
     try:
         a_t, workers = await add_info_to_thread(message.html_text, thread=thread)
     except ThreadStopped:
         return await message.reply("Этот матч завершён!")
     except Exception:
+        logger.info("admin {user} try add new info to thread {thread} but failed",
+                    user=user.id, thread=thread.id)
         await message.reply(
-            "Что-то пошло не так, я уверен, однажды, дела образуются, пока могу посоветовать только отправить ещё разок"
+            "Что-то пошло не так, я уверен, однажды, дела образуются, "
+            "пока могу посоветовать только отправить ещё разок"
         )
         raise
+    logger.info("admin {user} add new info {a_t} to thread {thread} ",
+                user=user.id, a_t=a_t.id, thread=thread.id)
     await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
 
 
@@ -104,6 +110,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
 
 
 async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
+    logger.info("start sending additional info {a_t}", a_t=a_text.id)
     try:
         await start_mailing(a_text, bot, thread=thread)
     except ThreadStopped:

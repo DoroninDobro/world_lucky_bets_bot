@@ -106,6 +106,8 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
         enable_workers = await get_enable_workers(a_text)
         for enable_worker, worker_start_thread_message_id in enable_workers:
+            logger.info("sending additional info {a_t} to user {user}",
+                        a_t=a_text, user=enable_worker.id)
             msg = await bot.send_message(
                 chat_id=enable_worker.id,
                 text=a_text.text,
