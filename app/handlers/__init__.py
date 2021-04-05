@@ -1,3 +1,4 @@
+from . import channels
 from . import superuser_bot
 from . import base
 from . import errors
@@ -7,4 +8,4 @@ from . import workers
 from . import common
 
 
-__all__ = [errors, superuser_bot, base, admin, reports, workers, common]
+__all__ = [channels, errors, superuser_bot, base, admin, reports, workers, common]
