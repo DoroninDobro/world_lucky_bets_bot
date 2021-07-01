@@ -13,7 +13,7 @@ async def cmd_start(message: types.Message):
     """For start handler for admin see admin.py """
     logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
-        "Привет "
+        "Hello "
     )
 
 
@@ -22,7 +22,7 @@ async def cmd_start(message: types.Message):
 async def cmd_help(message: types.Message):
     logger.info("User {user} read help in {chat}", user=message.from_user.id, chat=message.chat.id)
     await message.reply(
-        'Здесь будет помощь'
+        'Help will be here'
     )
 
 
@@ -30,8 +30,8 @@ async def cmd_help(message: types.Message):
 @dp.throttled(rate=30)
 async def get_idchat(message: types.Message):
     text = (
-        f"id этого чата: {hpre(message.chat.id)}\n"
-        f"Ваш id: {hpre(message.from_user.id)}"
+        f"id of this chat: {hpre(message.chat.id)}\n"
+        f"Your id: {hpre(message.from_user.id)}"
     )
     if message.reply_to_message:
         text += (
@@ -50,7 +50,7 @@ async def cancel_state(message: types.Message, state: FSMContext):
     logger.info(f'Cancelling state {current_state}')
     await state.finish()
     await message.reply(
-        'Введённые во время диалога данные удалены, а сам диалог прекращён',
+        'The data entered during the dialogue was deleted, and the dialogue is terminated',
         reply_markup=types.ReplyKeyboardRemove()
     )
 

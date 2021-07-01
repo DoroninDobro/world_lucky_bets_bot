@@ -21,14 +21,14 @@ cb_currency = CallbackData("currency", "code")
 cb_confirm_report = CallbackData("confirm", "yes")
 cb_confirm_add_bookmaker = CallbackData("confirm_bookmaker", "yes")
 boolean_emoji = {True: "✅", False: "🚫"}
-all_time_report = "Отчёт за всё время"
-last_month_report = "Отчёт за прошлый месяц"
-current_moth_report = "Отчёт за этот месяц"
+all_time_report = "All time report"
+last_month_report = "Last month report"
+current_moth_report = "Current month report"
 
 
 def get_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
-    kb.insert(InlineKeyboardButton("Остановить", callback_data=cb_stop.new(thread_id=thread_id)))
+    kb.insert(InlineKeyboardButton("Stop", callback_data=cb_stop.new(thread_id=thread_id)))
     _append_rename_button_to_kb(kb, thread_id)
     return kb
 
@@ -40,12 +40,12 @@ def get_stopped_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
 
 
 def _append_rename_button_to_kb(kb: InlineKeyboardMarkup, thread_id: int):
-    kb.insert(InlineKeyboardButton("Переименовать", callback_data=cb_rename_thread.new(thread_id=thread_id)))
+    kb.insert(InlineKeyboardButton("Rename", callback_data=cb_rename_thread.new(thread_id=thread_id)))
 
 
 def get_agree_work(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
-    kb.insert(InlineKeyboardButton("Буду работать +", callback_data=cb_agree.new(thread_id=thread_id)))
+    kb.insert(InlineKeyboardButton("I will work +", callback_data=cb_agree.new(thread_id=thread_id)))
     return kb
 
 
@@ -55,11 +55,11 @@ def get_kb_menu_send(
 ) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=1)
     kb.insert(InlineKeyboardButton(
-        "📬Отправить!",
+        "📬Send!",
         callback_data=cb_send_now.new(additional_text=additional_text.id),
     ))
     kb.insert(InlineKeyboardButton(
-        "🔄Обновить",
+        "🔄Refresh",
         callback_data=cb_update.new(additional_text=additional_text.id),
     ))
     kb.insert(InlineKeyboardButton(
@@ -81,14 +81,14 @@ def get_kb_menu_send(
 
 def get_disinformation_button_name(now_marked_as_disinformation: bool) -> str:
     if now_marked_as_disinformation:
-        return boolean_emoji[not now_marked_as_disinformation] + "Выключить приватный режим"
-    return boolean_emoji[not now_marked_as_disinformation] + "Включить приватный режим"
+        return boolean_emoji[not now_marked_as_disinformation] + "Turn off private mode"
+    return boolean_emoji[not now_marked_as_disinformation] + "Turn on private mode"
 
 
 def get_kb_send_report(user: User, thread: WorkThread) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=1)
     kb.insert(InlineKeyboardButton(
-        "Отправить отчёт",
+        "Send report",
         callback_data=cb_send_report.new(user_id=user.id, thread_id=thread.id),
     ))
     return kb

@@ -41,7 +41,7 @@ async def cmd_start(message: types.Message):
     """For start handler for not admin see base.py """
     logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
-        "Привет, админ!",
+        "Hi, admin!",
         reply_markup=kb.get_reply_kb_report(),
     )
 
@@ -54,7 +54,7 @@ async def new_send(message: types.Message, user: User):
     try:
         thread = await start_new_thread(photo_file_id, user, message.bot)
     except Exception:
-        await message.reply("Что-то пошло не так, мы записали проблему")
+        await message.reply("Something went wrong, we wrote down the problem")
         logger.error("admin {user} try start new thread, but failed")
         raise
     logger.info("admin {user} start new thread {thread}",
@@ -68,23 +68,23 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         thread = await get_thread(reply.message_id)
     except DoesNotExist:
         logger.info("admin {user} send message as reply but without thread", user=user.id)
-        return await message.reply("Непонятно, это сообщение не направлено на стартовое")
+        return await message.reply("It's unclear, this message is not directed to the start message")
 
     try:
         a_t, workers = await add_info_to_thread(message.html_text, thread=thread)
     except ThreadStopped:
-        return await message.reply("Этот матч завершён!")
+        return await message.reply("This match is over!")
     except Exception:
         logger.info("admin {user} try add new info to thread {thread} but failed",
                     user=user.id, thread=thread.id)
         await message.reply(
-            "Что-то пошло не так, я уверен, однажды, дела образуются, "
-            "пока могу посоветовать только отправить ещё разок"
+            "Something went wrong, I'm sure one day things will return to normal, "
+            "while I can only advise you to send it again"
         )
         raise
     logger.info("admin {user} add new info {a_t} to thread {thread} ",
                 user=user.id, a_t=a_t.id, thread=thread.id)
-    await message.reply(f"Отправить информацию:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
+    await message.reply(f"Send information:\n{a_t.text}", reply_markup=kb.get_kb_menu_send(workers, a_t))
 
 
 async def get_additional_text(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
@@ -96,8 +96,8 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
             raise DoesNotExist
     except DoesNotExist:
         logger.info("admin {user} try send message without thread", user=user.id)
-        await callback_query.answer("Это какая-то странная кнопка, я удалю от греха подальше", show_alert=True)
-        await callback_query.message.edit_text("Тут было какое-то старое сообщение с невалидными кнопками")
+        await callback_query.answer("This is some kind of strange button, I'll take it out of harm's way", show_alert=True)
+        await callback_query.message.edit_text("There was some old message with invalid buttons")
         raise CancelHandler
     else:
         return a_t, thread
@@ -114,11 +114,11 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
     try:
         await start_mailing(a_text, bot, thread=thread)
     except ThreadStopped:
-        return await callback_query.answer("Матч уже завершён!", show_alert=True)
+        return await callback_query.answer("This match is over!", show_alert=True)
     except Exception:
-        await callback_query.answer("Произошла ошибка, мы записали, постараемся разобраться", show_alert=True)
+        await callback_query.answer("An error occurred, we wrote it down, we will try to figure it out", show_alert=True)
         raise
-    await callback_query.message.edit_text(f"Отправлено:\n{a_text.text}")
+    await callback_query.message.edit_text(f"Sent by:\n{a_text.text}")
 
 
 @dp.callback_query_handler(kb.cb_update.filter())
@@ -133,7 +133,7 @@ async def update_handler(
     try:
         await callback_query.message.edit_reply_markup(kb.get_kb_menu_send(await get_workers(a_t), a_t))
     except MessageNotModified:
-        await callback_query.answer("Уже обновлено", cache_time=3)
+        await callback_query.answer("Already updated", cache_time=3)
 
 
 @dp.callback_query_handler(kb.cb_is_disinformation.filter())
@@ -192,7 +192,7 @@ async def stop_work_thread(
     )
     await callback_query.answer()
     caption = f"{thread.id}. " \
-              f"Матч {thread.name if thread.name is not None else ''} успешно завершён"
+              f"Match {thread.name if thread.name is not None else ''} has been successfully completed"
     try:
         # edit message in PM admin
         await callback_query.message.edit_caption(
@@ -225,11 +225,11 @@ async def start_rename_thread_process(
     thread_id = int(callback_data['thread_id'])
     await state.update_data(thread_id=thread_id)
     await RenameThread.name.set()
-    await callback_query.message.answer("Пришлите новое название для этого матча")
+    await callback_query.message.answer("Send a new name for this match")
 
 
 @dp.message_handler(is_admin=True, state=RenameThread.name)
 async def save_new_name_process(message: types.Message, state: FSMContext):
     await rename_thread((await state.get_data())['thread_id'], message.text)
     await state.finish()
-    await message.reply("Сохранено!")
+    await message.reply("Saved!")

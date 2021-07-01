@@ -14,7 +14,7 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
     worker_in_thread = await WorkerInThread.create(work_thread=thread, worker=user, message_id=message_id)
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} присоединился к работе над матчем {thread.id}"
+        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} joined to work on the match {thread.id}"
     )
     texts = await thread.additional_texts.filter(is_draft=False, is_disinformation=False).all()
     if texts:

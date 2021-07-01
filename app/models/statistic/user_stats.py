@@ -13,28 +13,28 @@ from app.models.db import Bookmaker, User, WorkThread, BetItem
 class UserStat:
     user: User
 
-    day_name: typing.ClassVar = "Дата"
+    day_name: typing.ClassVar = "Date"
     day: date
-    thread_id_name: typing.ClassVar = "Номер матча"
-    thread_name_name: typing.ClassVar = "Название матча"
+    thread_id_name: typing.ClassVar = "Match number"
+    thread_name_name: typing.ClassVar = "Match name"
     thread: WorkThread
-    total_bet_name: typing.ClassVar = f"Ставка"
+    total_bet_name: typing.ClassVar = f"Bet"
     total_bet: Decimal
-    total_payment_name: typing.ClassVar = f"Расчёт"
+    total_payment_name: typing.ClassVar = f"Payment"
     total_payment: Decimal
-    total_result_name: typing.ClassVar = f"Профит"
+    total_result_name: typing.ClassVar = f"Profit"
     total_result: Decimal
     currency: Currency
-    total_bet_eur_name: typing.ClassVar = f"Ставка в в {config.BASE_CURRENCY}"
+    total_bet_eur_name: typing.ClassVar = f"Bet in {config.BASE_CURRENCY}"
     total_bet_eur: Decimal
-    total_payment_eur_name: typing.ClassVar = f"Расчёт в {config.BASE_CURRENCY}"
+    total_payment_eur_name: typing.ClassVar = f"Payment in {config.BASE_CURRENCY}"
     total_payment_eur: Decimal
-    total_result_eur_name: typing.ClassVar = f"Профит в {config.BASE_CURRENCY}"
+    total_result_eur_name: typing.ClassVar = f"Profit in {config.BASE_CURRENCY}"
     total_result_eur: Decimal
-    bookmaker_name: typing.ClassVar = "Букмекер"
+    bookmaker_name: typing.ClassVar = "Bookmaker"
     bookmaker: Bookmaker
 
-    bet_id_name: typing.ClassVar = "ID записи"
+    bet_id_name: typing.ClassVar = "Entry ID"
     bet_item: BetItem
 
     def get_captions(self) -> list[str]:

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from loguru import logger
 
-
+# TODO -  И ПРО ЭТО:
 class Rates(ABC):
     val_chars = {
         "AUD": "A$",

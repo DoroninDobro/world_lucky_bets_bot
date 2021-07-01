@@ -25,8 +25,8 @@ async def errors_handler(update: types.Update, exception: Exception):
     with suppress(BadRequest):
         await bot.send_message(
             config.TECH_LOG_CHAT_ID,
-            f"Получено исключение {quote_html(exception)}\n"
-            f"во время обработки апдейта {quote_html(update)}\n"
+            f"Exception {quote_html(exception)}\n"
+            f"was received while processing an update {quote_html(update)}\n"
             f"{quote_html(exception.args)}"
         )
     return True
