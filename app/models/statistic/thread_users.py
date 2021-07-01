@@ -10,10 +10,10 @@ convert = {True: "+", False: "-", None: "?"}
 
 @dataclass
 class ThreadUsers:
-    day_name: typing.ClassVar = "Date"
+    day_name: typing.ClassVar = "Дата"
     day: date
-    thread_id_name: typing.ClassVar = "Match number"
-    thread_name_name: typing.ClassVar = "Match name"
+    thread_id_name: typing.ClassVar = "Номер матча"
+    thread_name_name: typing.ClassVar = "Название матча"
     thread: WorkThread
     user_names: list[str]
     user_has_worked: list[bool]

@@ -27,7 +27,11 @@ class Report(StatesGroup):
 
 
 @dp.callback_query_handler(kb.cb_agree.filter(), is_admin=False)
-async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def agree_work_thread(
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        user: User,
+):
     thread_id = int(callback_data['thread_id'])
     try:
         thread = await WorkThread.get(id=thread_id)
@@ -41,46 +45,63 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
             chat_id=callback_query.from_user.id,
             photo=thread.start_photo_file_id,
             caption=f"{thread_id}. You are subscribed to this",
-            reply_markup=kb.get_kb_send_report(user, thread)
+            reply_markup=kb.get_kb_send_report(user, thread),
         )
     except (BotBlocked, CantInitiateConversation, Unauthorized):
-        logger.info("user {user} try to be worker in thread {thread} but he don't start conversation with bot",
-                    user=user.id, thread=thread_id)
-        return await callback_query.answer("First, write something to me in PM", show_alert=True)
+        logger.info(
+            "user {user} try to be worker in thread {thread} "
+            "but he don't start conversation with bot",
+            user=user.id, thread=thread_id,
+        )
+        return await callback_query.answer("First, write something to me in PM",
+                                           show_alert=True)
 
     try:
         await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread)
     except IntegrityError:
         await delete_message(msg)
-        logger.info("user {user} try to be worker in thread {thread} but he already worker in that thread",
-                    user=user.id, thread=thread_id)
-        return await callback_query.answer("Error, are you already subscribed?", show_alert=True, cache_time=3600)
+        logger.info(
+            "user {user} try to be worker in thread {thread}, "
+            "but he already worker in that thread",
+            user=user.id, thread=thread_id,
+        )
+        return await callback_query.answer("Error, are you already subscribed?",
+                                           show_alert=True, cache_time=3600)
 
     await callback_query.answer("successfully")
-    logger.info("user {user} now worker in thread {thread}", user=user.id, thread=thread_id)
+    logger.info("user {user} now worker in thread {thread}",
+                user=user.id, thread=thread_id)
 
 
 @dp.callback_query_handler(kb.cb_agree.filter())
 async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
-    await callback_query.answer("The admin cannot participate in the work!", show_alert=True, cache_time=3600)
+    await callback_query.answer("The admin cannot participate in the work!",
+                                show_alert=True, cache_time=3600)
     thread_id = int(callback_data['thread_id'])
-    logger.info("admin {user}, try to be worker in thread {thread}", user=user.id, thread=thread_id)
+    logger.info("admin {user}, try to be worker in thread {thread}",
+                user=user.id, thread=thread_id)
 
 
 @dp.callback_query_handler(kb.cb_send_report.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
 async def start_fill_report(
-        callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], state: FSMContext):
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        state: FSMContext,
+):
     await callback_query.answer()
     await state.update_data(thread_id=int(callback_data["thread_id"]))
     await callback_query.message.reply(
         "Select the currency of the bet",
-        reply_markup=kb.get_kb_currency(config.currencies)
+        reply_markup=kb.get_kb_currency(config.currencies),
     )
 
 
 @dp.callback_query_handler(kb.cb_currency.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
 async def process_currency_in_report(
-        callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], state: FSMContext):
+        callback_query: types.CallbackQuery,
+        callback_data: typing.Dict[str, str],
+        state: FSMContext,
+):
     await callback_query.answer()
     await state.update_data(currency=callback_data['code'])
     await callback_query.message.edit_text(
@@ -144,7 +165,9 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
         await callback_query.message.edit_text("Bookmaker added successfully")
     except IntegrityError:
         bookmaker = await Bookmaker.get(name=state_data['new_bookmaker'])
-        await callback_query.message.edit_text("The bookmaker was just added by someone else")
+        await callback_query.message.edit_text(
+            "The bookmaker was just added by someone else",
+        )
     await state.update_data(bookmaker_id=bookmaker.id)
     await Report.next()
     await send_check_data(callback_query.message, state)

@@ -12,7 +12,6 @@ def format_date(date_: date) -> str:
     return f"{date_.day} {get_ru_month_name(date_)}"
 
 
-# TODO -  Я ПРО ЭТО:
 def get_ru_month_name(date_: date) -> str:
     return [
         "января",

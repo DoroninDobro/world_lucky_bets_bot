@@ -45,7 +45,7 @@ class ExcelWriter:
         self.current_currency = config.currencies[config.BASE_CURRENCY]
 
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
-        total_ws = self.wb.create_sheet("General summary of matches")
+        total_ws = self.wb.create_sheet("Общая сводка матчей")
         _insert_row(total_ws, get_first_dict_value(report_data).get_captions(), A1)
         currencies_columns = {self.current_currency.symbol: (4, 5, 6)}
 
@@ -61,7 +61,7 @@ class ExcelWriter:
         )
 
     def insert_thread_users(self, report_data: list[ThreadUsers]):
-        thread_users_ws = self.wb.create_sheet("Reports from employees")
+        thread_users_ws = self.wb.create_sheet("Отчёты от работников")
         _insert_row(thread_users_ws, report_data[0].get_captions(), A1)
         for i, report_row in enumerate(report_data, 1):
             _insert_row(thread_users_ws, report_row.get_printable(), A1.shift(row=i))
@@ -144,7 +144,7 @@ def _make_auto_width(
         total_ws.column_dimensions[get_column_letter(i)].width += -3
     for i in names:
         total_ws.column_dimensions[get_column_letter(i)].width += 15
-    if "General summary of matches" in total_ws.title:
+    if "Общая сводка матчей" in total_ws.title:
         width_add = 15
     else:
         width_add = 3

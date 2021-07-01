@@ -20,7 +20,8 @@ async def cmd_start(message: types.Message):
 @dp.message_handler(commands=["help"], commands_prefix='!/')
 @dp.throttled(rate=3)
 async def cmd_help(message: types.Message):
-    logger.info("User {user} read help in {chat}", user=message.from_user.id, chat=message.chat.id)
+    logger.info("User {user} read help in {chat}",
+                user=message.from_user.id, chat=message.chat.id)
     await message.reply(
         'Help will be here'
     )
@@ -50,8 +51,9 @@ async def cancel_state(message: types.Message, state: FSMContext):
     logger.info(f'Cancelling state {current_state}')
     await state.finish()
     await message.reply(
-        'The data entered during the dialogue was deleted, and the dialogue is terminated',
-        reply_markup=types.ReplyKeyboardRemove()
+        'The data entered during the dialogue was deleted, '
+        'and the dialogue is terminated',
+        reply_markup=types.ReplyKeyboardRemove(),
     )
 
 

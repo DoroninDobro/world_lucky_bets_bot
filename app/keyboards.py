@@ -21,14 +21,16 @@ cb_currency = CallbackData("currency", "code")
 cb_confirm_report = CallbackData("confirm", "yes")
 cb_confirm_add_bookmaker = CallbackData("confirm_bookmaker", "yes")
 boolean_emoji = {True: "✅", False: "🚫"}
-all_time_report = "All time report"
-last_month_report = "Last month report"
-current_moth_report = "Current month report"
+all_time_report = "Отчёт за всё время"
+last_month_report = "Отчёт за прошлый месяц"
+current_moth_report = "Отчёт за этот месяц"
 
 
 def get_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
-    kb.insert(InlineKeyboardButton("Stop", callback_data=cb_stop.new(thread_id=thread_id)))
+    kb.insert(InlineKeyboardButton(
+        "Stop", callback_data=cb_stop.new(thread_id=thread_id),
+    ))
     _append_rename_button_to_kb(kb, thread_id)
     return kb
 
