@@ -1,5 +1,5 @@
 class BotError(Exception):
-    notify_user = "Ошибка в боте"
+    notify_user = "Bot error"
 
     def __init__(
             self,
@@ -26,7 +26,7 @@ class BotError(Exception):
 
 
 class ThreadStopped(BotError):
-    notify_user = "Матч закрыт"
+    notify_user = "Match closed"
 
     def __init__(self, thread_id: int = None, *args, **kwargs):
         super(ThreadStopped, self).__init__(*args, **kwargs)

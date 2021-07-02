@@ -23,8 +23,10 @@ thread_results = typing.List[typing.Tuple[User, int, float]]
 
 
 async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThread:
-    async with in_transaction() as connection, msg_cleaner() as transaction_messages:
-        created_thread = WorkThread(start_photo_file_id=photo_file_id, admin_id=admin.id)
+    async with in_transaction() as connection, \
+               msg_cleaner() as transaction_messages:
+        created_thread = WorkThread(start_photo_file_id=photo_file_id,
+                                    admin_id=admin.id)
         await created_thread.save(using_db=connection)
 
         msg_to_workers = await bot.send_photo(
@@ -38,7 +40,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         msg_to_admin = await bot.send_photo(
             chat_id=admin.id,
             photo=photo_file_id,
-            caption=f"{created_thread.id}. Сообщение отправлено",
+            caption=f"{created_thread.id}. Message sent",
             reply_markup=kb.get_work_thread_admin_kb(created_thread.id)
         )
         transaction_messages.append(msg_to_admin)
@@ -46,7 +48,8 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         log_chat_message = await bot.send_photo(
             chat_id=config.ADMIN_LOG_CHAT_ID,
             photo=photo_file_id,
-            caption=f"{created_thread.id}. Начат новый матч от {admin.mention_link}"
+            caption=f"{created_thread.id}. "
+                    f"Started a new match from {admin.mention_link}"
         )
         transaction_messages.append(log_chat_message)
 
@@ -88,8 +91,12 @@ async def get_thread(message_id: int) -> WorkThread:
 @check_thread_running
 async def add_info_to_thread(text: str, *, thread: WorkThread):
     async with in_transaction() as connection:
-        a_t = await AdditionalText.create(text=text, thread=thread, using_db=connection)
-        workers = await create_send_workers(await get_workers_from_thread(thread=thread), a_t, using_db=connection)
+        a_t = await AdditionalText.create(text=text, thread=thread,
+                                          using_db=connection)
+        workers = await create_send_workers(
+            await get_workers_from_thread(thread=thread),
+            a_t, using_db=connection
+        )
     return a_t, workers
 
 
@@ -116,7 +123,8 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
         enable_workers_user = [worker for worker, _ in enable_workers]
-        log_msg = await send_log_mailing(a_text, bot, enable_workers_user, thread)
+        log_msg = await send_log_mailing(a_text, bot,
+                                         enable_workers_user, thread)
         transaction_messages.append(log_msg)
 
         if a_text.is_disinformation:
@@ -163,8 +171,8 @@ async def send_log_mailing(
 
 
 def render_log_message_caption(a_text: AdditionalText) -> str:
-    text = "Сообщение"
-    text += ' ‼️является приватной инфой‼️' if a_text.is_disinformation else ''
+    text = "Message"
+    text += ' ‼️is private info‼️' if a_text.is_disinformation else ''
     text += f":\n{a_text.text}\n"
     return text
 
@@ -174,9 +182,9 @@ async def render_workers_lists_with_caption(a_text: AdditionalText, workers: typ
     disable_workers_mention = "\n".join([worker.mention_link for worker in await get_disable_workers(a_text)])
     text = ""
     if enable_workers_mentions:
-        text += f"Список пользователей, получивших сообщение сразу:\n{enable_workers_mentions}\n"
+        text += f"List of users who received the message immediately:\n{enable_workers_mentions}\n"
     if disable_workers_mention:
-        text += f"Список пользователей, отправка которым была отменена:\n{disable_workers_mention}\n"
+        text += f"List of users whose sending was canceled:\n{disable_workers_mention}\n"
     return text
 
 
@@ -186,19 +194,19 @@ async def render_disinformation_log(
         all_workers: typing.List[User],
 ) -> str:
     text_parts = [
-        f"Матч <b>{a_text.get_thread_id()}</b>",
-        f"Сообщние: <b>{a_text.text}</b>",
+        f"Match <b>{a_text.get_thread_id()}</b>",
+        f"Message: <b>{a_text.text}</b>",
     ]
     if enable_workers:
-        text_parts.append("Приватно получили:")
+        text_parts.append("Received privately:")
         for enable_worker in enable_workers:
             text_parts.append(enable_worker.mention_link)
     if all_workers:
-        text_parts.append("Всего участвовали на момент отправки:")
+        text_parts.append("Total participated at the time of sending:")
         for worker in all_workers:
             text_parts.append(worker.mention_link)
     else:
-        text_parts.append("Участников на момент отправки не было")
+        text_parts.append("There were no participants at the time of sending")
     return "\n".join(text_parts)
 
 
@@ -213,48 +221,13 @@ async def get_workers_from_thread(*, thread: WorkThread) -> typing.List[User]:
 
 async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
     logger.error("thread {thread_id} not found", thread_id=thread_id)
-    await callback_query.answer(f"Матч thread_id={thread_id} не найдён", show_alert=True)
+    await callback_query.answer(f"Match thread_id={thread_id} not found",
+                                show_alert=True)
     await callback_query.message.edit_caption(
-        f"Матч thread_id={thread_id} не найден, возможно он уже был завершён",
-        reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id)
+        f"Match thread_id={thread_id} not found, "
+        f"maybe it was already finished",
+        reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id),
     )
-
-
-async def get_stats(thread: WorkThread) -> thread_results:
-    """ TODO Этот метод пока не используется"""
-    results: thread_results = []
-    for worker in await thread.workers:
-        user = await worker.worker
-        money_sum = 0
-        win_sum = 0
-        for bet in await worker.bets:
-            money_sum += bet.money
-            win_sum += bet.money * bet.odd
-        try:
-            average_odd = win_sum / money_sum
-        except ZeroDivisionError:
-            average_odd = 0.0
-        results.append((user, money_sum, average_odd))
-    return results
-
-
-def format_results_thread(thread_id: int, results: thread_results) -> str:
-    """ TODO Этот метод пока не используется"""
-    text = f"Результаты матча {thread_id}:"
-    total_sum = 0
-    total_win_sum = 0
-    for user, money_sum, average_odd in results:
-        text += f"\n{user.mention_link} общая сумма {money_sum}, средний кэф {average_odd:.2f}"
-        total_sum += money_sum
-        total_win_sum += money_sum * average_odd
-    text += f"\n\nИтого за матч: общая сумма {total_sum}"
-    try:
-        total_odd = total_win_sum / total_sum
-    except ZeroDivisionError:
-        text += "."
-    else:
-        text += f", средний кэф {total_odd:.2f}."
-    return text
 
 
 async def rename_thread(thread_id: int, new_name: str):
@@ -266,9 +239,14 @@ async def rename_thread(thread_id: int, new_name: str):
 async def send_notification_stop(thread: WorkThread, bot: Bot):
     for worker in await thread.workers:
         user = await worker.worker
-        await bot.send_message(user.id, f"Матч {thread.id} закончен", reply_to_message_id=worker.message_id)
+        await bot.send_message(user.id, f"Match {thread.id} is over",
+                               reply_to_message_id=worker.message_id)
         await asyncio.sleep(0.5)
-    notify_text = f"{thread.id}. Матч {thread.name if thread.name is not None else ''} успешно завершён"
+    notify_text = (
+        f"{thread.id}. "
+        f"Match {thread.name if thread.name is not None else ''} "
+        f"has been successfully completed"
+    )
     await bot.send_message(
         chat_id=config.ADMIN_LOG_CHAT_ID,
         text=notify_text,

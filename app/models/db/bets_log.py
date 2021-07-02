@@ -28,9 +28,9 @@ class BetItem(Model):
 
     def __str__(self):
         return (
-            f"ставка: {self.bet:.2f} {self.currency} "
-            f"результат: {self.result:.2f} {self.currency}. "
-            f"ID ставки: {self.id}"
+            f"bet: {self.bet:.2f} {self.currency} "
+            f"result: {self.result:.2f} {self.currency}. "
+            f"bet ID: {self.id}"
         )
 
     async def get_full_printable(self):
@@ -38,8 +38,8 @@ class BetItem(Model):
         user = self.worker_thread.worker
         bookmaker = await self.bookmaker
         return (
-            f"ставка ID {self.id} от {user.mention_link} "
-            f"у букмекера \"{bookmaker.name if bookmaker else 'не известно'}\": "
+            f"bet ID {self.id} от {user.mention_link} "
+            f"at the bookmaker \"{bookmaker.name if bookmaker else 'unknown'}\": "
             f"{self.bet:.2f} {self.currency}, "
-            f"результат: {self.result:.2f} {self.currency}"
+            f"result: {self.result:.2f} {self.currency}"
         )

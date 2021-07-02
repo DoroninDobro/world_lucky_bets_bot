@@ -5,8 +5,8 @@ from loguru import logger
 
 from app.misc import dp
 
-YOU_ARE_IN_STATE_MSG = "Вы находитесь в диалоге (например отправляете данные для отчёта). " \
-    "Если Вы не помните такого или не понимаете о чём речь - жмите /cancel"
+YOU_ARE_IN_STATE_MSG = "You are in the dialogue (eg sending the data for the report). " \
+    "If you do not remember this or do not understand what it is about - press /cancel"
 
 
 @dp.message_handler(filters.RegexpCommandsFilter(regexp_commands=['.*']), state='*')
@@ -27,7 +27,7 @@ async def message_in_state(message: types.Message, state: FSMContext):
 @dp.callback_query_handler()
 async def not_supported_callback(callback_query: types.CallbackQuery):
     await callback_query.answer(
-        "Эта кнопка не поддерживается или не предназначена для Вас. хз где вы ее взяли",
+        "This button is not supported or intended for you. I don't know where you got it",
         show_alert=True
     )
     logger.warning(
