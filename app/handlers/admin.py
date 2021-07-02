@@ -87,7 +87,7 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
                     user=user.id, thread=thread.id)
         await message.reply(
             "Something went wrong, I'm sure one day things thing will get back to normal, "
-            "for now I can only suggest"
+            "for now I can only suggest you to send it again"
         )
         raise
     logger.info("admin {user} add new info {a_t} to thread {thread} ",

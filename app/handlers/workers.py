@@ -140,7 +140,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
     except DoesNotExist:
         await state.update_data(new_bookmaker=message.text)
         return await message.reply(
-            "This bookmaker is unknown to me, sure you want to add new one?",
+            "This bookmaker is unknown to me, sure you want to add a new one?",
             reply_markup=kb.get_kb_confirm_add_bookmaker(),
         )
     await state.update_data(bookmaker_id=bookmaker.id)
