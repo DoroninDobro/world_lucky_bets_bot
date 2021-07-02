@@ -195,7 +195,7 @@ async def send_check_data(message: types.Message, state: FSMContext):
     await message.answer(
         "<b>Is that correct?</b>\n\n"
         f"Bookmaker {bookmaker.name}\n"
-        f"Bet made: {state_data['bet']} {current_currency_symbol}\n"
+        f"Bet stake: {state_data['bet']} {current_currency_symbol}\n"
         f"Payment: {state_data['result']} {current_currency_symbol}\n",
         reply_markup=kb.get_kb_confirm_report(),
     )
