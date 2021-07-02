@@ -86,8 +86,8 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
         logger.info("admin {user} try add new info to thread {thread} but failed",
                     user=user.id, thread=thread.id)
         await message.reply(
-            "Something went wrong, I'm sure one day things will return to normal, "
-            "while I can only advise you to send it again"
+            "Something went wrong, I'm sure one day things thing will get back to normal, "
+            "for now I can only suggest"
         )
         raise
     logger.info("admin {user} add new info {a_t} to thread {thread} ",
@@ -228,7 +228,7 @@ async def stop_work_thread(
     caption = (
         f"{thread.id}. "
         f"Match {thread.name if thread.name is not None else ''} "
-        f"has been successfully completed"
+        f"has been successfully finished"
     )
     try:
         # edit message in PM admin
