@@ -222,6 +222,7 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
         await state.finish()
         await callback_query.answer()
     except Exception:
+        logger.warning("error by saving report by user {user}", user=user.id)
         await callback_query.answer("An error occurred", show_alert=True)
         raise
 
