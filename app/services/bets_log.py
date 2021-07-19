@@ -27,7 +27,7 @@ async def save_new_betting_odd(
     )
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{get_current_datetime_in_format()} - {await bet_item.get_full_printable()} в матче {thread_id}"
+        f"{get_current_datetime_in_format()} - {await bet_item.get_full_printable()} at match {thread_id}"
     )
     return bet_item
 
