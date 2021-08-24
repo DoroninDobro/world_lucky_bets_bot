@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext, filters
 from aiogram.dispatcher.handler import SkipHandler
+from aiogram.utils.exceptions import TelegramAPIError
 from loguru import logger
 
 from app.misc import dp
@@ -39,5 +40,13 @@ async def not_supported_callback(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(state='*')
 async def not_supported_callback(callback_query: types.CallbackQuery):
-    await callback_query.answer(YOU_ARE_IN_STATE_MSG)
-    await callback_query.message.answer(YOU_ARE_IN_STATE_MSG)
+    logger.warning(
+        "user {} press inline button {} in state",
+        callback_query.from_user.id,
+        callback_query.data,
+    )
+    await callback_query.answer(YOU_ARE_IN_STATE_MSG, show_alert=True)
+    try:
+        await callback_query.bot.send_message(callback_query.from_user.id, YOU_ARE_IN_STATE_MSG)
+    except TelegramAPIError as e:
+        logger.error("can't send message about state & callback", e)
