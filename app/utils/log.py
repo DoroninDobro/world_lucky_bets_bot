@@ -2,9 +2,9 @@ import pathlib
 
 from loguru import logger
 
-from app.config import PRINT_LOG, app_dir
+from app.config import PRINT_LOG, app_dir, CURRENT_BOT
 
-log_path = pathlib.Path(app_dir / 'log')
+log_path = pathlib.Path(app_dir / 'log' / CURRENT_BOT)
 log_path.mkdir(parents=True, exist_ok=True)
 
 
