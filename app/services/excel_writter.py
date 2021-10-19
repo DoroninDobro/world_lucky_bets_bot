@@ -88,7 +88,7 @@ class ExcelWriter:
                         names=[*names_cols, *self.name_columns],
                     )
                 current_user = report_row.user
-                current_user_ws = self.wb.create_sheet(current_user.fullname)
+                current_user_ws = self.wb.create_sheet(current_user.excel_caption_name)
                 _insert_row(current_user_ws, report_row.get_captions(), A1)
                 i = 1
             _insert_row(current_user_ws, report_row.get_printable(), A1.shift(row=i))
