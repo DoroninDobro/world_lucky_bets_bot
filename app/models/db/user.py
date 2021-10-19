@@ -87,6 +87,12 @@ class User(Model):
             return ' '.join((self.first_name, self.last_name))
         return self.first_name or self.username or self.id
 
+    @property
+    def excel_caption_name(self):
+        fullname = self.fullname
+        result = "".join(filter(lambda x: x not in r'\/?*[]:!', fullname)) or self.username or self.id
+        return result[:32]
+
     def to_json(self):
         return dict(
             id=self.id,
