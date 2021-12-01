@@ -4,7 +4,6 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.exceptions import BotBlocked, CantInitiateConversation, Unauthorized
-from loguru import logger
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from app.config.currency import Currency
@@ -48,11 +47,6 @@ async def agree_work_thread(
             reply_markup=kb.get_kb_send_report(user, thread),
         )
     except (BotBlocked, CantInitiateConversation, Unauthorized):
-        logger.info(
-            "user {user} try to be worker in thread {thread} "
-            "but he don't start conversation with bot",
-            user=user.id, thread=thread_id,
-        )
         return await callback_query.answer("First, write something to me in PM",
                                            show_alert=True)
 
@@ -60,17 +54,10 @@ async def agree_work_thread(
         await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread)
     except IntegrityError:
         await delete_message(msg)
-        logger.info(
-            "user {user} try to be worker in thread {thread}, "
-            "but he already worker in that thread",
-            user=user.id, thread=thread_id,
-        )
         return await callback_query.answer("Error, are you already subscribed?",
                                            show_alert=True, cache_time=3600)
 
     await callback_query.answer("successfully")
-    logger.info("user {user} now worker in thread {thread}",
-                user=user.id, thread=thread_id)
 
 
 @dp.callback_query_handler(kb.cb_agree.filter())
@@ -78,8 +65,6 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
     await callback_query.answer("The admin cannot participate in the work!",
                                 show_alert=True, cache_time=3600)
     thread_id = int(callback_data['thread_id'])
-    logger.info("admin {user}, try to be worker in thread {thread}",
-                user=user.id, thread=thread_id)
 
 
 @dp.callback_query_handler(kb.cb_send_report.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
@@ -222,7 +207,6 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
         await state.finish()
         await callback_query.answer()
     except Exception:
-        logger.warning("error by saving report by user {user}", user=user.id)
         await callback_query.answer("An error occurred", show_alert=True)
         raise
 

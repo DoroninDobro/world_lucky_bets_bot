@@ -4,7 +4,6 @@ from typing import Optional
 
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
-from loguru import logger
 
 from app.models.db.chat import Chat
 from app.models.db.user import User
@@ -24,7 +23,6 @@ class ACLMiddleware(BaseMiddleware):
                 chat = await Chat.get_or_create_from_tg_chat(chat)
 
         except Exception as e:
-            logger.error("troubles with db")
             raise e
         data["user"] = user
         data["chat"] = chat

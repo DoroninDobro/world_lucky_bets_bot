@@ -3,7 +3,6 @@ import typing
 from contextlib import suppress
 
 from aiogram import Bot, types
-from loguru import logger
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
@@ -13,7 +12,6 @@ from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
     create_send_workers,
-    get_disable_workers,
     get_workers
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
@@ -45,23 +43,6 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         )
         transaction_messages.append(msg_to_admin)
 
-        log_chat_message = await bot.send_photo(
-            chat_id=config.ADMIN_LOG_CHAT_ID,
-            photo=photo_file_id,
-            caption=f"{created_thread.id}. "
-                    f"Started a new match from {admin.mention_link}"
-        )
-        transaction_messages.append(log_chat_message)
-
-        for_admins_no_usernames_message = await bot.send_photo(
-            chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
-            photo=photo_file_id,
-            caption=str(created_thread.id)
-        )
-        transaction_messages.append(for_admins_no_usernames_message)
-
-        created_thread.log_chat_message_id = log_chat_message.message_id
-        created_thread.log_chat_for_admins_without_usernames_message_id = for_admins_no_usernames_message.message_id
         created_thread.start_message_id = msg_to_admin.message_id
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
@@ -109,12 +90,10 @@ async def stop_thread(thread_id: int) -> WorkThread:
 
 
 @check_thread_running
-async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread):
+async def start_mailing(a_text: AdditionalText, bot: Bot):
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
         enable_workers = await get_enable_workers(a_text)
         for enable_worker, worker_start_thread_message_id in enable_workers:
-            logger.info("sending additional info {a_t} to user {user}",
-                        a_t=a_text, user=enable_worker.id)
             msg = await bot.send_message(
                 chat_id=enable_worker.id,
                 text=a_text.text,
@@ -123,9 +102,6 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
         enable_workers_user = [worker for worker, _ in enable_workers]
-        log_msg = await send_log_mailing(a_text, bot,
-                                         enable_workers_user, thread)
-        transaction_messages.append(log_msg)
 
         if a_text.is_disinformation:
             disinformation_log_msg_text = await render_disinformation_log(
@@ -141,51 +117,6 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
 
         a_text.is_draft = False
         await a_text.save(using_db=conn)
-
-
-async def send_log_mailing(
-        a_text: AdditionalText,
-        bot: Bot,
-        workers: typing.List[User],
-        thread: WorkThread
-) -> types.Message:
-
-    text = render_log_message_caption(a_text)
-
-    # В этот чат отправляем только заголовок
-    # (информацию о приватности инфы и текст сообщения)
-    await bot.send_message(
-        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
-        text=text,
-        reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id
-    )
-
-    # Добавляем к заголовку список воркеров
-    # и теперь можно отправлять и в обычный логчат
-    text += await render_workers_lists_with_caption(a_text, workers)
-    return await bot.send_message(
-        chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=text,
-        reply_to_message_id=thread.log_chat_message_id
-    )
-
-
-def render_log_message_caption(a_text: AdditionalText) -> str:
-    text = "Message"
-    text += ' ‼️is private info‼️' if a_text.is_disinformation else ''
-    text += f":\n{a_text.text}\n"
-    return text
-
-
-async def render_workers_lists_with_caption(a_text: AdditionalText, workers: typing.List[User]) -> str:
-    enable_workers_mentions = "\n".join([worker.mention_link for worker in workers])
-    disable_workers_mention = "\n".join([worker.mention_link for worker in await get_disable_workers(a_text)])
-    text = ""
-    if enable_workers_mentions:
-        text += f"List of users who received the message immediately:\n{enable_workers_mentions}\n"
-    if disable_workers_mention:
-        text += f"List of users whose sending was canceled:\n{disable_workers_mention}\n"
-    return text
 
 
 async def render_disinformation_log(
@@ -220,7 +151,6 @@ async def get_workers_from_thread(*, thread: WorkThread) -> typing.List[User]:
 
 
 async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
-    logger.error("thread {thread_id} not found", thread_id=thread_id)
     await callback_query.answer(f"Match thread_id={thread_id} not found",
                                 show_alert=True)
     await callback_query.message.edit_caption(
@@ -248,15 +178,6 @@ async def send_notification_stop(thread: WorkThread, bot: Bot):
         f"has been successfully completed"
     )
     await bot.send_message(
-        chat_id=config.ADMIN_LOG_CHAT_ID,
-        text=notify_text,
-        reply_to_message_id=thread.log_chat_message_id,
-    )
-    await bot.send_message(
         chat_id=config.USER_LOG_CHAT_ID,
-        text=notify_text,
-    )
-    await bot.send_message(
-        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
         text=notify_text,
     )

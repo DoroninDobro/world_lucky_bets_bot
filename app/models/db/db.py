@@ -2,7 +2,7 @@ from functools import partial
 
 from aiogram import Dispatcher
 from aiogram.utils.executor import Executor
-from tortoise import Tortoise, run_async
+from tortoise import Tortoise
 
 from app.config import DBConfig
 
@@ -25,12 +25,3 @@ async def on_shutdown(_: Dispatcher):
 def setup(executor: Executor, db_config: DBConfig):
     executor.on_startup(partial(on_startup, db_config=db_config))
     executor.on_shutdown(on_shutdown)
-
-
-async def generate_schemas_db(db_config: DBConfig):
-    await db_init(db_config)
-    await Tortoise.generate_schemas()
-
-
-def generate_schemas(db_config: DBConfig):
-    run_async(generate_schemas_db(db_config))

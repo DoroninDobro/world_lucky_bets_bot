@@ -1,9 +1,7 @@
 from aiogram import Dispatcher
-from loguru import logger
 
 
 def setup(dispatcher: Dispatcher):
-    logger.info("Configure filters...")
     from .admin import IsAdminFilter
 
     text_messages = [

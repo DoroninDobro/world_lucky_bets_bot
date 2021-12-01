@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 
 
-from loguru import logger
-
-
 class Rates(ABC):
     val_chars = {
         "AUD": "A$",
@@ -44,9 +41,6 @@ class Rates(ABC):
         "SCR": " SCR",
         "AED": "Dh"
     }
-
-    def __init__(self):
-        logger.info(f'init {self.source_rates}')
 
     @abstractmethod
     async def get_updated_date(self):

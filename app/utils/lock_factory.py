@@ -1,8 +1,6 @@
 import asyncio
 import typing
 
-from loguru import logger
-
 
 class LockFactory:
     def __init__(self):
@@ -29,7 +27,6 @@ class LockFactory:
         to_remove = [key for key, lock in self._locks.items() if not lock.locked()]
         for key in to_remove:
             del self._locks[key]
-            logger.debug("remove lock for {key}", key=key)
 
     async def _check_and_clear(self, cool_down: int = 1800):
         while True:

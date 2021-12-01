@@ -1,7 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hpre, hbold
-from loguru import logger
 
 from app.misc import dp
 from app.models.db.chat import Chat
@@ -10,7 +9,6 @@ from app.models.db.chat import Chat
 @dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=False)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
-    logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
         "Hello "
     )
@@ -19,8 +17,6 @@ async def cmd_start(message: types.Message):
 @dp.message_handler(commands=["help"], commands_prefix='!/')
 @dp.throttled(rate=3)
 async def cmd_help(message: types.Message):
-    logger.info("User {user} read help in {chat}",
-                user=message.from_user.id, chat=message.chat.id)
     await message.reply(
         'Help will be here'
     )
@@ -47,7 +43,6 @@ async def cancel_state(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
-    logger.info(f'Cancelling state {current_state}')
     await state.finish()
     await message.reply(
         'The data entered during the dialogue was deleted, '
@@ -58,8 +53,6 @@ async def cancel_state(message: types.Message, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentTypes.MIGRATE_TO_CHAT_ID)
 async def chat_migrate(message: types.Message, chat: Chat):
-    old_id = message.chat.id
     new_id = message.migrate_to_chat_id
     chat.chat_id = new_id
     await chat.save()
-    logger.info(f"Migrate chat from {old_id} to {new_id}")

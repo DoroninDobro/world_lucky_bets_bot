@@ -1,6 +1,5 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from loguru import logger
 
 from app import config
 
@@ -12,11 +11,8 @@ def setup():
     from app import filters
     from app import middlewares
     from app.utils import executor
-    logger.debug(f"As application dir using: {config.app_dir}")
 
     middlewares.setup(dp)
     filters.setup(dp)
     executor.setup(config.db_config)
-
-    logger.info("Configure handlers...")
     import app.handlers
