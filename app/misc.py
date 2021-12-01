@@ -1,4 +1,3 @@
-# partially from https://github.com/aiogram/bot
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from loguru import logger
@@ -20,5 +19,4 @@ def setup():
     executor.setup(config.db_config)
 
     logger.info("Configure handlers...")
-    # noinspection PyUnresolvedReferences
     import app.handlers
