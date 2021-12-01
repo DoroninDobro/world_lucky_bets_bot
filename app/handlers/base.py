@@ -10,7 +10,6 @@ from app.models.db.chat import Chat
 @dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=False)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
-    """For start handler for admin see admin.py """
     logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
         "Hello "

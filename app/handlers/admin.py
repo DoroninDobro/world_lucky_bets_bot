@@ -38,7 +38,6 @@ class RenameThread(StatesGroup):
 @dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=True)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
-    """For start handler for not admin see base.py """
     logger.info("User {user} start conversation with bot", user=message.from_user.id)
     await message.reply(
         "Hi, admin!",
@@ -231,7 +230,6 @@ async def stop_work_thread(
         f"has been successfully finished"
     )
     try:
-        # edit message in PM admin
         await callback_query.message.edit_caption(
             caption=caption,
             reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id),
@@ -240,7 +238,6 @@ async def stop_work_thread(
         logger.exception(e)
 
     try:
-        # edit message in workers chat
         await callback_query.bot.edit_message_caption(
             chat_id=config.WORKERS_CHAT_ID,
             message_id=thread.workers_chat_message_id,

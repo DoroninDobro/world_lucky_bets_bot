@@ -1,6 +1,3 @@
-"""
-constants, settings
-"""
 import json
 import os
 import secrets
@@ -27,10 +24,6 @@ PRINT_LOG = f"{CURRENT_BOT}.print.log"
 
 ENABLE_LOGGING_MIDDLEWARE = bool(int(os.getenv("ENABLE_LOGGING_MIDDLEWARE", default=1)))
 
-BOMZHEG_ID = 46866565
-TREE_HOUSE_TRIP_ID = 203288953
-SUPERUSERS = {BOMZHEG_ID, TREE_HOUSE_TRIP_ID}
-
 TECH_LOG_CHAT_ID = int(os.getenv("TECH_LOG_CHAT_ID", -1001171895296))
 USER_LOG_CHAT_ID = int(os.getenv("USER_LOG_CHAT_ID", -1001350461791))
 ADMIN_LOG_CHAT_ID = int(os.getenv("ADMIN_LOG_CHAT_ID", -1001426455516))
@@ -53,7 +46,7 @@ with (config_path / "currency.yml").open("r", encoding="utf-8") as f:
     currencies = load_currency(yaml.load(f, SafeLoader))
 
 
-secret_str = secrets.token_urlsafe(16)  # for webhook path
+secret_str = secrets.token_urlsafe(16)
 
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 WEBHOOK_PORT = os.getenv("WEBHOOK_PORT", default=443)

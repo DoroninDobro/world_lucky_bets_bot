@@ -16,10 +16,6 @@ class Currency:
 
 
 def load_currency(dumped: dict) -> dict[str, Currency]:
-    """
-    :param dumped: dictionary loaded from config file
-    :return: dict with key - iso code and value dataclass Currency
-    """
     return {currency_code: Currency(
         iso_code=currency_code,
         symbol=currency_description['symbol'],
