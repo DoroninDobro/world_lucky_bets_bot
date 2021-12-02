@@ -17,22 +17,15 @@ tz_view = tz.gettz('Europe/Moscow')
 
 PRINT_LOG = f"bot.print.log"
 
-ENABLE_LOGGING_MIDDLEWARE = bool(int(os.getenv("ENABLE_LOGGING_MIDDLEWARE", default=1)))
-
 TECH_LOG_CHAT_ID = int(os.getenv("TECH_LOG_CHAT_ID", -1001171895296))
 USER_LOG_CHAT_ID = int(os.getenv("USER_LOG_CHAT_ID", -1001350461791))
 WORKERS_CHAT_ID = int(os.getenv("WORKERS_CHAT_ID", -1001243606983))
-
-allow_list_path = jsons_dir / "bot" / 'allow_list.json'
-ENABLE_ALLOW_LIST = bool(int(os.getenv("ENABLE_ALLOW_LIST", default=0)))
 
 admin_list_path = jsons_dir / "bot" / 'admins_list.json'
 with open(admin_list_path) as f:
     admins_list = set(json.load(f))
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
-    raise EnvironmentError("You have to specify BOT_TOKEN environment")
 OER_TOKEN = os.getenv("OER_TOKEN")
 
 with (config_path / "currency.yml").open("r", encoding="utf-8") as f:
