@@ -1,12 +1,11 @@
 import asyncio
-import typing
 from contextlib import suppress
 
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
 from app import config, keyboards as kb
-from app.models import WorkThread, User, AdditionalText, RateItem
+from app.models import WorkThread, AdditionalText, RateItem
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
@@ -15,8 +14,6 @@ from app.services.additional_text import (
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
 from app.services.rates import OpenExchangeRates
-
-thread_results = typing.List[typing.Tuple[User, int, float]]
 
 
 async def start_new_thread(photo_file_id, admin, bot):
