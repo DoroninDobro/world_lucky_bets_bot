@@ -1,4 +1,3 @@
-from aiogram import types
 from aiogram.utils.markdown import hlink, quote_html
 from tortoise import fields
 from tortoise.exceptions import DoesNotExist
@@ -10,17 +9,15 @@ class User(Model):
     first_name = fields.CharField(max_length=255, null=True)
     last_name = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=32, null=True)
-    is_bot: bool = fields.BooleanField(null=True)
-    # noinspection PyUnresolvedReferences
+    is_bot = fields.BooleanField(null=True)
     work_threads: fields.ReverseRelation['WorkerInThread']
-    # noinspection PyUnresolvedReferences
     admin_threads: fields.ReverseRelation['WorkThread']
 
     class Meta:
         table = "users"
 
     @classmethod
-    async def create_from_tg_user(cls, user: types.User):
+    async def create_from_tg_user(cls, user):
         user = await cls.create(
             id=user.id,
             first_name=user.first_name,
@@ -59,7 +56,7 @@ class User(Model):
             await self.save()
 
     @classmethod
-    async def get_or_create_from_tg_user(cls, user_tg: types.User):
+    async def get_or_create_from_tg_user(cls, user_tg):
 
         try:
             user = await cls.get(id=user_tg.id)

@@ -16,7 +16,7 @@ class ChatType(str, Enum):
 
 class Chat(Model):
     id = fields.BigIntField(pk=True, generated=False)
-    type_: ChatType = typing.cast(ChatType, fields.CharEnumField(ChatType))
+    type_ = typing.cast(ChatType, fields.CharEnumField(ChatType))
     title = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=32, null=True)
     description = fields.CharField(max_length=255, null=True)

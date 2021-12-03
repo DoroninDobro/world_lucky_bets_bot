@@ -3,7 +3,6 @@ import functools
 from tortoise import fields
 from tortoise.models import Model
 
-from .user import User
 from app.utils.exceptions import ThreadStopped
 
 
@@ -13,12 +12,10 @@ class WorkThread(Model):
     start_photo_file_id = fields.CharField(128)
     start_message_id = fields.IntField(null=True)
     workers_chat_message_id = fields.IntField(null=True)
-    admin: fields.ForeignKeyRelation[User] = fields.ForeignKeyField('models.User', related_name='admin_threads')
-    # noinspection PyUnresolvedReferences
+    admin = fields.ForeignKeyField('models.User', related_name='admin_threads')
     workers: fields.ReverseRelation['WorkerInThread']
-    # noinspection PyUnresolvedReferences
     additional_texts: fields.ReverseRelation['AdditionalText']
-    stopped: bool = fields.BooleanField(default=False)
+    stopped = fields.BooleanField(default=False)
     name = fields.CharField(128, null=True)
 
     class Meta:
@@ -28,7 +25,6 @@ class WorkThread(Model):
         return f"<WorkThread id={self.id}>"
 
     def get_admin_id(self):
-        # noinspection PyUnresolvedReferences
         return self.admin_id
 
 
