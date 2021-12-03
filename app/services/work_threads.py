@@ -86,7 +86,7 @@ async def stop_thread(thread_id):
 
 
 @check_thread_running
-async def start_mailing(a_text, bot):
+async def start_mailing(a_text, bot, *, thread):
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
         enable_workers = await get_enable_workers(a_text)
         for enable_worker, worker_start_thread_message_id in enable_workers:
