@@ -14,18 +14,12 @@ def create_parser():
 def cli():
 
     def polling(skip_updates):
-        """
-        Start application
-        """
         from app.utils.executor import runner
 
         runner.skip_updates = skip_updates
         runner.start_polling(reset_webhook=True)
 
     def webhook():
-        """
-        Run application in webhook mode
-        """
         from app.utils.executor import runner
         runner.start_webhook(
             webhook_path=f'/{config.secret_str}/',

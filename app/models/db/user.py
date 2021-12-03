@@ -29,7 +29,6 @@ class User(Model):
         return user
 
     async def update_user_data(self, user_tg):
-        # TODO изучить фреймворк лучше - уверен есть встроенная функция для обновления только в случае расхождений
         changed = False
 
         if self.id is None and user_tg.id is not None:
