@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from app import config
 from app.models import WorkThread
 
 
@@ -14,11 +13,11 @@ class TotalStatistic:
     thread_id_name: typing.ClassVar = "Номер матча"
     thread_name_name: typing.ClassVar = "Название матча"
     thread: WorkThread
-    total_bet_eur_name: typing.ClassVar = f"Общая сумма ставки в {config.BASE_CURRENCY}"
+    total_bet_eur_name: typing.ClassVar = f"Общая сумма ставки в EUR"
     total_bet_eur: Decimal
-    total_payment_eur_name: typing.ClassVar = f"Общая сумма расчёта в {config.BASE_CURRENCY}"
+    total_payment_eur_name: typing.ClassVar = f"Общая сумма расчёта в EUR"
     total_payment_eur: Decimal
-    total_result_eur_name: typing.ClassVar = f"Общий плюс в {config.BASE_CURRENCY}"
+    total_result_eur_name: typing.ClassVar = f"Общий плюс в EUR"
     total_result_eur: Decimal
 
     @classmethod

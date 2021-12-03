@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
-from app import config
 from app.config.currency import Currency
 from app.models.db import Bookmaker, User, WorkThread, BetItem
 
@@ -24,11 +23,11 @@ class UserStat:
     total_result_name: typing.ClassVar = f"Профит"
     total_result: Decimal
     currency: Currency
-    total_bet_eur_name: typing.ClassVar = f"Ставка в в {config.BASE_CURRENCY}"
+    total_bet_eur_name: typing.ClassVar = f"Ставка в в EUR"
     total_bet_eur: Decimal
-    total_payment_eur_name: typing.ClassVar = f"Расчёт в {config.BASE_CURRENCY}"
+    total_payment_eur_name: typing.ClassVar = f"Расчёт в EUR"
     total_payment_eur: Decimal
-    total_result_eur_name: typing.ClassVar = f"Профит в {config.BASE_CURRENCY}"
+    total_result_eur_name: typing.ClassVar = f"Профит в EUR"
     total_result_eur: Decimal
     bookmaker_name: typing.ClassVar = "Букмекер"
     bookmaker: Bookmaker
