@@ -12,7 +12,7 @@ class DataTimeRange:
             raise ValueError("in data range 'start' can't be greater that 'stop'")
 
     @classmethod
-    def get_month_range(cls, month: int, year: int):
+    def get_month_range(cls, month, year):
         start = date(year, month, 1)
         if month == 12:
             stop = date(year + 1, 1, 1)
@@ -43,5 +43,5 @@ class DataTimeRange:
                f"{(self.stop.date() - timedelta(days=1)).isoformat()}"
 
 
-def date_to_datetime(day: date) -> datetime:
+def date_to_datetime(day):
     return datetime.combine(day, time(0, 0, 0, 0))
