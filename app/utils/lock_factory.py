@@ -1,17 +1,14 @@
 import asyncio
-import typing
 
 
 class LockFactory:
     def __init__(self):
-        self._locks: typing.Optional[typing.Dict[typing.Any, asyncio.Lock]] = None
+        self._locks = None
 
-    def get_lock(self, id_: typing.Any):
+    def get_lock(self, id_):
         if self._locks is None:
             self._locks = {}
 
-            # Это костыль, по хорошему эта таска должна создаваться в ините,
-            # для этого милваря должна создаваться после бота и диспетчера
             asyncio.create_task(self._check_and_clear())
 
         return self._locks.setdefault(id_, asyncio.Lock())
@@ -28,7 +25,7 @@ class LockFactory:
         for key in to_remove:
             del self._locks[key]
 
-    async def _check_and_clear(self, cool_down: int = 1800):
+    async def _check_and_clear(self, cool_down=1800):
         while True:
             await asyncio.sleep(cool_down)
             self.clear_free()

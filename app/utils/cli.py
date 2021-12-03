@@ -13,7 +13,7 @@ def create_parser():
 
 def cli():
 
-    def polling(skip_updates: bool):
+    def polling(skip_updates):
         """
         Start application
         """
