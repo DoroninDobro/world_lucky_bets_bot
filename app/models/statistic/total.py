@@ -2,7 +2,6 @@ import typing
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import Union
 
 from app import config
 from app.models import WorkThread
@@ -23,7 +22,7 @@ class TotalStatistic:
     total_result_eur: Decimal
 
     @classmethod
-    def get_captions(cls) -> list[str]:
+    def get_captions(cls):
         return [
             cls.day_name,
             cls.thread_id_name,
@@ -33,7 +32,7 @@ class TotalStatistic:
             cls.total_result_eur_name,
         ]
 
-    def get_printable(self) -> list[Union[str, date]]:
+    def get_printable(self):
         return [
             self.day,
             self.thread.id,

@@ -1,7 +1,6 @@
 import typing
 from dataclasses import dataclass
 from datetime import date
-from typing import Union
 
 from app.models import WorkThread
 
@@ -18,7 +17,7 @@ class ThreadUsers:
     user_names: list[str]
     user_has_worked: list[bool]
 
-    def get_captions(self) -> list[str]:
+    def get_captions(self):
         return [
             self.day_name,
             self.thread_id_name,
@@ -26,7 +25,7 @@ class ThreadUsers:
             *self.user_names,
         ]
 
-    def get_printable(self) -> list[Union[str, date]]:
+    def get_printable(self):
         return [
             self.day,
             self.thread.id,

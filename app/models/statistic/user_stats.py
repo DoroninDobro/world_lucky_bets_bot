@@ -2,7 +2,6 @@ import typing
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
-from typing import Union
 
 from app import config
 from app.config.currency import Currency
@@ -37,7 +36,7 @@ class UserStat:
     bet_id_name: typing.ClassVar = "ID записи"
     bet_item: BetItem
 
-    def get_captions(self) -> list[str]:
+    def get_captions(self):
         return [
             self.day_name,
             self.thread_id_name,
@@ -52,7 +51,7 @@ class UserStat:
             self.bet_id_name,
         ]
 
-    def get_printable(self) -> list[Union[str, date]]:
+    def get_printable(self):
         return [
             self.day,
             self.thread.id,
