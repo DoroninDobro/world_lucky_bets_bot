@@ -2,12 +2,11 @@ import asyncio
 import typing
 from contextlib import suppress
 
-from aiogram import Bot, types
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
 from app import config, keyboards as kb
-from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
+from app.models import WorkThread, User, AdditionalText, RateItem
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
@@ -20,7 +19,7 @@ from app.services.rates import OpenExchangeRates
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
 
-async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThread:
+async def start_new_thread(photo_file_id, admin, bot):
     async with in_transaction() as connection, \
                msg_cleaner() as transaction_messages:
         created_thread = WorkThread(start_photo_file_id=photo_file_id,
@@ -65,12 +64,12 @@ async def save_daily_rates(using_db=None):
                 await rate.save(using_db=using_db)
 
 
-async def get_thread(message_id: int) -> WorkThread:
+async def get_thread(message_id):
     return await WorkThread.get(start_message_id=message_id)
 
 
 @check_thread_running
-async def add_info_to_thread(text: str, *, thread: WorkThread):
+async def add_info_to_thread(text, *, thread):
     async with in_transaction() as connection:
         a_t = await AdditionalText.create(text=text, thread=thread,
                                           using_db=connection)
@@ -81,7 +80,7 @@ async def add_info_to_thread(text: str, *, thread: WorkThread):
     return a_t, workers
 
 
-async def stop_thread(thread_id: int) -> WorkThread:
+async def stop_thread(thread_id):
     async with in_transaction() as connection:
         thread = await WorkThread.get(id=thread_id)
         thread.stopped = True
@@ -90,7 +89,7 @@ async def stop_thread(thread_id: int) -> WorkThread:
 
 
 @check_thread_running
-async def start_mailing(a_text: AdditionalText, bot: Bot):
+async def start_mailing(a_text, bot):
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
         enable_workers = await get_enable_workers(a_text)
         for enable_worker, worker_start_thread_message_id in enable_workers:
@@ -119,11 +118,7 @@ async def start_mailing(a_text: AdditionalText, bot: Bot):
         await a_text.save(using_db=conn)
 
 
-async def render_disinformation_log(
-        a_text: AdditionalText,
-        enable_workers: typing.List[User],
-        all_workers: typing.List[User],
-) -> str:
+async def render_disinformation_log(a_text, enable_workers, all_workers, ):
     text_parts = [
         f"Match <b>{a_text.get_thread_id()}</b>",
         f"Message: <b>{a_text.text}</b>",
@@ -142,15 +137,15 @@ async def render_disinformation_log(
 
 
 @check_thread_running
-async def get_workers_from_thread(*, thread: WorkThread) -> typing.List[User]:
-    workers_in_thread: typing.List[WorkerInThread] = await thread.workers
+async def get_workers_from_thread(*, thread):
+    workers_in_thread = await thread.workers
     if workers_in_thread:
         return [await worker.worker for worker in workers_in_thread]
     else:
         return []
 
 
-async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
+async def thread_not_found(callback_query, thread_id):
     await callback_query.answer(f"Match thread_id={thread_id} not found",
                                 show_alert=True)
     await callback_query.message.edit_caption(
@@ -160,13 +155,13 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
     )
 
 
-async def rename_thread(thread_id: int, new_name: str):
+async def rename_thread(thread_id, new_name):
     thread = await WorkThread.get(id=thread_id)
     thread.name = new_name
     await thread.save()
 
 
-async def send_notification_stop(thread: WorkThread, bot: Bot):
+async def send_notification_stop(thread, bot):
     for worker in await thread.workers:
         user = await worker.worker
         await bot.send_message(user.id, f"Match {thread.id} is over",

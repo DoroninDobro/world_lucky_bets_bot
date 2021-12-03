@@ -1,17 +1,1 @@
-import asyncio
-from contextlib import suppress
-
-from aiogram import types
-from aiogram.utils.exceptions import (MessageToEditNotFound, MessageCantBeEdited, MessageCantBeDeleted,
-                                      MessageToDeleteNotFound)
-
-
-async def remove_kb_after_sleep(message: types.Message, sleep_time: int = 0):
-    await asyncio.sleep(sleep_time)
-    with suppress(MessageToEditNotFound, MessageCantBeEdited):
-        await message.edit_reply_markup()
-
-
-async def delete_message(message: types.Message):
-    with suppress(MessageCantBeDeleted, MessageToDeleteNotFound):
-        await message.delete()
+import asynciofrom contextlib import suppressfrom aiogram.utils.exceptions import (MessageToEditNotFound, MessageCantBeEdited, MessageCantBeDeleted,                                      MessageToDeleteNotFound)async def remove_kb_after_sleep(message, sleep_time=0):    await asyncio.sleep(sleep_time)    with suppress(MessageToEditNotFound, MessageCantBeEdited):        await message.edit_reply_markup()async def delete_message(message):    with suppress(MessageCantBeDeleted, MessageToDeleteNotFound):        await message.delete()
