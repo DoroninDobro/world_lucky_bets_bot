@@ -1,29 +1,1 @@
-from contextlib import suppress
-
-from aiogram import types
-from aiogram.utils.exceptions import CantParseEntities, BotBlocked, BadRequest
-from aiogram.utils.markdown import quote_html
-
-from app import config
-from app.misc import dp, bot
-
-
-@dp.errors_handler()
-async def errors_handler(update: types.Update, exception: Exception):
-    try:
-        raise exception
-    except CantParseEntities as e:
-        pass
-    except BotBlocked:
-        pass
-    except Exception as e:
-        pass
-
-    with suppress(BadRequest):
-        await bot.send_message(
-            config.TECH_LOG_CHAT_ID,
-            f"Exception {quote_html(exception)}\n"
-            f"was received while processing an update {quote_html(update)}\n"
-            f"{quote_html(exception.args)}"
-        )
-    return True
+from contextlib import suppressfrom aiogram.utils.exceptions import BadRequestfrom aiogram.utils.markdown import quote_htmlfrom app import configfrom app.misc import dp, bot@dp.errors_handler()async def errors_handler(update, exception):    with suppress(BadRequest):        await bot.send_message(            config.TECH_LOG_CHAT_ID,            f"Exception {quote_html(exception)}\n"            f"was received while processing an update {quote_html(update)}\n"            f"{quote_html(exception.args)}"        )    return True
