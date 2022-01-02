@@ -1,9 +1,9 @@
-aiohttp~=3.7.3
+aiohttp~=3.8.1
 loguru~=0.5.3
 python-dotenv~=0.15.0
 tortoise-orm
 python-dateutil~=2.8.1
-aiogram~=2.11.2
+aiogram~=2.18
 git+https://github.com/bomzheg/openexchangerates@master
 pyyaml~=5.4.1
 openpyxl~=3.0.6

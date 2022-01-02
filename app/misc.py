@@ -5,7 +5,11 @@ from loguru import logger
 
 from app import config
 
-bot = Bot(config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+bot = Bot(
+    config.BOT_TOKEN,
+    parse_mode=types.ParseMode.HTML,
+    disable_web_page_preview=True,
+)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
