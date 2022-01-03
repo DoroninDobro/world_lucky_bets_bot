@@ -13,6 +13,7 @@ class AdditionalText(Model):
     text = fields.CharField(4096)
     # noinspection PyUnresolvedReferences
     send_to_workers: fields.ReverseRelation['SendWorkers']
+    sent = fields.DatetimeField(null=True)
 
     class Meta:
         table = "additional_texts"

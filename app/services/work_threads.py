@@ -1,6 +1,7 @@
 import asyncio
 import typing
 from contextlib import suppress
+from datetime import datetime
 
 from aiogram import Bot, types
 from loguru import logger
@@ -8,6 +9,7 @@ from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
 from app import config, keyboards as kb
+from app.config import tz_db
 from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
@@ -140,6 +142,7 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             transaction_messages.append(disinformation_log_msg)
 
         a_text.is_draft = False
+        a_text.sent = datetime.now(tz=tz_db)
         await a_text.save(using_db=conn)
 
 

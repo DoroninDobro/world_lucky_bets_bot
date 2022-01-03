@@ -22,6 +22,7 @@ CURRENT_BOT = os.getenv("BOT_NAME", default="")
 load_dotenv(str(config_path / f"{CURRENT_BOT}.env"))
 
 tz_view = tz.gettz('Europe/Moscow')
+tz_db = tz.gettz("UTC")
 
 PRINT_LOG = f"{CURRENT_BOT}.print.log"
 
