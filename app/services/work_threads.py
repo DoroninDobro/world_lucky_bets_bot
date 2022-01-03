@@ -20,6 +20,7 @@ from app.services.additional_text import (
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
 from app.services.rates import OpenExchangeRates
+from app.utils.text_utils import remove_usernames
 
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
@@ -93,11 +94,12 @@ async def get_thread(message_id: int) -> WorkThread:
 @check_thread_running
 async def add_info_to_thread(text: str, *, thread: WorkThread):
     async with in_transaction() as connection:
-        a_t = await AdditionalText.create(text=text, thread=thread,
-                                          using_db=connection)
+        a_t = await AdditionalText.create(
+            text=remove_usernames(text), thread=thread, using_db=connection,
+        )
         workers = await create_send_workers(
             await get_workers_from_thread(thread=thread),
-            a_t, using_db=connection
+            a_t, using_db=connection,
         )
     return a_t, workers
 
