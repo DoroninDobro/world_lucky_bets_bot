@@ -95,7 +95,7 @@ async def get_thread(message_id: int) -> WorkThread:
 async def add_info_to_thread(text: str, *, thread: WorkThread):
     async with in_transaction() as connection:
         a_t = await AdditionalText.create(
-            text=remove_usernames(text), thread=thread, using_db=connection,
+            text=text, thread=thread, using_db=connection,
         )
         workers = await create_send_workers(
             await get_workers_from_thread(thread=thread),
@@ -161,7 +161,7 @@ async def send_log_mailing(
     # (информацию о приватности инфы и текст сообщения)
     await bot.send_message(
         chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
-        text=text,
+        text=remove_usernames(text),
         reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id
     )
 
