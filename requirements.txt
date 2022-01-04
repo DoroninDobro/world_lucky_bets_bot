@@ -1,10 +1,10 @@
 aiohttp~=3.8.1
 loguru~=0.5.3
-python-dotenv~=0.15.0
+python-dotenv~=0.19.2
 tortoise-orm
 python-dateutil~=2.8.1
 git+https://github.com/bomzheg/aiogram@dev-2.x-default-protected-content
 git+https://github.com/bomzheg/openexchangerates@master
-pyyaml~=5.4.1
+pyyaml~=6.0
 openpyxl~=3.0.6
 asyncpg
