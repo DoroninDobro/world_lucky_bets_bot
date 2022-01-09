@@ -44,7 +44,8 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=admin.id,
             photo=photo_file_id,
             caption=f"{created_thread.id}. Message sent",
-            reply_markup=kb.get_work_thread_admin_kb(created_thread.id)
+            reply_markup=kb.get_work_thread_admin_kb(created_thread.id),
+            protect_content=False,
         )
         transaction_messages.append(msg_to_admin)
 
@@ -52,7 +53,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=config.ADMIN_LOG_CHAT_ID,
             photo=photo_file_id,
             caption=f"{created_thread.id}. "
-                    f"Started a new match from {admin.mention_link}"
+                    f"Started a new match from {admin.mention_link}",
         )
         transaction_messages.append(log_chat_message)
 
@@ -68,8 +69,6 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         created_thread.start_message_id = msg_to_admin.message_id
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
-
-    await save_daily_rates()
 
     return created_thread
 

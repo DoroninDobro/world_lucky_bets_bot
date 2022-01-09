@@ -10,26 +10,39 @@ from app.services.reports.excel_report import process_report
 async def make_all_time_report(message: types.Message):
     try:
         date_range = DataTimeRange.get_all_time_range()
-        await message.reply_document(await process_report(date_range))
+        await generate_and_send_report(date_range, message)
     except IndexError:
-        await message.reply("Скорее всего за всё время ничего не было")
+        await message.reply(
+            "Скорее всего за всё время ничего не было", protect_content=False,
+        )
 
 
 @dp.message_handler(text=kb.last_month_report, is_admin=True)
 async def make_last_month_report(message: types.Message):
     try:
         date_range = DataTimeRange.get_last_month_range()
-        await message.reply_document(await process_report(date_range))
+        await generate_and_send_report(date_range, message)
     except IndexError:
-        await message.reply("Скорее всего в прошедшем месяце ничего не было")
+        await message.reply(
+            "Скорее всего в прошедшем месяце ничего не было", protect_content=False,
+        )
 
 
 @dp.message_handler(text=kb.current_moth_report, is_admin=True)
 async def make_current_mont_report(message: types.Message):
     try:
         date_range = DataTimeRange.get_current_month_range()
-        await message.reply_document(await process_report(date_range))
+        await generate_and_send_report(date_range, message)
     except IndexError:
-        await message.reply("Скорее всего в этом месяце пока ничего не было")
+        await message.reply(
+            "Скорее всего в этом месяце пока ничего не было", protect_content=False,
+        )
+
+
+async def generate_and_send_report(date_range: DataTimeRange, message: types.Message):
+    await message.reply_document(
+        await process_report(date_range),
+        protect_content=False,
+    )
 
 
