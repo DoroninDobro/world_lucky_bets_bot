@@ -149,6 +149,7 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
             show_alert=True
         )
         raise
+    await callback_query.answer()
     await callback_query.message.edit_text(f"Sent by:\n{a_text.text}")
 
 
