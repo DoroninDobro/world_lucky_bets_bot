@@ -11,8 +11,7 @@ class AdditionalText(Model):
     is_draft: bool = fields.BooleanField(default=True)
     is_disinformation: bool = fields.BooleanField(default=False)
     text = fields.CharField(4096)
-    # noinspection PyUnresolvedReferences
-    send_to_workers: fields.ReverseRelation['SendWorkers']
+    send_to_workers: fields.ReverseRelation['SendWorkers']  # noqa F821
     sent = fields.DatetimeField(null=True)
 
     class Meta:

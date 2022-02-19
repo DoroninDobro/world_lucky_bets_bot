@@ -16,10 +16,8 @@ class WorkThread(Model):
     log_chat_for_admins_without_usernames_message_id = fields.IntField(null=True)
     workers_chat_message_id = fields.IntField(null=True)
     admin: fields.ForeignKeyRelation[User] = fields.ForeignKeyField('models.User', related_name='admin_threads')
-    # noinspection PyUnresolvedReferences
-    workers: fields.ReverseRelation['WorkerInThread']
-    # noinspection PyUnresolvedReferences
-    additional_texts: fields.ReverseRelation['AdditionalText']
+    workers: fields.ReverseRelation['WorkerInThread']  # noqa F821
+    additional_texts: fields.ReverseRelation['AdditionalText']  # noqa F821
     stopped: bool = fields.BooleanField(default=False)
     name = fields.CharField(128, null=True)
 

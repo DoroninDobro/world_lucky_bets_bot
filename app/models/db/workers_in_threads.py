@@ -12,8 +12,7 @@ class WorkerInThread(Model):
     worker: fields.ForeignKeyRelation[User] = fields.ForeignKeyField(
         'models.User', related_name='work_threads')
     message_id: int = fields.IntField()
-    # noinspection PyUnresolvedReferences
-    bets: fields.ReverseRelation["BetItem"]
+    bets: fields.ReverseRelation["BetItem"]  # noqa F821
 
     class Meta:
         table = "workers_in_threads"
