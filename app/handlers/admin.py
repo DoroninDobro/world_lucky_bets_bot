@@ -51,7 +51,6 @@ async def cmd_start(message: types.Message):
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
                     content_types=types.ContentType.PHOTO)
-@dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
     photo_file_id = message.photo[-1].file_id
     try:
@@ -135,6 +134,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
     asyncio.create_task(
         process_mailing(callback_query, a_t, callback_query.bot, thread=thread)
     )
+    await callback_query.answer(cache_time=1)
 
 
 async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
@@ -142,14 +142,14 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
     try:
         await start_mailing(a_text, bot, thread=thread)
     except ThreadStopped:
-        return await callback_query.answer("This match is over!", show_alert=True)
+        return await callback_query.message.reply(
+            "This match is over! Can't process mailing",
+        )
     except Exception:
-        await callback_query.answer(
+        await callback_query.message.reply(
             "An error occurred, we wrote it down, we will try to figure it out",
-            show_alert=True
         )
         raise
-    await callback_query.answer()
     await callback_query.message.edit_text(f"Sent by:\n{a_text.text}")
 
 
