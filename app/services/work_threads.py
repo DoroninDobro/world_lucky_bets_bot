@@ -20,6 +20,7 @@ from app.services.additional_text import (
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
 from app.services.rates import OpenExchangeRates
+from app.utils.text_utils import remove_usernames
 
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
@@ -43,7 +44,8 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=admin.id,
             photo=photo_file_id,
             caption=f"{created_thread.id}. Message sent",
-            reply_markup=kb.get_work_thread_admin_kb(created_thread.id)
+            reply_markup=kb.get_work_thread_admin_kb(created_thread.id),
+            protect_content=False,
         )
         transaction_messages.append(msg_to_admin)
 
@@ -51,7 +53,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=config.ADMIN_LOG_CHAT_ID,
             photo=photo_file_id,
             caption=f"{created_thread.id}. "
-                    f"Started a new match from {admin.mention_link}"
+                    f"Started a new match from {admin.mention_link}",
         )
         transaction_messages.append(log_chat_message)
 
@@ -67,8 +69,6 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         created_thread.start_message_id = msg_to_admin.message_id
         created_thread.workers_chat_message_id = msg_to_workers.message_id
         await created_thread.save(using_db=connection)
-
-    await save_daily_rates()
 
     return created_thread
 
@@ -93,11 +93,12 @@ async def get_thread(message_id: int) -> WorkThread:
 @check_thread_running
 async def add_info_to_thread(text: str, *, thread: WorkThread):
     async with in_transaction() as connection:
-        a_t = await AdditionalText.create(text=text, thread=thread,
-                                          using_db=connection)
+        a_t = await AdditionalText.create(
+            text=text, thread=thread, using_db=connection,
+        )
         workers = await create_send_workers(
             await get_workers_from_thread(thread=thread),
-            a_t, using_db=connection
+            a_t, using_db=connection,
         )
     return a_t, workers
 
@@ -159,7 +160,7 @@ async def send_log_mailing(
     # (информацию о приватности инфы и текст сообщения)
     await bot.send_message(
         chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
-        text=text,
+        text=remove_usernames(text),
         reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id
     )
 

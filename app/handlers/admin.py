@@ -18,7 +18,9 @@ from app.services.work_threads import (
     start_mailing,
     thread_not_found,
     send_notification_stop,
-    add_info_to_thread, rename_thread,
+    add_info_to_thread,
+    rename_thread,
+    save_daily_rates,
 )
 from app import config, keyboards as kb
 from app.models import User, AdditionalText, WorkThread
@@ -43,18 +45,21 @@ async def cmd_start(message: types.Message):
     await message.reply(
         "Hi, admin!",
         reply_markup=kb.get_reply_kb_report(),
+        protect_content=False,
     )
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
                     content_types=types.ContentType.PHOTO)
-@dp.throttled(rate=0.5)
 async def new_send(message: types.Message, user: User):
     photo_file_id = message.photo[-1].file_id
     try:
         thread = await start_new_thread(photo_file_id, user, message.bot)
     except Exception:
-        await message.reply("Something went wrong, we wrote down the problem")
+        await message.reply(
+            "Something went wrong, we wrote down the problem",
+            protect_content=False
+        )
         logger.error(
             "admin {user} try start new thread, but failed",
             user=user.id
@@ -63,6 +68,7 @@ async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread {thread}",
                 user=message.from_user.id, thread=thread.id)
     await delete_message(message)
+    await save_daily_rates()
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=True)
@@ -75,26 +81,29 @@ async def add_new_info(message: types.Message, user: User, reply: types.Message)
             user=user.id
         )
         return await message.reply(
-            "It's unclear, this message is not directed to the start message"
+            "It's unclear, this message is not directed to the start message",
+            protect_content=False,
         )
 
     try:
         a_t, workers = await add_info_to_thread(message.html_text, thread=thread)
     except ThreadStopped:
-        return await message.reply("This match is over!")
+        return await message.reply("This match is over!", protect_content=False)
     except Exception:
         logger.info("admin {user} try add new info to thread {thread} but failed",
                     user=user.id, thread=thread.id)
         await message.reply(
             "Something went wrong, I'm sure one day things thing will get back to normal, "
-            "for now I can only suggest you to send it again"
+            "for now I can only suggest you to send it again",
+            protect_content=False,
         )
         raise
     logger.info("admin {user} add new info {a_t} to thread {thread} ",
                 user=user.id, a_t=a_t.id, thread=thread.id)
     await message.reply(
         f"Send information:\n{a_t.text}",
-        reply_markup=kb.get_kb_menu_send(workers, a_t)
+        reply_markup=kb.get_kb_menu_send(workers, a_t),
+        protect_content=False,
     )
 
 
@@ -109,10 +118,10 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
         logger.info("admin {user} try send message without thread", user=user.id)
         await callback_query.answer(
             "This is some kind of strange button, I'll take it out of harm's way",
-            show_alert=True
+            show_alert=True,
         )
         await callback_query.message.edit_text(
-            "There was some old message with invalid buttons"
+            "There was some old message with invalid buttons",
         )
         raise CancelHandler
     else:
@@ -125,6 +134,7 @@ async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: 
     asyncio.create_task(
         process_mailing(callback_query, a_t, callback_query.bot, thread=thread)
     )
+    await callback_query.answer(cache_time=1)
 
 
 async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
@@ -132,11 +142,12 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
     try:
         await start_mailing(a_text, bot, thread=thread)
     except ThreadStopped:
-        return await callback_query.answer("This match is over!", show_alert=True)
+        return await callback_query.message.reply(
+            "This match is over! Can't process mailing",
+        )
     except Exception:
-        await callback_query.answer(
+        await callback_query.message.reply(
             "An error occurred, we wrote it down, we will try to figure it out",
-            show_alert=True
         )
         raise
     await callback_query.message.edit_text(f"Sent by:\n{a_text.text}")
