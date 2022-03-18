@@ -1,7 +1,6 @@
 """
 constants, settings
 """
-import json
 import os
 import secrets
 from pathlib import Path
@@ -43,7 +42,7 @@ ENABLE_ALLOW_LIST = bool(int(os.getenv("ENABLE_ALLOW_LIST", default=0)))
 
 admin_list_path = jsons_dir / CURRENT_BOT / 'admins_list.json'
 with open(admin_list_path) as f:
-    admins_list = set(json.load(f))
+    admins_list = set(yaml.safe_load(f))
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
