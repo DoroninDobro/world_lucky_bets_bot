@@ -38,6 +38,11 @@ class DataTimeRange:
         last_time = date.max
         return cls(start=date_to_datetime(first_time), stop=date_to_datetime(last_time))
 
+    @classmethod
+    def from_date(cls, date_: date):
+        date_as_dt = datetime.combine(date=date_, time=time())
+        return cls(start=date_as_dt, stop=date_as_dt)
+
     def __repr__(self):
         return f"{self.start.date().isoformat()} - " \
                f"{(self.stop.date() - timedelta(days=1)).isoformat()}"
