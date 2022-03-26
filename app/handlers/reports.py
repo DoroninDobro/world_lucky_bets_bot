@@ -41,7 +41,7 @@ async def make_current_mont_report(message: types.Message):
         )
 
 
-@dp.message_handler(commands="report")
+@dp.message_handler(commands="lumos")
 async def match_report(m: types.Message):
     _, args = m.text.split(maxsplit=1)
     try:
