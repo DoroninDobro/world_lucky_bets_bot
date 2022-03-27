@@ -12,9 +12,9 @@ async def get_thread_report(thread_id: int) -> str:
     thread = await WorkThread.get(id=thread_id)
     report_result = f"Отчёт о матче <b>{thread.name}</b> ({thread_id}):\n"
     user_statistics = await get_user_stats(thread)
-    total_bets = reduce(operator.add, map(lambda x: x.total_bet_eur, user_statistics))
+    total_bets = reduce(operator.add, map(lambda x: x.total_bet_eur, user_statistics), 0)
     report_result += f"Итого {total_bets:.2f}€ / "
-    total_result = reduce(operator.add, map(lambda x: x.total_result_eur, user_statistics))
+    total_result = reduce(operator.add, map(lambda x: x.total_result_eur, user_statistics), 0)
     report_result += f"{total_result:.2f}€\n"
     statistics_by_user: dict[int, list[UserStat]] = {}
     for us in user_statistics:

@@ -1,5 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher.handler import SkipHandler
+from loguru import logger
 
 from app.misc import dp
 from app.models import DataTimeRange
@@ -43,10 +44,12 @@ async def make_current_mont_report(message: types.Message):
 
 @dp.message_handler(commands="lumos")
 async def match_report(m: types.Message):
-    _, args = m.text.split(maxsplit=1)
     try:
+        _, args = m.text.split(maxsplit=1)
         thread_id = int(args)
-    except ValueError:
+        logger.info("user {user} ask report for {thread}", user=m.from_user.id, thread=thread_id)
+    except ValueError as e:
+        logger.info("user {user} ask report for thread but {e}", user=m.from_user.id, e=e)
         raise SkipHandler
     await m.reply(await get_thread_report(thread_id))
 
