@@ -27,7 +27,9 @@ async def save_new_betting_odd(
     )
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{get_current_datetime_in_format()} - {await bet_item.get_full_printable()} at match {thread_id}"
+        f"{get_current_datetime_in_format()} - "
+        f"{await bet_item.get_full_printable()} at match {thread_id}",
+        protect_content=False,
     )
     return bet_item
 
@@ -38,6 +40,7 @@ async def remove_bet_item(bet_item_id: int, removing_by_user: User):
         await bet_item.delete()
         return bet_item
     await bet_item.fetch_related("worker_thread")
+    # noinspection PyUnresolvedReferences
     if bet_item.worker_thread.worker_id == removing_by_user.id:
         await bet_item.delete()
         return bet_item

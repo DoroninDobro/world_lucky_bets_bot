@@ -16,8 +16,9 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
     )
     await bot.send_message(
         config.USER_LOG_CHAT_ID,
-        f"{datetime.now(tz=config.tz_view)} - {user.mention_link} "
-        f"joined to work on the match {thread.id}",
+        f"{datetime.now(tz=config.tz_view).strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"{user.mention_link} joined to {thread.id}",
+        protect_content=False,
     )
     texts = await thread.additional_texts\
         .filter(is_draft=False, is_disinformation=False)\
