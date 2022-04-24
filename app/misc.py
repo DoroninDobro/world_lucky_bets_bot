@@ -1,9 +1,11 @@
 # partially from https://github.com/aiogram/bot
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram_dialog import DialogRegistry
 from loguru import logger
 
 from app import config
+from app.dialogs.panel import setup_dialogs
 
 bot = Bot(
     config.BOT_TOKEN,
@@ -12,6 +14,7 @@ bot = Bot(
     protect_content=True,
 )
 dp = Dispatcher(bot, storage=MemoryStorage())
+registry = DialogRegistry(dp)
 
 
 def setup():
@@ -27,3 +30,4 @@ def setup():
     logger.info("Configure handlers...")
     # noinspection PyUnresolvedReferences
     import app.handlers
+    setup_dialogs(registry)
