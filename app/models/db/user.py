@@ -11,6 +11,7 @@ class User(Model):
     last_name = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=32, null=True)
     is_bot: bool = fields.BooleanField(null=True)
+    registered: bool = fields.BooleanField(null=False, default=False)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
 

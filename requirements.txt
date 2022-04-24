@@ -8,3 +8,4 @@ git+https://github.com/bomzheg/openexchangerates@master
 pyyaml~=6.0
 openpyxl~=3.0.6
 asyncpg
+aiogram_dialog

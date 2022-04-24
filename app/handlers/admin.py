@@ -6,6 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
+from aiogram_dialog import DialogManager, StartMode
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
@@ -30,6 +31,7 @@ from ..services.additional_text import (
     change_worker,
 )
 from ..services.remove_message import delete_message
+from ..states import Panel
 from ..utils.exceptions import ThreadStopped
 
 
@@ -281,3 +283,8 @@ async def save_new_name_process(message: types.Message, state: FSMContext):
     await rename_thread((await state.get_data())['thread_id'], message.text)
     await state.finish()
     await message.reply("Saved!")
+
+
+@dp.message_handler(is_admin=True, commands="users")
+async def get_users_list(_: types.Message, dialog_manager: DialogManager):
+    await dialog_manager.start(Panel.users, mode=StartMode.RESET_STACK)
