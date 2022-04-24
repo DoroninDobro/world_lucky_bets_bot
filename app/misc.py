@@ -31,3 +31,5 @@ def setup():
     # noinspection PyUnresolvedReferences
     import app.handlers
     setup_dialogs(registry)
+    # noinspection PyUnresolvedReferences
+    from app.handlers import last
