@@ -10,3 +10,4 @@ class Report(StatesGroup):
 
 class Panel(StatesGroup):
     users = State()
+    user_main = State()
