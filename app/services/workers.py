@@ -33,3 +33,12 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
 
 async def get_worker_in_thread(message_id: int, user: User):
     return await WorkerInThread.get(worker=user, message_id=message_id)
+
+
+async def register_worker(user: User):
+    user.registered = True
+    await user.save()
+
+
+async def get_registered() -> list[User]:
+    return await User.filter(registered=True).all()

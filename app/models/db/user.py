@@ -11,6 +11,7 @@ class User(Model):
     last_name = fields.CharField(max_length=255, null=True)
     username = fields.CharField(max_length=32, null=True)
     is_bot: bool = fields.BooleanField(null=True)
+    registered: bool = fields.BooleanField(null=False, default=False)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
 
@@ -101,9 +102,12 @@ class User(Model):
         )
 
     def __str__(self):
-        rez = f"User ID {self.id}, by name {self.first_name} {self.last_name}"
+        rez = (
+            f"{self.mention_link}\n"
+            f"#️⃣{self.id}\n"
+        )
         if self.username:
-            rez += f" with username @{self.username}"
+            rez += f"username @{self.username}\n"
         return rez
 
     def __repr__(self):

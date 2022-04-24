@@ -2,7 +2,6 @@ import typing
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils.exceptions import BotBlocked, CantInitiateConversation, Unauthorized
 from loguru import logger
 from tortoise.exceptions import DoesNotExist, IntegrityError
@@ -15,15 +14,9 @@ from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message
-from app.services.workers import add_worker_to_thread
+from app.services.workers import add_worker_to_thread, register_worker
 from app.services.bets_log import save_new_betting_odd
-
-
-class Report(StatesGroup):
-    bet = State()
-    result = State()
-    bookmaker = State()
-    ok = State()
+from app.states import Report
 
 
 @dp.callback_query_handler(kb.cb_agree.filter(), is_admin=False)
@@ -237,3 +230,9 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer("Save canceled", show_alert=True)
     await callback_query.message.edit_text("Save canceled")
     await state.finish()
+
+
+@dp.message_handler(commands="registration")
+async def register_user(message: types.Message, user: User):
+    await register_worker(user)
+    await message.reply("registration was successfully")
