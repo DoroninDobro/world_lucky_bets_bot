@@ -182,8 +182,8 @@ def render_log_message_caption(a_text: AdditionalText) -> str:
 
 
 async def render_workers_lists_with_caption(a_text: AdditionalText, workers: typing.List[User]) -> str:
-    enable_workers_mentions = "\n".join([worker.id for worker in workers])
-    disable_workers_mention = "\n".join([worker.id for worker in await get_disable_workers(a_text)])
+    enable_workers_mentions = "\n".join([str(worker.id) for worker in workers])
+    disable_workers_mention = "\n".join([str(worker.id) for worker in await get_disable_workers(a_text)])
     text = ""
     if enable_workers_mentions:
         text += f"List of users who received the message immediately:\n{enable_workers_mentions}\n"
