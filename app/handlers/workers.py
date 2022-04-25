@@ -10,6 +10,7 @@ from app.config.currency import Currency
 from app.misc import dp
 from app import config
 from app import keyboards as kb
+from app.services.balance import calculate_balance
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread, Bookmaker
@@ -236,3 +237,8 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext):
 async def register_user(message: types.Message, user: User):
     await register_worker(user)
     await message.reply("registration was successfully")
+
+
+@dp.message_handler(commands="status")
+async def get_status(message: types.Message, user: User):
+    await message.reply(str(await calculate_balance(user)))
