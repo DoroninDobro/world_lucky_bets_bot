@@ -7,7 +7,8 @@ from .db import (
     AdditionalText,
     SendWorkers,
     RateItem,
-    Bookmaker
+    Bookmaker,
+    BalanceEvent,
 )
 from .statistic import (
     TotalStatistic,
@@ -27,6 +28,7 @@ __all__ = [
     SendWorkers,
     RateItem,
     Bookmaker,
+    BalanceEvent,
 
     TotalStatistic,
     ThreadUsers,

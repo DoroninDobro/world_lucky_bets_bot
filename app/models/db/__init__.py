@@ -7,6 +7,7 @@ from .additional_text import AdditionalText
 from .send_to_workers import SendWorkers
 from .rate import RateItem
 from .bookmaker import Bookmaker
+from .balance import BalanceEvent
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     SendWorkers,
     RateItem,
     Bookmaker,
+    BalanceEvent,
 ]

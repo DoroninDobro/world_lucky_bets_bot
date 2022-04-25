@@ -14,6 +14,7 @@ class User(Model):
     registered: bool = fields.BooleanField(null=False, default=False)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
+    balance_events: fields.ReverseRelation['BalanceEvents']  # noqa F821
 
     class Meta:
         table = "users"

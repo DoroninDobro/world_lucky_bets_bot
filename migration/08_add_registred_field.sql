@@ -1,2 +1,2 @@
 ALTER TABLE users
-ADD COLUMN registered bool not null default FALSE;
+ADD COLUMN registered BOOL NOT NULL DEFAULT FALSE;
