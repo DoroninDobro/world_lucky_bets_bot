@@ -11,9 +11,9 @@ from app.models.db.user import User
 from app.utils.lock_factory import LockFactory
 
 
-class ACLMiddleware(BaseMiddleware):
+class DbMiddleware(BaseMiddleware):
     def __init__(self):
-        super(ACLMiddleware, self).__init__()
+        super(DbMiddleware, self).__init__()
         self.lock_factory = LockFactory()
 
     async def setup_chat(self, data: dict, user: types.User, chat: Optional[types.Chat] = None):
