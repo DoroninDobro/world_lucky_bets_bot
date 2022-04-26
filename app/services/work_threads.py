@@ -53,7 +53,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
             chat_id=config.ADMIN_LOG_CHAT_ID,
             photo=photo_file_id,
             caption=f"{created_thread.id}. "
-                    f"Started a new match from {admin.mention_link}",
+                    f"Started a new match from {admin.id}",
         )
         transaction_messages.append(log_chat_message)
 
