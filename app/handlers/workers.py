@@ -6,7 +6,7 @@ from aiogram.utils.exceptions import BotBlocked, CantInitiateConversation, Unaut
 from loguru import logger
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
-from app.config.currency import Currency
+from app.models.config.currency import Currency
 from app.misc import dp
 from app import config
 from app import keyboards as kb

@@ -1,0 +1,55 @@
+db:
+  type: postgresql
+  connector: asyncpg
+  host: localhost
+  port: 5432
+  login: postgres
+  password: postgres
+  name: daily
+bot:
+  token: "995080576:AAHY-9A_iHCE_PEbm0Z8CC6CPpzxV3mP5Hs"
+  log_chat: 46866565
+  superusers:
+    - 46866565
+currencies:
+  oer_api_token: "token"
+  currency:
+    RUB:
+      symbol: ₽
+      fullname: ruble
+      plural_name: rubles
+      short_name: rub.
+    USD:
+      symbol: $
+      fullname: dollar
+      plural_name: dollars
+      short_name: US$
+    EUR:
+      symbol: €
+      fullname: euro
+      plural_name: euros
+      short_name: euro
+    GBP:
+      symbol: "£"
+      fullname: "pound sterling"
+      plural_name: pounds
+      short_name: pound
+    CNY:
+      symbol: "¥"
+      fullname: chinese yuan
+      plural_name: yuan
+      short_name: yuan
+app:
+  admins:
+      - 840744086  # @Grey_Gonzales
+      - 203288953  # @TreeHouseTrip
+      - 46866565   # @bomzheg
+      - 2073882853 # ___Первый второй
+      - 1853932989 # @SerbiaOfCourse
+      - 1343503689 # ___Daria
+      - 1861486195 # @maximus7112
+  tech_log: -1001171895296
+  user_log: -1001350461791
+  admin_log: -1001426455516
+  workers: -1001243606983
+  admins_without_usernames_log: -1001227120186

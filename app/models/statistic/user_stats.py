@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Union
 
 from app import config
-from app.config.currency import Currency
+from app.models.config.currency import Currency
 from app.models.db import Bookmaker, User, WorkThread, BetItem
 
 

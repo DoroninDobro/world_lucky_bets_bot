@@ -6,6 +6,7 @@ from loguru import logger
 
 from app import config
 from app.dialogs.panel import setup_dialogs
+from app.models.config.main import Paths
 
 bot = Bot(
     config.BOT_TOKEN,
