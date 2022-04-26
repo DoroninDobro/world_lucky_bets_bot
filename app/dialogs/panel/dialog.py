@@ -26,7 +26,7 @@ panel = Dialog(
         state=Panel.users,
     ),
     Window(
-        Format("{user}"),
+        Format("{user}\nbalance: {balance}"),
         SwitchTo(
             Const("Back to users"),
             state=Panel.users,
