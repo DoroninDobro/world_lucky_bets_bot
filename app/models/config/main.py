@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from dateutil import tz
+
 from app.models.config.app_config import AppConfig
 from app.models.config.currency import CurrenciesConfig
 from app.models.config.db import DBConfig
@@ -14,6 +16,8 @@ class Config:
     bot: BotConfig
     currencies: CurrenciesConfig
     app: AppConfig
+    tz_view = tz.gettz('Europe/Moscow')
+    tz_db = tz.gettz("UTC")
 
     @property
     def app_dir(self) -> Path:
@@ -26,6 +30,10 @@ class Config:
     @property
     def log_path(self) -> Path:
         return self.paths.log_path
+
+    @property
+    def temp_path(self) -> Path:
+        return self.paths.temp_path
 
 
 @dataclass
@@ -45,9 +53,14 @@ class Paths:
     def log_path(self) -> Path:
         return self.app_dir / "log" / self.bot_name
 
+    @property
+    def temp_path(self) -> Path:
+        return self.app_dir / "temp" / self.bot_name
+
 
 @dataclass
 class BotConfig:
     token: str
     log_chat: int
     superusers: list[int]
+    enable_logging_middleware: bool

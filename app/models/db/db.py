@@ -4,7 +4,7 @@ from aiogram import Dispatcher
 from aiogram.utils.executor import Executor
 from tortoise import Tortoise, run_async
 
-from app.config import DBConfig
+from app.models.config.db import DBConfig
 
 DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
@@ -15,7 +15,7 @@ async def on_startup(_: Dispatcher, db_config: DBConfig):
 
 async def db_init(db_config: DBConfig):
     await Tortoise.init(
-        db_url=db_config.create_url_config(),
+        db_url=db_config.uri(),
         modules={'models': ['app.models']}
     )
 

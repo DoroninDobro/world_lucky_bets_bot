@@ -4,13 +4,13 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from loguru import logger
 
 from app.middlewares.db_middleware import DbMiddleware
-from app import config
+from app.models.config import Config
 
 
-def setup(dispatcher: Dispatcher):
+def setup(dispatcher: Dispatcher, config: Config):
     logger.info("Configure middlewares...")
-    dispatcher.middleware.setup(DbMiddleware())
-    if config.ENABLE_LOGGING_MIDDLEWARE:
+    dispatcher.middleware.setup(DbMiddleware(config))
+    if config.bot.enable_logging_middleware:
         logging_middleware = LoggingMiddleware()
         logging_middleware.logger = logger
         dispatcher.middleware.setup(logging_middleware)

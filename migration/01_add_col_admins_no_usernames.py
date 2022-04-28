@@ -1,10 +1,10 @@
 import sqlite3
 
-from app import config
+from app.misc import config as global_config
 
 
 def upgrade():
-    with sqlite3.connect(config.db_config.db_path) as conn:
+    with sqlite3.connect(global_config.db_config.db_path) as conn:
         cur = conn.cursor()
         cur.execute("""
             ALTER TABLE work_threads

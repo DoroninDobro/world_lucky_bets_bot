@@ -1,16 +1,13 @@
-import pathlib
-
 from loguru import logger
 
-from app.config import PRINT_LOG, app_dir, CURRENT_BOT
-
-log_path = pathlib.Path(app_dir / 'log' / CURRENT_BOT)
-log_path.mkdir(parents=True, exist_ok=True)
+from app.models.config import Config
 
 
-def setup():
+def setup(config: Config):
+    log_path = config.log_path / "app.log"
+    log_path.mkdir(parents=True, exist_ok=True)
     logger.add(
-        sink=log_path / PRINT_LOG,
+        sink=log_path,
         format='{time} - {name} - {level} - {message}',
         level="INFO",
         encoding='utf-8',

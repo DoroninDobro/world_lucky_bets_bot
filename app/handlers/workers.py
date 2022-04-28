@@ -6,11 +6,12 @@ from aiogram.utils.exceptions import BotBlocked, CantInitiateConversation, Unaut
 from loguru import logger
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
+from app.models.config import Config
 from app.models.config.currency import Currency
 from app.misc import dp
-from app import config
 from app import keyboards as kb
 from app.services.balance import calculate_balance
+from app.services.rates import OpenExchangeRates
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
 from app.models import User, WorkThread, Bookmaker
@@ -81,12 +82,13 @@ async def start_fill_report(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
         state: FSMContext,
+        config: Config
 ):
     await callback_query.answer()
     await state.update_data(thread_id=int(callback_data["thread_id"]))
     await callback_query.message.reply(
         "Select the currency of the bet",
-        reply_markup=kb.get_kb_currency(config.currencies),
+        reply_markup=kb.get_kb_currency(config.currencies.currencies),
     )
 
 
@@ -95,11 +97,12 @@ async def process_currency_in_report(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
         state: FSMContext,
+        config: Config,
 ):
     await callback_query.answer()
     await state.update_data(currency=callback_data['code'])
     await callback_query.message.edit_text(
-        f"Currency selected {config.currencies[callback_data['code']]}"
+        f"Currency selected {config.currencies.currencies[callback_data['code']]}"
     )
     await Report.bet.set()
     await callback_query.message.reply("Enter bet:")
@@ -128,7 +131,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(is_admin=False, chat_type=types.ChatType.PRIVATE, state=Report.bookmaker)
-async def process_result_in_report(message: types.Message, state: FSMContext):
+async def process_result_in_report(message: types.Message, state: FSMContext, config: Config):
     try:
         bookmaker = await Bookmaker.get(name=message.text)
     except DoesNotExist:
@@ -139,7 +142,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
         )
     await state.update_data(bookmaker_id=bookmaker.id)
     await Report.next()
-    await send_check_data(message, state)
+    await send_check_data(message, state, config)
 
 
 @dp.callback_query_handler(
@@ -148,7 +151,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext):
     chat_type=types.ChatType.PRIVATE,
     state=Report.bookmaker
 )
-async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext, user: User):
+async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMContext, user: User, config: Config):
     state_data = await state.get_data()
     try:
         bookmaker = await Bookmaker.create(
@@ -164,7 +167,7 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
         )
     await state.update_data(bookmaker_id=bookmaker.id)
     await Report.next()
-    await send_check_data(callback_query.message, state)
+    await send_check_data(callback_query.message, state, config)
 
 
 @dp.callback_query_handler(
@@ -182,9 +185,9 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
     )
 
 
-async def send_check_data(message: types.Message, state: FSMContext):
+async def send_check_data(message: types.Message, state: FSMContext, config: Config):
     state_data = await state.get_data()
-    current_currency_symbol = config.currencies[state_data['currency']].symbol
+    current_currency_symbol = config.currencies.currencies[state_data['currency']].symbol
     bookmaker = await Bookmaker.get(id=state_data['bookmaker_id'])
     await message.answer(
         "<b>Is that correct?</b>\n\n"
@@ -201,14 +204,15 @@ async def send_check_data(message: types.Message, state: FSMContext):
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
 )
-async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: User):
+async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: User, config: Config):
     try:
         state_data = await state.get_data()
-        currency: Currency = config.currencies[state_data.pop('currency')]
+        currency: Currency = config.currencies.currencies[state_data.pop('currency')]
         betting_item = await save_new_betting_odd(
             user=user,
             bot=callback_query.bot,
             currency=currency,
+            config=config,
             **state_data
         )
 
@@ -240,5 +244,6 @@ async def register_user(message: types.Message, user: User):
 
 
 @dp.message_handler(commands="status")
-async def get_status(message: types.Message, user: User):
-    await message.reply(str(await calculate_balance(user)))
+async def get_status(message: types.Message, user: User, config: Config):
+    async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
+        await message.reply(str(await calculate_balance(user, oer)))

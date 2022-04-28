@@ -6,4 +6,5 @@ def load_bot_config(dct: dict) -> BotConfig:
         token=dct["token"],
         log_chat=dct["log_chat"],
         superusers=dct["superusers"],
+        enable_logging_middleware=dct["enable_logging_middleware"],
     )
