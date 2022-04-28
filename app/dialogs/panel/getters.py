@@ -31,5 +31,3 @@ async def get_user(dialog_manager: DialogManager, **kwargs):
                 await be.format() for be in await get_last_balance_events(user)
             ]),
         }
-
-
