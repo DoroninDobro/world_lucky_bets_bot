@@ -5,7 +5,7 @@ from app.models.config.currency import Currency, CurrenciesConfig
 
 def load_currencies(dct: dict[str, Any]) -> CurrenciesConfig:
     return CurrenciesConfig(
-        currencies=load_currency(dct["currencies"]),
+        currencies=load_currency(dct["currency"]),
         oer_api_token=dct["oer_api_token"]
     )
 

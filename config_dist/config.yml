@@ -1,16 +1,17 @@
 db:
-  type: postgresql
+  type: postgres
   connector: asyncpg
   host: localhost
   port: 5432
   login: postgres
   password: postgres
-  name: daily
+  name: bot
 bot:
-  token: "995080576:AAHY-9A_iHCE_PEbm0Z8CC6CPpzxV3mP5Hs"
-  log_chat: 46866565
+  token: "token"
+  log_chat: -1001170611048
   superusers:
     - 46866565
+  enable_logging_middleware: True
 currencies:
   oer_api_token: "token"
   currency:
@@ -44,12 +45,9 @@ app:
       - 840744086  # @Grey_Gonzales
       - 203288953  # @TreeHouseTrip
       - 46866565   # @bomzheg
-      - 2073882853 # ___Первый второй
-      - 1853932989 # @SerbiaOfCourse
-      - 1343503689 # ___Daria
-      - 1861486195 # @maximus7112
-  tech_log: -1001171895296
-  user_log: -1001350461791
-  admin_log: -1001426455516
-  workers: -1001243606983
-  admins_without_usernames_log: -1001227120186
+  chats:
+    tech_log: -1001170611048
+    user_log: -1001477659294
+    admin_log: -1001334339850
+    workers: -1001161281713
+    admins_without_usernames_log: -1001426455516

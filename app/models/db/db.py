@@ -15,7 +15,7 @@ async def on_startup(_: Dispatcher, db_config: DBConfig):
 
 async def db_init(db_config: DBConfig):
     await Tortoise.init(
-        db_url=db_config.uri(),
+        db_url=db_config.uri,
         modules={'models': ['app.models']}
     )
 

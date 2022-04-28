@@ -19,7 +19,7 @@ class DBConfig:
 
     @property
     def uri(self):
-        if self.type in ('mysql', 'postgresql'):
+        if self.type in ('mysql', 'postgres'):
             url = (
                 f'{self.type}://{self.login}:{self.password}'
                 f'@{self.host}:{self.port}/{self.name}'

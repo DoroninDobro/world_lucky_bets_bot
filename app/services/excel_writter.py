@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import numbers
 from openpyxl.worksheet.worksheet import Worksheet
 
-from app.config import BASE_CURRENCY
+from app.constants import BASE_CURRENCY
 from app.models import TotalStatistic, UserStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.thread_users import ThreadUsers

@@ -4,8 +4,8 @@ from app.models.config import Config
 
 
 def setup(config: Config):
+    config.log_path.mkdir(parents=True, exist_ok=True)
     log_path = config.log_path / "app.log"
-    log_path.mkdir(parents=True, exist_ok=True)
     logger.add(
         sink=log_path,
         format='{time} - {name} - {level} - {message}',

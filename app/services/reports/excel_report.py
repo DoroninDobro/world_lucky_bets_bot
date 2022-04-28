@@ -11,6 +11,7 @@ from app.services.reports.user_stat import generate_user_report
 
 
 async def process_report(date_range: DataTimeRange, config: Config) -> InputFile:
+    config.temp_path.mkdir(exist_ok=True, parents=True)
     excel_writer = ExcelWriter(config.currencies)
     excel_writer.insert_total_report(await generate_total_report(date_range, config.currencies))
     excel_writer.insert_thread_users(await generate_thread_users(date_range))

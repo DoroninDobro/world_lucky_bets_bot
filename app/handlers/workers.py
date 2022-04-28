@@ -26,6 +26,7 @@ async def agree_work_thread(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
         user: User,
+        config: Config,
 ):
     thread_id = int(callback_data['thread_id'])
     try:
@@ -52,7 +53,7 @@ async def agree_work_thread(
                                            show_alert=True)
 
     try:
-        await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread)
+        await add_worker_to_thread(user, msg.message_id, msg.bot, thread=thread, config=config)
     except IntegrityError:
         await delete_message(msg)
         logger.info(

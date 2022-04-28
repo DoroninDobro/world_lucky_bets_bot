@@ -7,7 +7,7 @@ from aiogram.utils.exceptions import TelegramAPIError
 from aiogram.utils.executor import Executor
 from loguru import logger
 
-from app.config import WEBHOOK_URL_BASE, secret_str
+from app.constants import WEBHOOK_URL_BASE, secret_str
 from app.misc import dp
 from app.models.config import Config
 from app.models.db import db

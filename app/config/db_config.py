@@ -10,7 +10,7 @@ def load_db_config(dct: dict[str, Any]) -> DBConfig:
     result.password = dct["password"]
     result.name = dct["name"]
     result.host = dct["host"]
-    port = dct.get("host", None)
+    port = dct.get("port", None)
     if port is None:
         if result.type == 'mysql':
             result.port = 3306

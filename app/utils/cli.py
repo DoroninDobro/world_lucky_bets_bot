@@ -3,7 +3,7 @@ import argparse
 
 from loguru import logger
 
-from app.config import secret_str, LISTEN_IP, LISTEN_PORT, PROG_NAME, PROG_DESC, PROG_EP, DESC_POLLING
+from app.constants import secret_str, LISTEN_IP, LISTEN_PORT, PROG_NAME, PROG_DESC, PROG_EP, DESC_POLLING
 from app.misc import config as global_config
 
 

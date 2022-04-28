@@ -4,7 +4,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Union
 
-from app.config import BASE_CURRENCY
+from app.constants import BASE_CURRENCY
 from app.models import WorkThread
 
 
