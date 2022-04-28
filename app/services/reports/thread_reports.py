@@ -42,7 +42,13 @@ async def get_user_stats(thread: WorkThread, config: Config):
     user_statistics = []
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
         for bet_item in bets_log:
-            search_kwargs = dict(currency=bet_item.currency, day=day, oer=oer, rates=rates)
+            search_kwargs = dict(
+                currency=bet_item.currency,
+                day=day,
+                oer=oer,
+                rates=rates,
+                currency_to=config.currencies.default_currency.iso_code,
+            )
             bet = await find_rate_and_convert(value=bet_item.bet, **search_kwargs)
             result = await find_rate_and_convert(value=bet_item.result, **search_kwargs)
             user_stat = UserStat(

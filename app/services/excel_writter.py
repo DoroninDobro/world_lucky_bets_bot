@@ -6,7 +6,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import numbers
 from openpyxl.worksheet.worksheet import Worksheet
 
-from app.constants import BASE_CURRENCY
 from app.models import TotalStatistic, UserStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.thread_users import ThreadUsers
@@ -43,7 +42,7 @@ class ExcelWriter:
     def __init__(self, config: CurrenciesConfig):
         self.wb = Workbook()
         self._remove_all_worksheets()
-        self.current_currency = config.currencies[BASE_CURRENCY]
+        self.current_currency = config.default_currency
 
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
         total_ws = self.wb.create_sheet("Общая сводка матчей")

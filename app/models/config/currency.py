@@ -16,4 +16,12 @@ class Currency:
 @dataclass
 class CurrenciesConfig:
     currencies: dict[str, Currency]
+    base: str
     oer_api_token: str
+
+    def symbol_by_code(self, code: str) -> str:
+        return self.currencies[code].symbol
+
+    @property
+    def default_currency(self) -> Currency:
+        return self.currencies[self.base]

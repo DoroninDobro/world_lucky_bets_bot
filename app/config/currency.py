@@ -4,10 +4,15 @@ from app.models.config.currency import Currency, CurrenciesConfig
 
 
 def load_currencies(dct: dict[str, Any]) -> CurrenciesConfig:
-    return CurrenciesConfig(
+    currencies_config = CurrenciesConfig(
         currencies=load_currency(dct["currency"]),
-        oer_api_token=dct["oer_api_token"]
+        oer_api_token=dct["oer_api_token"],
+        base=dct["base"],
     )
+
+    from app import constants
+    constants.BASE_CURRENCY = currencies_config.base
+    return currencies_config
 
 
 def load_currency(dumped: dict) -> dict[str, Currency]:
