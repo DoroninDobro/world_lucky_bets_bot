@@ -12,7 +12,7 @@ from .db_config import load_db_config
 
 
 def load_config(paths: Paths) -> Config:
-    with (paths.config_path / "config.yml").open() as f:
+    with (paths.config_path / "config.yml").open(encoding="utf8") as f:
         dct_config = yaml.safe_load(f)
     return Config(
         paths=paths,
