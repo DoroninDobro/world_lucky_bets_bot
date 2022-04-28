@@ -5,7 +5,7 @@ from aiogram.utils.exceptions import CantParseEntities, BotBlocked, BadRequest
 from aiogram.utils.markdown import quote_html
 from loguru import logger
 
-from app import config
+from app.misc import config as global_config
 from app.misc import dp, bot
 
 
@@ -23,11 +23,11 @@ async def errors_handler(update: types.Update, exception: Exception):
         logger.exception("Cause exception {e} in update {update}", e=e, update=update)
 
     user = get_user(update)
-    if user.id in config.SUPERUSERS:
+    if user.id in global_config.bot.superusers:
         # Vova don't wont receive errors with his actions in tech logs
         chat_id = user.id
     else:
-        chat_id = config.TECH_LOG_CHAT_ID
+        chat_id = global_config.app.chats.tech_log
 
     with suppress(BadRequest):
         await bot.send_message(

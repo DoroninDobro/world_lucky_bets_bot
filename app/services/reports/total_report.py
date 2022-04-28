@@ -1,15 +1,15 @@
-from app import config
 from app.models import TotalStatistic, WorkThread, DataTimeRange
+from app.models.config.currency import CurrenciesConfig
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_mont_bets, get_month_rates
 
 
-async def generate_total_report(date_range: DataTimeRange) -> dict[int, TotalStatistic]:
+async def generate_total_report(date_range: DataTimeRange, config: CurrenciesConfig) -> dict[int, TotalStatistic]:
     bets_log = await get_mont_bets(date_range)
     rates = await get_month_rates(date_range)
     total_statistics = {}
-    async with OpenExchangeRates(config.OER_TOKEN) as oer:
+    async with OpenExchangeRates(config.oer_api_token) as oer:
         for bet_item in bets_log:
             thread: WorkThread = bet_item.worker_thread.work_thread
             day = thread.start.date()

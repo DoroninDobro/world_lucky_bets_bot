@@ -1,17 +1,17 @@
 import operator
 from functools import reduce
 
-from app import config
 from app.models import WorkThread, UserStat
+from app.models.config import Config
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_thread_bets, get_rates_by_date
 
 
-async def get_thread_report(thread_id: int) -> str:
+async def get_thread_report(thread_id: int, config: Config) -> str:
     thread = await WorkThread.get(id=thread_id)
     report_result = f"Отчёт о матче <b>{thread.name}</b> ({thread_id}):\n"
-    user_statistics = await get_user_stats(thread)
+    user_statistics = await get_user_stats(thread, config)
     total_bets = reduce(operator.add, map(lambda x: x.total_bet_eur, user_statistics), 0)
     report_result += f"Итого {total_bets:.2f}€ / "
     total_result = reduce(operator.add, map(lambda x: x.total_result_eur, user_statistics), 0)
@@ -35,12 +35,12 @@ async def get_thread_report(thread_id: int) -> str:
     return report_result
 
 
-async def get_user_stats(thread: WorkThread):
+async def get_user_stats(thread: WorkThread, config: Config):
     day = thread.start.date()
     bets_log = await get_thread_bets(thread.id)
     rates = await get_rates_by_date(day)
     user_statistics = []
-    async with OpenExchangeRates(config.OER_TOKEN) as oer:
+    async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
         for bet_item in bets_log:
             search_kwargs = dict(currency=bet_item.currency, day=day, oer=oer, rates=rates)
             bet = await find_rate_and_convert(value=bet_item.bet, **search_kwargs)
@@ -52,7 +52,7 @@ async def get_user_stats(thread: WorkThread):
                 total_bet=bet_item.bet,
                 total_result=bet_item.result - bet_item.bet,
                 total_payment=bet_item.result,
-                currency=config.currencies[bet_item.currency],
+                currency=config.currencies.currencies[bet_item.currency],
                 total_bet_eur=bet,
                 total_result_eur=result - bet,
                 total_payment_eur=result,

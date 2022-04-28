@@ -8,9 +8,9 @@ from loguru import logger
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
-from app import config, keyboards as kb
-from app.config import tz_db
+from app import keyboards as kb
 from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
+from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
     get_enable_workers,
@@ -25,7 +25,9 @@ from app.utils.text_utils import remove_usernames
 thread_results = typing.List[typing.Tuple[User, int, float]]
 
 
-async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThread:
+async def start_new_thread(
+        photo_file_id: str, admin: User, bot: Bot, config: Config,
+) -> WorkThread:
     async with in_transaction() as connection, \
                msg_cleaner() as transaction_messages:
         created_thread = WorkThread(start_photo_file_id=photo_file_id,
@@ -33,7 +35,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         await created_thread.save(using_db=connection)
 
         msg_to_workers = await bot.send_photo(
-            chat_id=config.WORKERS_CHAT_ID,
+            chat_id=config.app.chats.workers,
             photo=photo_file_id,
             caption=f"{created_thread.id}",
             reply_markup=kb.get_agree_work(created_thread.id)
@@ -50,7 +52,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         transaction_messages.append(msg_to_admin)
 
         log_chat_message = await bot.send_photo(
-            chat_id=config.ADMIN_LOG_CHAT_ID,
+            chat_id=config.app.chats.admin_log,
             photo=photo_file_id,
             caption=f"{created_thread.id}. "
                     f"Started a new match from {admin.mention_link}",
@@ -58,7 +60,7 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
         transaction_messages.append(log_chat_message)
 
         for_admins_no_usernames_message = await bot.send_photo(
-            chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+            chat_id=config.app.chats.admins_without_usernames_log,
             photo=photo_file_id,
             caption=str(created_thread.id)
         )
@@ -73,10 +75,10 @@ async def start_new_thread(photo_file_id: str, admin: User, bot: Bot) -> WorkThr
     return created_thread
 
 
-async def save_daily_rates(using_db=None):
-    async with OpenExchangeRates(config.OER_TOKEN) as oer:
+async def save_daily_rates(config: Config, using_db=None):
+    async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
         with suppress(IntegrityError):
-            for currency in config.currencies:
+            for currency in config.currencies.currencies:
                 rate = RateItem(
                     at=(await oer.get_updated_date()).date(),
                     currency=currency,
@@ -112,7 +114,9 @@ async def stop_thread(thread_id: int) -> WorkThread:
 
 
 @check_thread_running
-async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread):
+async def start_mailing(
+        a_text: AdditionalText, bot: Bot, *, thread: WorkThread, config: Config,
+):
     async with in_transaction() as conn, msg_cleaner() as transaction_messages:
         enable_workers = await get_enable_workers(a_text)
         for enable_worker, worker_start_thread_message_id in enable_workers:
@@ -126,8 +130,9 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
             transaction_messages.append(msg)
             await asyncio.sleep(0.1)
         enable_workers_user = [worker for worker, _ in enable_workers]
-        log_msg = await send_log_mailing(a_text, bot,
-                                         enable_workers_user, thread)
+        log_msg = await send_log_mailing(
+            a_text, bot, enable_workers_user, thread, config,
+        )
         transaction_messages.append(log_msg)
 
         if a_text.is_disinformation:
@@ -137,13 +142,13 @@ async def start_mailing(a_text: AdditionalText, bot: Bot, *, thread: WorkThread)
                 [worker.worker for worker in await get_workers(a_text)]
             )
             disinformation_log_msg = await bot.send_message(
-                chat_id=config.USER_LOG_CHAT_ID,
+                chat_id=config.app.chats.user_log,
                 text=disinformation_log_msg_text,
             )
             transaction_messages.append(disinformation_log_msg)
 
         a_text.is_draft = False
-        a_text.sent = datetime.now(tz=tz_db)
+        a_text.sent = datetime.now(tz=config.tz_db)
         await a_text.save(using_db=conn)
 
 
@@ -151,7 +156,8 @@ async def send_log_mailing(
         a_text: AdditionalText,
         bot: Bot,
         workers: typing.List[User],
-        thread: WorkThread
+        thread: WorkThread,
+        config: Config,
 ) -> types.Message:
 
     text = render_log_message_caption(a_text)
@@ -159,7 +165,7 @@ async def send_log_mailing(
     # В этот чат отправляем только заголовок
     # (информацию о приватности инфы и текст сообщения)
     await bot.send_message(
-        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+        chat_id=config.app.chats.admins_without_usernames_log,
         text=remove_usernames(text),
         reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id
     )
@@ -168,7 +174,7 @@ async def send_log_mailing(
     # и теперь можно отправлять и в обычный логчат
     text += await render_workers_lists_with_caption(a_text, workers)
     return await bot.send_message(
-        chat_id=config.ADMIN_LOG_CHAT_ID,
+        chat_id=config.app.chats.admin_log,
         text=text,
         reply_to_message_id=thread.log_chat_message_id
     )
@@ -240,7 +246,7 @@ async def rename_thread(thread_id: int, new_name: str):
     await thread.save()
 
 
-async def send_notification_stop(thread: WorkThread, bot: Bot):
+async def send_notification_stop(thread: WorkThread, bot: Bot, config: Config):
     for worker in await thread.workers:
         user = await worker.worker
         await bot.send_message(user.id, f"Match {thread.id} is over",
@@ -252,15 +258,15 @@ async def send_notification_stop(thread: WorkThread, bot: Bot):
         f"has been successfully completed"
     )
     await bot.send_message(
-        chat_id=config.ADMIN_LOG_CHAT_ID,
+        chat_id=config.app.chats.admin_log,
         text=notify_text,
         reply_to_message_id=thread.log_chat_message_id,
     )
     await bot.send_message(
-        chat_id=config.USER_LOG_CHAT_ID,
+        chat_id=config.app.chats.user_log,
         text=notify_text,
     )
     await bot.send_message(
-        chat_id=config.ADMINS_WITHOUT_USERNAMES_LOG_CHAT_ID,
+        chat_id=config.app.chats.admins_without_usernames_log,
         text=notify_text,
     )
