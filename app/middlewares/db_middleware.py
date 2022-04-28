@@ -6,15 +6,17 @@ from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from loguru import logger
 
+from app.models.config import Config
 from app.models.db.chat import Chat
 from app.models.db.user import User
 from app.utils.lock_factory import LockFactory
 
 
 class DbMiddleware(BaseMiddleware):
-    def __init__(self):
+    def __init__(self, config: Config):
         super(DbMiddleware, self).__init__()
         self.lock_factory = LockFactory()
+        self.config = config
 
     async def setup_chat(self, data: dict, user: types.User, chat: Optional[types.Chat] = None):
         try:
@@ -28,6 +30,7 @@ class DbMiddleware(BaseMiddleware):
             raise e
         data["user"] = user
         data["chat"] = chat
+        data["config"] = self.config
 
     async def on_pre_process_message(self, message: types.Message, data: dict):
         await self.setup_chat(data, message.from_user, message.chat)

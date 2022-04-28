@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from app.models import RateItem
 from app.services.rates import OpenExchangeRates
-from app.config import BASE_CURRENCY
+from app.constants import BASE_CURRENCY
 
 
 async def find_rate_and_convert(

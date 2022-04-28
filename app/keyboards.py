@@ -5,7 +5,7 @@ from typing import Dict
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from app.config.currency import Currency
+from app.models.config.currency import Currency
 from app.models import AdditionalText, SendWorkers, User, WorkThread
 
 
