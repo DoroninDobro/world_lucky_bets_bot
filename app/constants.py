@@ -15,4 +15,8 @@ PROG_NAME = "world lucky bets bot"
 PROG_DESC = "This program is a Python 3.9+ script. The script launches a bot in Telegram"
 PROG_EP = "by bomzheg"
 DESC_POLLING = "Run tg bot with polling. Default use WebHook"
+
+# ========================================
 BASE_CURRENCY = "EUR"
+"""global! it initialize in load_config"""
+# ========================================

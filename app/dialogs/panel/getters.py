@@ -21,6 +21,6 @@ async def get_user(dialog_manager: DialogManager, **kwargs):
     async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
         return {
             "user": user,
-            "balance": await calculate_balance(user, oer=oer),
+            "balance": await calculate_balance(user, oer=oer, config=config.currencies),
         }
 

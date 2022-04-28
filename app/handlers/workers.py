@@ -248,4 +248,5 @@ async def register_user(message: types.Message, user: User):
 async def get_status(message: types.Message, user: User, config: Config):
     logger.info("user {user} ask balance", user=user.id)
     async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
-        await message.reply(str(await calculate_balance(user, oer)))
+        balance = await calculate_balance(user, oer, config.currencies)
+        await message.reply(f"Your balance is {balance} {config.currencies.default_currency.symbol}")

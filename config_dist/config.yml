@@ -14,6 +14,7 @@ bot:
   enable_logging_middleware: True
 currencies:
   oer_api_token: "token"
+  base: EUR
   currency:
     RUB:
       symbol: ₽

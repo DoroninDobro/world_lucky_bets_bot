@@ -13,7 +13,9 @@ async def generate_total_report(date_range: DataTimeRange, config: CurrenciesCon
         for bet_item in bets_log:
             thread: WorkThread = bet_item.worker_thread.work_thread
             day = thread.start.date()
-            search_kwargs = dict(currency=bet_item.currency, day=day, oer=oer, rates=rates)
+            search_kwargs = dict(
+                currency=bet_item.currency, day=day, oer=oer, rates=rates, currency_to=config.default_currency.iso_code,
+            )
             bet = await find_rate_and_convert(value=bet_item.bet, **search_kwargs)
             result = await find_rate_and_convert(value=bet_item.result, **search_kwargs)
             total_statistic = TotalStatistic(
