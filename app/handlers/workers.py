@@ -10,6 +10,7 @@ from app.models.config import Config
 from app.models.config.currency import Currency
 from app.misc import dp
 from app import keyboards as kb
+from app.rendering.balance import render_balance
 from app.services.balance import calculate_balance
 from app.services.rates import OpenExchangeRates
 from app.services.text_utils import parse_numeric
@@ -249,4 +250,4 @@ async def get_status(message: types.Message, user: User, config: Config):
     logger.info("user {user} ask balance", user=user.id)
     async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
         balance = await calculate_balance(user, oer, config.currencies)
-        await message.reply(f"Your balance is {balance} {config.currencies.default_currency.symbol}")
+        await message.reply(f"Your balance is {render_balance(balance, config.currencies.default_currency)}")
