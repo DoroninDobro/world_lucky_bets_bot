@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from app.models import User, BalanceEvent
 from app.models.config.currency import CurrenciesConfig
+from app.models.data.transaction import TransactionData
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_rates_by_date
@@ -20,3 +21,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
             currency_to=config.default_currency.iso_code,
         )
     return balance_sum
+
+
+async def add_balance_event(transaction_data: TransactionData):
+    pass

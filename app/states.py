@@ -11,3 +11,10 @@ class Report(StatesGroup):
 class Panel(StatesGroup):
     users = State()
     user_main = State()
+
+
+class AddTransaction(StatesGroup):
+    sign = State()
+    currency = State()
+    amount = State()
+    comment = State()

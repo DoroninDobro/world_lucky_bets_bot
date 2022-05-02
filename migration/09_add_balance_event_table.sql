@@ -1,6 +1,7 @@
 CREATE TABLE balance_events(
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    author_id INTEGER NOT NULL,
     at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     delta NUMERIC(20, 10),
     currency VARCHAR,
@@ -9,4 +10,8 @@ CREATE TABLE balance_events(
 ALTER TABLE balance_events
     ADD CONSTRAINT balance_events_user_id_fk
         FOREIGN KEY (user_id)
+            REFERENCES public.users (id);
+ALTER TABLE balance_events
+    ADD CONSTRAINT balance_events_author_id_fk
+        FOREIGN KEY (author_id)
             REFERENCES public.users (id);

@@ -8,7 +8,8 @@ from loguru import logger
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
-from app import keyboards as kb
+from app.view.keyboards import admin as kb_admin
+from app.view.keyboards import worker as kb_worker
 from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
 from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
@@ -38,7 +39,7 @@ async def start_new_thread(
             chat_id=config.app.chats.workers,
             photo=photo_file_id,
             caption=f"{created_thread.id}",
-            reply_markup=kb.get_agree_work(created_thread.id)
+            reply_markup=kb_worker.get_agree_work(created_thread.id)
         )
         transaction_messages.append(msg_to_workers)
 
@@ -46,7 +47,7 @@ async def start_new_thread(
             chat_id=admin.id,
             photo=photo_file_id,
             caption=f"{created_thread.id}. Message sent",
-            reply_markup=kb.get_work_thread_admin_kb(created_thread.id),
+            reply_markup=kb_admin.get_work_thread_admin_kb(created_thread.id),
             protect_content=False,
         )
         transaction_messages.append(msg_to_admin)
@@ -236,7 +237,7 @@ async def thread_not_found(callback_query: types.CallbackQuery, thread_id: int):
     await callback_query.message.edit_caption(
         f"Match thread_id={thread_id} not found, "
         f"maybe it was already finished",
-        reply_markup=kb.get_stopped_work_thread_admin_kb(thread_id),
+        reply_markup=kb_admin.get_stopped_work_thread_admin_kb(thread_id),
     )
 
 

@@ -10,6 +10,9 @@ class BalanceEvent(Model):
     user: fields.ForeignKeyRelation[User] = fields.ForeignKeyField(
         "models.User", related_name="balance_events",
     )
+    author: fields.ForeignKeyRelation[User] = fields.ForeignKeyField(
+        "models.User", related_name="balance_events_author",
+    )
     at = fields.DatetimeField(auto_now=True, null=False)
     delta = fields.DecimalField(**DECIMAL_CONFIG)
     currency = fields.CharField(max_length=16)

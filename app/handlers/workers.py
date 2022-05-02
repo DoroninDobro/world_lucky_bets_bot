@@ -9,7 +9,8 @@ from tortoise.exceptions import DoesNotExist, IntegrityError
 from app.models.config import Config
 from app.models.config.currency import Currency
 from app.misc import dp
-from app import keyboards as kb
+from app.view.keyboards import worker as kb_worker
+from app.view.keyboards import reports as kb_reports
 from app.rendering.balance import render_balance
 from app.services.balance import calculate_balance
 from app.services.rates import OpenExchangeRates
@@ -22,7 +23,7 @@ from app.services.bets_log import save_new_betting_odd
 from app.states import Report
 
 
-@dp.callback_query_handler(kb.cb_agree.filter(), is_admin=False)
+@dp.callback_query_handler(kb_worker.cb_agree.filter(), is_admin=False)
 async def agree_work_thread(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
@@ -42,7 +43,7 @@ async def agree_work_thread(
             chat_id=callback_query.from_user.id,
             photo=thread.start_photo_file_id,
             caption=f"{thread_id}. You are subscribed to this",
-            reply_markup=kb.get_kb_send_report(user, thread),
+            reply_markup=kb_reports.get_kb_send_report(user, thread),
         )
     except (BotBlocked, CantInitiateConversation, Unauthorized):
         logger.info(
@@ -70,7 +71,7 @@ async def agree_work_thread(
                 user=user.id, thread=thread_id)
 
 
-@dp.callback_query_handler(kb.cb_agree.filter())
+@dp.callback_query_handler(kb_worker.cb_agree.filter())
 async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
     await callback_query.answer("The admin cannot participate in the work!",
                                 show_alert=True, cache_time=3600)
@@ -79,7 +80,7 @@ async def agree_work_thread(callback_query: types.CallbackQuery, callback_data: 
                 user=user.id, thread=thread_id)
 
 
-@dp.callback_query_handler(kb.cb_send_report.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
+@dp.callback_query_handler(kb_reports.cb_send_report.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
 async def start_fill_report(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
@@ -90,11 +91,11 @@ async def start_fill_report(
     await state.update_data(thread_id=int(callback_data["thread_id"]))
     await callback_query.message.reply(
         "Select the currency of the bet",
-        reply_markup=kb.get_kb_currency(config.currencies.currencies),
+        reply_markup=kb_reports.get_kb_currency(config.currencies.currencies),
     )
 
 
-@dp.callback_query_handler(kb.cb_currency.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
+@dp.callback_query_handler(kb_reports.cb_currency.filter(), is_admin=False, chat_type=types.ChatType.PRIVATE)
 async def process_currency_in_report(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
@@ -140,7 +141,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext, co
         await state.update_data(new_bookmaker=message.text)
         return await message.reply(
             "This bookmaker is unknown to me, sure you want to add a new one?",
-            reply_markup=kb.get_kb_confirm_add_bookmaker(),
+            reply_markup=kb_reports.get_kb_confirm_add_bookmaker(),
         )
     await state.update_data(bookmaker_id=bookmaker.id)
     await Report.next()
@@ -148,7 +149,7 @@ async def process_result_in_report(message: types.Message, state: FSMContext, co
 
 
 @dp.callback_query_handler(
-    kb.cb_confirm_add_bookmaker.filter(yes=str(True)),
+    kb_reports.cb_confirm_add_bookmaker.filter(yes=str(True)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.bookmaker
@@ -173,7 +174,7 @@ async def add_new_bookmaker(callback_query: types.CallbackQuery, state: FSMConte
 
 
 @dp.callback_query_handler(
-    kb.cb_confirm_add_bookmaker.filter(yes=str(False)),
+    kb_reports.cb_confirm_add_bookmaker.filter(yes=str(False)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.bookmaker
@@ -196,12 +197,12 @@ async def send_check_data(message: types.Message, state: FSMContext, config: Con
         f"Bookmaker {bookmaker.name}\n"
         f"Bet stake: {state_data['bet']} {current_currency_symbol}\n"
         f"Payment: {state_data['result']} {current_currency_symbol}\n",
-        reply_markup=kb.get_kb_confirm_report(),
+        reply_markup=kb_reports.get_kb_confirm_report(),
     )
 
 
 @dp.callback_query_handler(
-    kb.cb_confirm_report.filter(yes=str(True)),
+    kb_reports.cb_confirm_report.filter(yes=str(True)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
@@ -228,7 +229,7 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
 
 
 @dp.callback_query_handler(
-    kb.cb_confirm_report.filter(yes=str(False)),
+    kb_reports.cb_confirm_report.filter(yes=str(False)),
     is_admin=False,
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
@@ -240,9 +241,16 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext):
 
 
 @dp.message_handler(commands="registration")
-async def register_user(message: types.Message, user: User):
-    await register_worker(user)
-    await message.reply("registration was successfully")
+async def register_user(message: types.Message, user: User, config: Config):
+    first_time_reg = await register_worker(user)
+    if not first_time_reg:
+        await message.reply("You are already registered")
+        return
+    await message.bot.send_message(
+        config.app.chats.user_log,
+        text=f"User {user.mention_link} was registered"
+    )
+    await message.reply("Registration was successfully")
 
 
 @dp.message_handler(commands="status")
