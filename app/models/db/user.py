@@ -15,6 +15,7 @@ class User(Model):
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
     balance_events: fields.ReverseRelation['BalanceEvents']  # noqa F821
+    balance_events_author: fields.ReverseRelation['BalanceEvents']  # noqa F821
 
     class Meta:
         table = "users"

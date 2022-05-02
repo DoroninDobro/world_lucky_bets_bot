@@ -23,7 +23,7 @@ from app.services.work_threads import (
     rename_thread,
     save_daily_rates,
 )
-from app import keyboards as kb
+from app.view.keyboards import admin as kb
 from app.models import User, AdditionalText, WorkThread
 from app.models.config import Config
 from app.services.additional_text import (

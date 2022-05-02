@@ -4,7 +4,7 @@ from loguru import logger
 
 from app.misc import dp
 from app.models import DataTimeRange
-from app import keyboards as kb
+from app.view.keyboards import admin as kb
 from app.models.config import Config
 from app.services.reports.excel_report import process_report
 from app.services.reports.thread_reports import get_thread_report

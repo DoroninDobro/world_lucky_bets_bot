@@ -38,8 +38,11 @@ async def get_worker_in_thread(message_id: int, user: User):
 
 
 async def register_worker(user: User):
-    user.registered = True
-    await user.save()
+    was_registered = user.registered
+    if was_registered:
+        user.registered = True
+        await user.save()
+    return not was_registered
 
 
 async def get_registered() -> list[User]:
