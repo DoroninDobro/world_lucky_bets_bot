@@ -24,4 +24,11 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
 
 
 async def add_balance_event(transaction_data: TransactionData):
-    pass
+    balance_event = BalanceEvent(
+        user_id=transaction_data.user_id,
+        author_id=transaction_data.author_id,
+        delta=transaction_data.amount,
+        currency=transaction_data.currency.iso_code,
+        comment=transaction_data.comment,
+    )
+    await balance_event.save()
