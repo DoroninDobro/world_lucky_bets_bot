@@ -2,7 +2,7 @@ from typing import Any
 
 from aiogram_dialog import DialogManager
 
-from app.models import User
+from app.models import User, BalanceEvent
 from app.models.config import Config
 from app.rendering.balance import render_balance
 from app.services.balance import calculate_balance
@@ -27,5 +27,6 @@ async def get_user(dialog_manager: DialogManager, **kwargs):
                 balance=await calculate_balance(user, oer=oer, config=config.currencies),
                 currency=config.currencies.default_currency,
             ),
+            "transactions": "\n".join(map(str, await BalanceEvent.filter(user=user).order_by("at").limit(5).all())),
         }
 

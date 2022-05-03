@@ -27,3 +27,17 @@ class BalanceEvent(Model):
             f"id={self.id} "
             f">"
         )
+
+    def __str__(self):
+        return (
+            f"{'📌 by admin ' if self.is_by_admin else ''}"
+            f"{self.at} "
+            f"{'income' if self.delta > 0 else 'expense'} "
+            f"{self.delta:.2f} {self.currency} "
+            f"{self.comment}"
+        )
+
+    @property
+    def is_by_admin(self):
+        # noinspection PyUnresolvedReferences
+        return self.user_id != self.author_id
