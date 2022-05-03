@@ -40,9 +40,13 @@ async def errors_handler(update: types.Update, exception: Exception):
 
 
 def get_user(update: types.Update) -> types.User:
-    return update.message.from_user \
-           or update.callback_query.from_user \
-           or update.edited_message.from_user \
-           or update.chosen_inline_result.from_user \
-           or update.inline_query.from_user \
+    return get_user_contained_event(update).from_user
+
+
+def get_user_contained_event(update: types.Update):
+    return update.message \
+           or update.callback_query \
+           or update.edited_message \
+           or update.chosen_inline_result \
+           or update.inline_query \
            or None
