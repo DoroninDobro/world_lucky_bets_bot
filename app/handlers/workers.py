@@ -240,7 +240,7 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext):
     await state.finish()
 
 
-@dp.message_handler(commands="registration")
+@dp.message_handler(commands="registration", is_admin=False)
 async def register_user(message: types.Message, user: User, config: Config):
     first_time_reg = await register_worker(user)
     if not first_time_reg:
@@ -251,6 +251,11 @@ async def register_user(message: types.Message, user: User, config: Config):
         text=f"User {user.mention_link} was registered"
     )
     await message.reply("Registration was successfully")
+
+
+@dp.message_handler(commands="registration", is_admin=True)
+async def register_user(message: types.Message):
+    await message.reply("Admin can't be registered")
 
 
 @dp.message_handler(commands="status")

@@ -39,7 +39,7 @@ async def get_worker_in_thread(message_id: int, user: User):
 
 async def register_worker(user: User):
     was_registered = user.registered
-    if was_registered:
+    if not was_registered:
         user.registered = True
         await user.save()
     return not was_registered
