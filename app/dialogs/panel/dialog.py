@@ -1,10 +1,10 @@
 
 from aiogram_dialog import Dialog, Window
-from aiogram_dialog.widgets.kbd import ScrollingGroup, Select, SwitchTo
+from aiogram_dialog.widgets.kbd import ScrollingGroup, Select, SwitchTo, Button
 from aiogram_dialog.widgets.text import Const, Format
 
 from app.dialogs.panel.getters import get_users, get_user
-from app.dialogs.panel.handlers import select_user
+from app.dialogs.panel.handlers import select_user, add_transaction_start
 from app.states import Panel
 
 panel = Dialog(
@@ -27,6 +27,11 @@ panel = Dialog(
     ),
     Window(
         Format("{user}\nbalance: {balance}"),
+        Button(
+            Const("Add transaction"),
+            on_click=add_transaction_start,
+            id="add_transaction",
+        ),
         SwitchTo(
             Const("Back to users"),
             state=Panel.users,
