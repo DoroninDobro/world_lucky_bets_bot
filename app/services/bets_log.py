@@ -5,7 +5,7 @@ from aiogram import Bot
 from app.models.config import Config
 from app.models.config.currency import Currency
 from app.models import User, WorkerInThread, BetItem
-from app.services.datetime_utils import get_current_datetime_in_format
+from app.view.datetime_utils import get_current_datetime_in_format
 from app.utils.exceptions import UserPermissionError
 
 

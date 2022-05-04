@@ -28,14 +28,24 @@ class BalanceEvent(Model):
             f">"
         )
 
-    def __str__(self):
-        return (
-            f"{'📌 by admin ' if self.is_by_admin else ''}"
-            f"{self.at} "
+    async def format(self, with_date: bool = True):
+        result = ""
+        await self.fetch_related("author", "user")
+        if with_date:
+            result += f"{self.at.strftime('%d.%B %H:%M')} "
+        if self.is_by_admin:
+            result += (
+                f"📌 admin {self.author.mention_link} "
+                f"add transaction for user {self.user.mention_link} "
+            )
+        else:
+            result += f"{self.user.mention_link} add transaction "
+        result += (
             f"{'income' if self.delta > 0 else 'expense'} "
             f"{self.delta:.2f} {self.currency} "
             f"{self.comment}"
         )
+        return result
 
     @property
     def is_by_admin(self):

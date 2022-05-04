@@ -23,7 +23,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
     return balance_sum
 
 
-async def add_balance_event(transaction_data: TransactionData):
+async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
     balance_event = BalanceEvent(
         user_id=transaction_data.user_id,
         author_id=transaction_data.author_id,
@@ -32,3 +32,8 @@ async def add_balance_event(transaction_data: TransactionData):
         comment=transaction_data.comment,
     )
     await balance_event.save()
+    return balance_event
+
+
+async def get_last_balance_events(user: User, limit: int = 5):
+    return await BalanceEvent.filter(user=user).order_by("-at").limit(limit).all()

@@ -105,10 +105,10 @@ async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment:
         amount=Decimal(saved_data["amount"]),
         comment=comment,
     )
-    await add_balance_event(transaction_data)
+    balance_event = await add_balance_event(transaction_data)
     await bot.send_message(
         config.app.chats.user_log,
-        text=str(transaction_data),
+        text=await balance_event.format(),
     )
     await state.finish()
 

@@ -16,10 +16,10 @@ class TransactionData:
     def __str__(self):
         if self.is_by_admin:
             result = (
-                f"📌 by admin {self.author_id} for user {self.user_id}\n"
+                f"📌 admin {self.author_id} add transaction for user {self.user_id}\n"
             )
         else:
-            result = f"User {self.user_id} add transaction "
+            result = f"User {self.user_id} add transaction\n"
         result += (
             f"{'income' if self.is_income else 'expense'} "
             f"{self.amount:.2f} {self.currency.symbol} "
