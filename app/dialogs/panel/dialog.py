@@ -26,7 +26,13 @@ panel = Dialog(
         state=Panel.users,
     ),
     Window(
-        Format("{user}\nbalance: {balance}\nLast transactions:\n{transactions}"),
+        Format(
+            "{user}\n"
+            "balance: {balance}\n"
+            "salary: {user.render.salary}\n"
+            "Last transactions:\n"
+            "{transactions}"
+        ),
         Button(
             Const("Add transaction"),
             on_click=add_transaction_start,

@@ -4,6 +4,9 @@ from tortoise import fields
 from tortoise.exceptions import DoesNotExist
 from tortoise.models import Model
 
+from app.models.enum.user_status import WorkerStatus
+from app.view.common import USER_STATUS_NAME
+
 
 class User(Model):
     id = fields.BigIntField(pk=True, generated=False)
@@ -12,6 +15,9 @@ class User(Model):
     username = fields.CharField(max_length=32, null=True)
     is_bot: bool = fields.BooleanField(null=True)
     registered: bool = fields.BooleanField(null=False, default=False)
+    worker_status = fields.CharEnumField(WorkerStatus, null=True)
+    piecework_pay = fields.IntField(null=True)
+    salary = fields.TextField(null=True)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
     balance_events: fields.ReverseRelation['BalanceEvents']  # noqa F821
@@ -94,14 +100,18 @@ class User(Model):
         result = "".join(filter(lambda x: x not in r'\/?*[]:!', fullname)) or self.username or self.id
         return result[:32]
 
-    def to_json(self):
-        return dict(
-            id=self.id,
-            first_name=self.first_name,
-            last_name=self.last_name,
-            username=self.username,
-            is_bot=self.is_bot
-        )
+    @property
+    def render_salary(self) -> str:
+        result = USER_STATUS_NAME[self.worker_status]
+        match self.worker_status:
+            case None:
+                return result
+            case WorkerStatus.SALARY:
+                return f"{result} {self.salary}"
+            case WorkerStatus.BET_PERCENT:
+                return f"{result} {self.piecework_pay}%"
+            case WorkerStatus.WIN_PERCENT:
+                return f"{result} {self.piecework_pay}%"
 
     def __str__(self):
         rez = (
