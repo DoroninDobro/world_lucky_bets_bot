@@ -1,10 +1,11 @@
 
 from aiogram_dialog import Dialog, Window
+from aiogram_dialog.widgets.input import TextInput
 from aiogram_dialog.widgets.kbd import ScrollingGroup, Select, SwitchTo, Button
 from aiogram_dialog.widgets.text import Const, Format
 
-from app.dialogs.panel.getters import get_users, get_user
-from app.dialogs.panel.handlers import select_user, add_transaction_start
+from app.dialogs.panel.getters import get_users, get_user, get_salary_types
+from app.dialogs.panel.handlers import select_user, add_transaction_start, select_salary_type
 from app.states import Panel
 
 panel = Dialog(
@@ -52,7 +53,15 @@ panel = Dialog(
         state=Panel.user_main,
     ),
     Window(
-
+        Format("select type of salary for {user}:"),
+        Select(
+            Format("{item.value}"),
+            id="salary_types",
+            item_id_getter=lambda x: x.name,
+            items="salary_types",
+            on_click=select_salary_type,
+        ),
+        getter=get_salary_types,
         state=Panel.change_salary,
     ),
 )

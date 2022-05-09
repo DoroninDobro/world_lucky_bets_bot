@@ -4,6 +4,7 @@ from aiogram_dialog import DialogManager
 
 from app.models import User
 from app.models.config import Config
+from app.models.enum.user_status import WorkerStatus
 from app.rendering.balance import render_balance
 from app.services.balance import calculate_balance, get_last_balance_events
 from app.services.rates import OpenExchangeRates
@@ -31,3 +32,12 @@ async def get_user(dialog_manager: DialogManager, **kwargs):
                 await be.format() for be in await get_last_balance_events(user)
             ]),
         }
+
+
+async def get_salary_types(dialog_manager: DialogManager, **kwargs):
+    data: dict[str, Any] = dialog_manager.current_context().dialog_data
+    user = await User.get(id=data["active_user"])
+    return {
+        "salary_types": [item for item in WorkerStatus],
+        "user": user,
+    }
