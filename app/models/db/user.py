@@ -4,7 +4,7 @@ from tortoise import fields
 from tortoise.exceptions import DoesNotExist
 from tortoise.models import Model
 
-from app.models.enum.user_status import WorkerStatus
+from app.models.enum.salary_type import SalaryType
 from app.view.common import USER_STATUS_NAME
 
 
@@ -15,7 +15,7 @@ class User(Model):
     username = fields.CharField(max_length=32, null=True)
     is_bot: bool = fields.BooleanField(null=True)
     registered: bool = fields.BooleanField(null=False, default=False)
-    worker_status = fields.CharEnumField(WorkerStatus, null=True)
+    worker_status = fields.CharEnumField(SalaryType, null=True)
     piecework_pay = fields.IntField(null=True)
     salary = fields.TextField(null=True)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
@@ -106,11 +106,11 @@ class User(Model):
         match self.worker_status:
             case None:
                 return result
-            case WorkerStatus.SALARY:
+            case SalaryType.SALARY:
                 return f"{result} {self.salary}"
-            case WorkerStatus.BET_PERCENT:
+            case SalaryType.BET_PERCENT:
                 return f"{result} {self.piecework_pay}%"
-            case WorkerStatus.WIN_PERCENT:
+            case SalaryType.WIN_PERCENT:
                 return f"{result} {self.piecework_pay}%"
 
     def __str__(self):

@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager
 
-from app.models.enum.user_status import WorkerStatus
+from app.models.enum.salary_type import SalaryType
 from app.view.keyboards import balance as kb_balance
 from app.states import Panel, AddTransaction
 
@@ -40,6 +40,6 @@ async def select_salary_type(c: CallbackQuery, widget: Any, manager: DialogManag
     data = manager.current_context().start_data
     if not isinstance(data, dict):
         data = {}
-    data["salary_type"] = WorkerStatus[item_id].name
+    data["salary_type"] = SalaryType[item_id].name
     await manager.update(data)
     await manager.switch_to(Panel.change_salary_value)

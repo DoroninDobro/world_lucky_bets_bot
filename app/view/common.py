@@ -1,10 +1,10 @@
-from app.models.enum.user_status import WorkerStatus
+from app.models.enum.salary_type import SalaryType
 
 boolean_emoji = {True: "✅", False: "🚫"}
 
 USER_STATUS_NAME = {
-    WorkerStatus.WIN_PERCENT: "💸 percent by winning",
-    WorkerStatus.BET_PERCENT: "💰 percent by bet",
-    WorkerStatus.SALARY: "💵 salary",
+    SalaryType.WIN_PERCENT: "💸 percent by winning",
+    SalaryType.BET_PERCENT: "💰 percent by bet",
+    SalaryType.SALARY: "💵 salary",
     None: "",
 }
