@@ -9,6 +9,7 @@ from aiogram.utils.exceptions import MessageNotModified, BadRequest
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
+from app.handlers.errors import errors_handler
 from app.misc import dp
 
 from app.services.work_threads import (
@@ -145,10 +146,11 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
         return await callback_query.message.reply(
             "This match is over! Can't process mailing",
         )
-    except Exception:
+    except Exception as e:
         await callback_query.message.reply(
             "An error occurred, we wrote it down, we will try to figure it out",
         )
+        await errors_handler(f"can't process mailing info {a_text}", e)  # noqa
         raise
     await callback_query.message.edit_text(f"Sent by:\n{a_text.text}")
 
