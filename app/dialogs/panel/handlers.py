@@ -1,9 +1,10 @@
 from typing import Any
 
 from aiogram.dispatcher import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import DialogManager
 
+from app.models import User
 from app.models.enum.salary_type import SalaryType
 from app.view.keyboards import balance as kb_balance
 from app.states import Panel, AddTransaction
@@ -43,3 +44,24 @@ async def select_salary_type(c: CallbackQuery, widget: Any, manager: DialogManag
     data["salary_type"] = SalaryType[item_id].name
     await manager.update(data)
     await manager.switch_to(Panel.change_salary_value)
+
+
+async def input_salary(m: Message, _, manager: DialogManager):
+    dialog_data = manager.current_context().dialog_data
+    salary_type = SalaryType[dialog_data["salary_type"]]
+    user = await User.get(id=dialog_data["active_user"])
+    user.worker_status = salary_type
+    if salary_type == SalaryType.SALARY:
+        user.salary = m.text
+    else:
+        try:
+            piecework_pay = int(m.text)
+        except ValueError:
+            return await m.answer("it is not a valid value")
+        if piecework_pay < 0 or piecework_pay > 100:
+            return await m.answer("value must be greater that 0 and less of 100")
+        user.piecework_pay = piecework_pay
+    await user.save()
+    await manager.switch_to(Panel.user_main)
+
+

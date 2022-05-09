@@ -41,3 +41,12 @@ async def get_salary_types(dialog_manager: DialogManager, **kwargs):
         "salary_types": [item for item in SalaryType],
         "user": user,
     }
+
+
+async def get_selected_salary_type(dialog_manager: DialogManager, **kwargs):
+    data: dict[str, Any] = dialog_manager.current_context().dialog_data
+    user = await User.get(id=data["active_user"])
+    return {
+        "salary_type": SalaryType[data["salary_type"]],
+        "user": user,
+    }

@@ -4,6 +4,7 @@ from tortoise import fields
 from tortoise.exceptions import DoesNotExist
 from tortoise.models import Model
 
+from app.models.db.db import DECIMAL_CONFIG
 from app.models.enum.salary_type import SalaryType
 from app.view.common import USER_STATUS_NAME
 
@@ -16,7 +17,7 @@ class User(Model):
     is_bot: bool = fields.BooleanField(null=True)
     registered: bool = fields.BooleanField(null=False, default=False)
     worker_status = fields.CharEnumField(SalaryType, null=True)
-    piecework_pay = fields.IntField(null=True)
+    piecework_pay = fields.DecimalField(**DECIMAL_CONFIG, null=True)
     salary = fields.TextField(null=True)
     work_threads: fields.ReverseRelation['WorkerInThread']  # noqa F821
     admin_threads: fields.ReverseRelation['WorkThread']  # noqa F821
