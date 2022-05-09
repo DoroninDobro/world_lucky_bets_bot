@@ -29,7 +29,7 @@ panel = Dialog(
         Format(
             "{user}\n"
             "balance: {balance}\n"
-            "salary: {user.render.salary}\n"
+            "salary: {user.render_salary}\n"
             "Last transactions:\n"
             "{transactions}"
         ),
@@ -39,11 +39,20 @@ panel = Dialog(
             id="add_transaction",
         ),
         SwitchTo(
+            Const("Change salary"),
+            state=Panel.change_salary,
+            id="change_salary"
+        ),
+        SwitchTo(
             Const("Back to users"),
             state=Panel.users,
             id="to_users_list",
         ),
         getter=get_user,
         state=Panel.user_main,
+    ),
+    Window(
+
+        state=Panel.change_salary,
     ),
 )

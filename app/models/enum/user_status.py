@@ -1,7 +1,7 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class WorkerStatus(Enum):
-    WIN_PERCENT = auto()
-    BET_PERCENT = auto()
-    SALARY = auto()
+    WIN_PERCENT = "WIN_PERCENT"
+    BET_PERCENT = "BET_PERCENT"
+    SALARY = "SALARY"

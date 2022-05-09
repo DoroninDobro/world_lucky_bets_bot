@@ -11,6 +11,7 @@ class Report(StatesGroup):
 class Panel(StatesGroup):
     users = State()
     user_main = State()
+    change_salary = State()
 
 
 class AddTransaction(StatesGroup):
