@@ -8,11 +8,10 @@ from app.models.enum.blance_event_type import BalanceEventType
 
 async def create_transactions_by_bet(bet_dto: Bet, bet: BetItem) -> list[TransactionData]:
     salary = bet_dto.salary
-    amount = bet_dto.profit - salary
     transactions = [
         transaction_data_factory(
             bet=bet,
-            amount=amount,
+            amount=bet_dto.profit,
             type_=BalanceEventType.REPORT,
             bet_dao=bet_dto,
         ),

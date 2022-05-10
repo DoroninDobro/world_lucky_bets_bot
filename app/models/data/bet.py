@@ -16,6 +16,10 @@ class Bet:
     user: User
 
     @property
+    def result_without_salary(self):
+        return self.result - self.salary
+
+    @property
     def profit_without_salary(self):
         return self.profit - self.salary
 

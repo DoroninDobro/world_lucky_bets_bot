@@ -14,7 +14,7 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
     bet_item = await BetItem.create(
         worker_thread=worker_in_thread,
         bet=bet.bet,
-        result=bet.result,
+        result=bet.result_without_salary,
         currency=bet.currency.iso_code,
         bookmaker_id=bet.bookmaker_id,
     )
