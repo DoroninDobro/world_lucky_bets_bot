@@ -2,7 +2,10 @@ from tortoise import fields
 from tortoise.models import Model
 
 from .user import User
-from .db import DECIMAL_CONFIG
+from .common import DECIMAL_CONFIG
+
+from .bets_log import BetItem
+from app.models.enum.blance_event_type import BalanceEventType
 
 
 class BalanceEvent(Model):
@@ -16,6 +19,10 @@ class BalanceEvent(Model):
     at = fields.DatetimeField(auto_now=True, null=False)
     delta = fields.DecimalField(**DECIMAL_CONFIG)
     currency = fields.CharField(max_length=16)
+    type_ = fields.CharEnumField(BalanceEventType, source_field="type")
+    bet_item: fields.ForeignKeyRelation[BetItem] = fields.ForeignKeyField(
+        "models.BetItem", related_name="balance_events",
+    )
     comment = fields.TextField(null=True)
 
     class Meta:

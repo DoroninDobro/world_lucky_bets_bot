@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from app.models import User, BalanceEvent
+from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
 from app.models.data.transaction import TransactionData
 from app.services.rates import OpenExchangeRates
@@ -24,12 +24,18 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
 
 
 async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
+    if bet_log_id := transaction_data.bet_log_item_id is not None:
+        bet_item = await BetItem.get(id=bet_log_id)
+    else:
+        bet_item = None
     balance_event = BalanceEvent(
         user_id=transaction_data.user_id,
         author_id=transaction_data.author_id,
         delta=transaction_data.amount,
         currency=transaction_data.currency.iso_code,
         comment=transaction_data.comment,
+        type_=transaction_data.balance_event_type,
+        bet_item=bet_item,
     )
     await balance_event.save()
     return balance_event

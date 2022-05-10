@@ -4,7 +4,7 @@ from tortoise import fields
 from tortoise.exceptions import DoesNotExist
 from tortoise.models import Model
 
-from app.models.db.db import DECIMAL_CONFIG
+from .common import DECIMAL_CONFIG
 from app.models.enum.salary_type import SalaryType
 from app.view.common import USER_STATUS_NAME
 

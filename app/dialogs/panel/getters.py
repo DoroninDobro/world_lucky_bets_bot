@@ -2,7 +2,7 @@ from typing import Any
 
 from aiogram_dialog import DialogManager
 
-from app.models import User
+from app.models.db import User
 from app.models.config import Config
 from app.models.enum.salary_type import SalaryType
 from app.rendering.balance import render_balance

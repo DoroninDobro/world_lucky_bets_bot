@@ -4,7 +4,7 @@ from functools import lru_cache
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from app.models import AdditionalText, SendWorkers
+from app.models.db import AdditionalText, SendWorkers
 from app.view.common import boolean_emoji
 
 cb_stop = CallbackData("stop_thread", "thread_id")

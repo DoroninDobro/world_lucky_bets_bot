@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Union
 
 from app.constants import BASE_CURRENCY
-from app.models import WorkThread
+from app.models.db import WorkThread
 
 
 @dataclass

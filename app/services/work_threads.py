@@ -10,7 +10,7 @@ from tortoise.transactions import in_transaction
 
 from app.view.keyboards import admin as kb_admin
 from app.view.keyboards import worker as kb_worker
-from app.models import WorkThread, WorkerInThread, User, AdditionalText, RateItem
+from app.models.db import WorkThread, WorkerInThread, User, AdditionalText, RateItem
 from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (

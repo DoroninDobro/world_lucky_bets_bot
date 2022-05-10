@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from app.models import RateItem
+from app.models.db import RateItem
 from app.services.rates import OpenExchangeRates
 
 

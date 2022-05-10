@@ -6,8 +6,6 @@ from tortoise import Tortoise, run_async
 
 from app.models.config.db import DBConfig
 
-DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
-
 
 async def on_startup(_: Dispatcher, db_config: DBConfig):
     await db_init(db_config)
@@ -16,7 +14,7 @@ async def on_startup(_: Dispatcher, db_config: DBConfig):
 async def db_init(db_config: DBConfig):
     await Tortoise.init(
         db_url=db_config.uri,
-        modules={'models': ['app.models']}
+        modules={'models': ("app.models.db", )}
     )
 
 

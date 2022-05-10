@@ -2,7 +2,7 @@ from aiogram import types
 from tortoise.exceptions import DoesNotExist
 
 from app.misc import dp
-from app.models import User
+from app.models.db import User
 from app.models.config import Config
 from app.services.bets_log import remove_bet_item
 from app.utils.exceptions import UserPermissionError

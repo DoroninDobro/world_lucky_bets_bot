@@ -16,7 +16,7 @@ from app.services.balance import calculate_balance
 from app.services.rates import OpenExchangeRates
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
-from app.models import User, WorkThread, Bookmaker
+from app.models.db import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message
 from app.services.workers import add_worker_to_thread, register_worker
 from app.services.bets_log import save_new_betting_odd

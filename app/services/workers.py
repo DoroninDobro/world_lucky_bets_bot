@@ -2,7 +2,7 @@ from datetime import datetime
 
 from aiogram import Bot
 
-from app.models import User, WorkThread, WorkerInThread
+from app.models.db import User, WorkThread, WorkerInThread
 from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
 

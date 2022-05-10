@@ -4,9 +4,10 @@ from aiogram import types, Bot
 from aiogram.dispatcher import FSMContext
 
 from app.misc import dp
-from app.models import User
+from app.models.db import User
 from app.models.config import Config
 from app.models.data.transaction import TransactionData
+from app.models.enum.blance_event_type import BalanceEventType
 from app.services.balance import add_balance_event
 from app.states import AddTransaction
 from app.view.keyboards import balance as kb_balance
@@ -15,7 +16,11 @@ from app.view.keyboards import balance as kb_balance
 @dp.message_handler(commands="transaction", is_admin=False, chat_type=types.ChatType.PRIVATE)
 async def add_transaction_start(message: types.Message, state: FSMContext, user: User):
     await state.set_state(AddTransaction.sign)
-    await state.update_data(user_id=user.id, author_id=user.id)
+    await state.update_data(
+        user_id=user.id,
+        author_id=user.id,
+        balance_event_type=BalanceEventType.USER.name,
+    )
     await message.answer(
         text="Please select type of transaction:",
         reply_markup=kb_balance.get_transaction_sign(),
@@ -103,6 +108,8 @@ async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment:
         is_income=bool(saved_data["is_income"]),
         currency=config.currencies.currencies[saved_data["iso_code"]],
         amount=Decimal(saved_data["amount"]),
+        bet_log_item_id=None,
+        balance_event_type=BalanceEventType[saved_data["balance_event_type"]],
         comment=comment,
     )
     balance_event = await add_balance_event(transaction_data)
