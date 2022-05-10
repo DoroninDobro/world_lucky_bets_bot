@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import date, timedelta, datetime, time
 
+from app.services.datetime_utils import get_last_month_first_day
+
 
 @dataclass
 class DataTimeRange:
@@ -22,10 +24,8 @@ class DataTimeRange:
 
     @classmethod
     def get_last_month_range(cls):
-        today = datetime.now()
-        if today.month > 1:
-            return cls.get_month_range(month=today.month - 1, year=today.year)
-        return cls.get_month_range(month=12, year=today.year - 1)
+        last_month = get_last_month_first_day()
+        return cls.get_month_range(month=last_month.month, year=last_month.year)
 
     @classmethod
     def get_current_month_range(cls):

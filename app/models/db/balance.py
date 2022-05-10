@@ -6,6 +6,7 @@ from .common import DECIMAL_CONFIG
 
 from .bets_log import BetItem
 from app.models.enum.blance_event_type import BalanceEventType
+from ..config.currency import CurrenciesConfig
 
 
 class BalanceEvent(Model):
@@ -35,20 +36,37 @@ class BalanceEvent(Model):
             f">"
         )
 
-    async def format(self, with_date: bool = True):
+    async def format_log(self):
         result = ""
         await self.fetch_related("author", "user")
-        if with_date:
-            result += f"{self.at.strftime('%d.%B %H:%M')} "
         if self.is_by_admin:
             result += (
                 f"📌 admin {self.author.mention_link} "
-                f"add transaction for user {self.user.mention_link} "
+                f"add transaction of type {self.type_} "
+                f"for user {self.user.mention_link} "
             )
         else:
-            result += f"{self.user.mention_link} add transaction "
+            result += (
+                f"{self.user.mention_link} "
+                f"add transaction of type {self.type_}"
+            )
         result += (
             f"{self.delta:.2f} {self.currency} "
+            f"{self.comment}"
+        )
+        return result
+
+    async def format_history(self, currencies: CurrenciesConfig):
+        await self.fetch_related("author", "user")
+        result = ""
+        result += f"{self.at.strftime('%d.%m.%Y')} "
+        if self.is_by_admin:
+            result += f"📌"
+        else:
+            result += ""
+        result += (
+            f"{self.delta:.0f}{currencies.currencies[self.currency].symbol} "
+            f"type: {self.type_.name} "
             f"{self.comment}"
         )
         return result

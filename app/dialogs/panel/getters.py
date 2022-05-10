@@ -29,7 +29,7 @@ async def get_user(dialog_manager: DialogManager, **kwargs):
                 currency=config.currencies.default_currency,
             ),
             "transactions": "\n".join([
-                await be.format() for be in await get_last_balance_events(user)
+                await be.format_history(config.currencies) for be in await get_last_balance_events(user)
             ]),
         }
 

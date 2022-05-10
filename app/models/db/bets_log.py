@@ -40,7 +40,7 @@ class BetItem(Model):
         user = self.worker_thread.worker
         bookmaker = await self.bookmaker
         return (
-            f"bet ID {self.id} от {user.mention_link} "
+            f"bet ID {self.id} by {user.mention_link} "
             f"at the bookmaker \"{bookmaker.name if bookmaker else 'unknown'}\": "
             f"{self.bet:.2f} {self.currency}, "
             f"result: {self.result:.2f} {self.currency}"

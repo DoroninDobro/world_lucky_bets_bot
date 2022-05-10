@@ -1,3 +1,4 @@
+from datetime import datetime, time
 from decimal import Decimal
 
 from aiogram import Bot
@@ -7,6 +8,7 @@ from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
 from app.models.data.transaction import TransactionData
 from app.models.enum.blance_event_type import BalanceEventType
+from app.services.datetime_utils import get_last_month_first_day
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_rates_by_date
@@ -46,7 +48,12 @@ async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
 
 
 async def get_last_balance_events(user: User, limit: int = 12):
-    return await BalanceEvent.filter(user=user).order_by("-at").limit(limit).all()
+    return await BalanceEvent\
+        .filter(user=user)\
+        .filter(at__gt=datetime.combine(date=get_last_month_first_day(), time=time()))\
+        .order_by("-at")\
+        .limit(limit)\
+        .all()
 
 
 async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, config: ChatsConfig):
@@ -54,5 +61,5 @@ async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, c
     if balance_event.type_ in (BalanceEventType.USER, BalanceEventType.ADMIN):
         await bot.send_message(
             config.user_log,
-            text=await balance_event.format(),
+            text=await balance_event.format_log(),
         )

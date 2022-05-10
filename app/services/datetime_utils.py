@@ -1,8 +1,8 @@
-from datetime import datetime
-
-from app.models.config import Config
+from datetime import datetime, date
 
 
-def get_current_datetime_in_format(config: Config) -> str:
-    now = datetime.now(tz=config.tz_view)
-    return now.strftime("%d %B\n%H:%M")
+def get_last_month_first_day():
+    today = datetime.now()
+    if today.month > 1:
+        return date(day=1, month=today.month - 1, year=today.year)
+    return date(day=1, month=12, year=today.year - 1)

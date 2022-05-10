@@ -15,7 +15,7 @@ class TransactionData:
     balance_event_type: BalanceEventType
     comment: str
 
-    def __str__(self):
+    def print_(self):
         if self.is_by_admin:
             result = (
                 f"📌 admin {self.author_id} add transaction for user {self.user_id}\n"
