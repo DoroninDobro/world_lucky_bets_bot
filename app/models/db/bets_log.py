@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from tortoise import fields
 from tortoise.models import Model
 
@@ -43,3 +45,11 @@ class BetItem(Model):
             f"{self.bet:.2f} {self.currency}, "
             f"result: {self.result:.2f} {self.currency}"
         )
+
+    @property
+    def is_win(self) -> bool:
+        return self.profit > 0
+
+    @property
+    def profit(self) -> Decimal:
+        return self.result - self.bet

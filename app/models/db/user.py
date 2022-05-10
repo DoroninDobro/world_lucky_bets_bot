@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from aiogram import types
 from aiogram.utils.markdown import hlink, quote_html
 from tortoise import fields
@@ -110,9 +112,13 @@ class User(Model):
             case SalaryType.SALARY:
                 return f"{result} {self.salary}"
             case SalaryType.BET_PERCENT:
-                return f"{result} {self.piecework_pay}%"
+                return f"{result} {self.piecework_pay:.2f}%"
             case SalaryType.WIN_PERCENT:
-                return f"{result} {self.piecework_pay}%"
+                return f"{result} {self.piecework_pay:.2f}%"
+
+    def calculate_piecework(self, total: Decimal) -> Decimal:
+        assert self.worker_status in (SalaryType.BET_PERCENT, SalaryType.WIN_PERCENT)
+        return total * (self.piecework_pay / 100)
 
     def __str__(self):
         rez = (

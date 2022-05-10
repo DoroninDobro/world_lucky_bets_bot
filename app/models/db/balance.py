@@ -48,7 +48,6 @@ class BalanceEvent(Model):
         else:
             result += f"{self.user.mention_link} add transaction "
         result += (
-            f"{'income' if self.delta > 0 else 'expense'} "
             f"{self.delta:.2f} {self.currency} "
             f"{self.comment}"
         )
