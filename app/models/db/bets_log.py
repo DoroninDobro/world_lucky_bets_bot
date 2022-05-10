@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 from tortoise import fields
 from tortoise.models import Model
 
-from .db import DECIMAL_CONFIG
+from .common import DECIMAL_CONFIG
 from .workers_in_threads import WorkerInThread
 from .bookmaker import Bookmaker
 
@@ -16,7 +18,9 @@ class BetItem(Model):
     result = fields.DecimalField(**DECIMAL_CONFIG)
     currency = fields.CharField(max_length=16)
     bookmaker: fields.ForeignKeyRelation[Bookmaker] = fields.ForeignKeyField(
-        'models.Bookmaker', related_name='bets')
+        'models.Bookmaker', related_name='bets',
+    )
+    balance_events: fields.ReverseRelation['BalanceEvents']  # noqa F821
 
     class Meta:
         table = "bets_log"
@@ -41,3 +45,11 @@ class BetItem(Model):
             f"{self.bet:.2f} {self.currency}, "
             f"result: {self.result:.2f} {self.currency}"
         )
+
+    @property
+    def is_win(self) -> bool:
+        return self.profit > 0
+
+    @property
+    def profit(self) -> Decimal:
+        return self.result - self.bet

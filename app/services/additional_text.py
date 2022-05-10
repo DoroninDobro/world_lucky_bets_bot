@@ -2,7 +2,7 @@ import typing
 
 from tortoise.transactions import in_transaction
 
-from app.models import AdditionalText, User, SendWorkers, WorkerInThread, WorkThread
+from app.models.db import AdditionalText, User, SendWorkers, WorkerInThread, WorkThread
 
 
 async def create_send_workers(

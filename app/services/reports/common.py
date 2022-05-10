@@ -1,6 +1,7 @@
 from datetime import date
 
-from app.models import BetItem, RateItem, DataTimeRange
+from app.models.db import BetItem, RateItem
+from app.models import DataTimeRange
 
 
 async def get_mont_bets(date_range: DataTimeRange) -> list[BetItem]:

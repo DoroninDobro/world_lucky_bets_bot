@@ -1,8 +1,9 @@
 import operator
 from functools import reduce
 
-from app.models import WorkThread, UserStat
+from app.models import UserStat
 from app.models.config import Config
+from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_thread_bets, get_rates_by_date

@@ -1,38 +1,32 @@
-from decimal import Decimal
-
 from aiogram import Bot
 
 from app.models.config import Config
-from app.models.config.currency import Currency
-from app.models import User, WorkerInThread, BetItem
+from app.models.data.bet import Bet
+from app.models.db import User, WorkerInThread, BetItem
+from app.services.balance import add_balance_event_and_notify
+from app.services.status import create_transactions_by_bet
 from app.view.datetime_utils import get_current_datetime_in_format
 from app.utils.exceptions import UserPermissionError
 
 
-async def save_new_betting_odd(
-        thread_id: int,
-        currency: Currency,
-        bet: Decimal,
-        result: Decimal,
-        bookmaker_id: str,
-        user: User,
-        bot: Bot,
-        config: Config
-):
-    worker_in_thread = await WorkerInThread.get(worker=user, work_thread_id=thread_id)
+async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
+    worker_in_thread = await WorkerInThread.get(worker=bet.user, work_thread_id=bet.thread_id)
     bet_item = await BetItem.create(
         worker_thread=worker_in_thread,
-        bet=bet,
-        result=result,
-        currency=currency.iso_code,
-        bookmaker_id=bookmaker_id,
+        bet=bet.bet,
+        result=bet.result_without_salary,
+        currency=bet.currency.iso_code,
+        bookmaker_id=bet.bookmaker_id,
     )
     await bot.send_message(
         config.app.chats.user_log,
         f"{get_current_datetime_in_format(config)} - "
-        f"{await bet_item.get_full_printable()} at match {thread_id}",
+        f"{await bet_item.get_full_printable()} at match {bet.thread_id}",
         protect_content=False,
     )
+    transactions = await create_transactions_by_bet(bet_dto=bet, bet=bet_item)
+    for transaction in transactions:
+        await add_balance_event_and_notify(transaction, bot, config.app.chats)
     return bet_item
 
 

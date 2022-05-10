@@ -3,7 +3,7 @@ from functools import lru_cache
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from app.models import User, WorkThread
+from app.models.db import User, WorkThread
 from app.models.config.currency import Currency
 from app.view.common import boolean_emoji
 

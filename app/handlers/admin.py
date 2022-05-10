@@ -25,7 +25,7 @@ from app.services.work_threads import (
     save_daily_rates,
 )
 from app.view.keyboards import admin as kb
-from app.models import User, AdditionalText, WorkThread
+from app.models.db import User, AdditionalText, WorkThread
 from app.models.config import Config
 from app.services.additional_text import (
     get_workers,

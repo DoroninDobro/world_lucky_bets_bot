@@ -1,7 +1,7 @@
-from app.models import WorkThread, WorkerInThread, DataTimeRange
+from app.models.db import WorkThread, WorkerInThread
 from app.models.statistic.thread_users import ThreadUsers
 from app.services.collections_utils import get_first_dict_value
-from app.models.data_range import date_to_datetime
+from app.models.data_range import date_to_datetime, DataTimeRange
 
 
 async def generate_thread_users(date_range: DataTimeRange) -> list[ThreadUsers]:

@@ -9,6 +9,7 @@ from tortoise.exceptions import DoesNotExist, IntegrityError
 from app.models.config import Config
 from app.models.config.currency import Currency
 from app.misc import dp
+from app.models.data.bet import Bet
 from app.view.keyboards import worker as kb_worker
 from app.view.keyboards import reports as kb_reports
 from app.rendering.balance import render_balance
@@ -16,7 +17,7 @@ from app.services.balance import calculate_balance
 from app.services.rates import OpenExchangeRates
 from app.services.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
-from app.models import User, WorkThread, Bookmaker
+from app.models.db import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message
 from app.services.workers import add_worker_to_thread, register_worker
 from app.services.bets_log import save_new_betting_odd
@@ -212,11 +213,13 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
         state_data = await state.get_data()
         currency: Currency = config.currencies.currencies[state_data.pop('currency')]
         betting_item = await save_new_betting_odd(
-            user=user,
+            Bet(
+                user=user,
+                currency=currency,
+                **state_data
+            ),
             bot=callback_query.bot,
-            currency=currency,
             config=config,
-            **state_data
         )
 
         await callback_query.message.edit_text(f"Successfully saved\n{betting_item}")
@@ -234,7 +237,7 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
 )
-async def saving(callback_query: types.CallbackQuery, state: FSMContext):
+async def discard_saving(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.answer("Save canceled", show_alert=True)
     await callback_query.message.edit_text("Save canceled")
     await state.finish()
@@ -263,4 +266,7 @@ async def get_status(message: types.Message, user: User, config: Config):
     logger.info("user {user} ask balance", user=user.id)
     async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
         balance = await calculate_balance(user, oer, config.currencies)
-        await message.reply(f"Your balance is {render_balance(balance, config.currencies.default_currency)}")
+        await message.reply(
+            f"Your balance is {render_balance(balance, config.currencies.default_currency)}\n"
+            f"Salary type: {user.render_salary}"
+        )

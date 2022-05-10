@@ -1,5 +1,6 @@
-from app.models import TotalStatistic, WorkThread, DataTimeRange
+from app.models import TotalStatistic, DataTimeRange
 from app.models.config.currency import CurrenciesConfig
+from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_mont_bets, get_month_rates
