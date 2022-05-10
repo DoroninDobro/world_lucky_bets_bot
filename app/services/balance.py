@@ -6,6 +6,7 @@ from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
 from app.models.data.transaction import TransactionData
+from app.models.enum.blance_event_type import BalanceEventType
 from app.services.rates import OpenExchangeRates
 from app.services.rates.utils import find_rate_and_convert
 from app.services.reports.common import get_rates_by_date
@@ -50,7 +51,8 @@ async def get_last_balance_events(user: User, limit: int = 12):
 
 async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, config: ChatsConfig):
     balance_event = await add_balance_event(transaction)
-    await bot.send_message(
-        config.user_log,
-        text=await balance_event.format(),
-    )
+    if balance_event.type_ in (BalanceEventType.USER, BalanceEventType.ADMIN):
+        await bot.send_message(
+            config.user_log,
+            text=await balance_event.format(),
+        )
