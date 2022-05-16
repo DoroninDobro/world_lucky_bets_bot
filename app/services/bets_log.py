@@ -5,7 +5,6 @@ from app.models.data.bet import Bet
 from app.models.db import User, WorkerInThread, BetItem
 from app.services.balance import add_balance_event_and_notify
 from app.services.status import create_transactions_by_bet
-from app.view.datetime_utils import get_current_datetime_in_format
 from app.utils.exceptions import UserPermissionError
 
 
@@ -20,8 +19,7 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
     )
     await bot.send_message(
         config.app.chats.user_log,
-        f"{get_current_datetime_in_format(config)} - "
-        f"{await bet_item.get_full_printable()} at match {bet.thread_id}",
+        f"{await bet_item.get_full_printable()} #️⃣{bet.thread_id}",
         protect_content=False,
     )
     transactions = await create_transactions_by_bet(bet_dto=bet, bet=bet_item)

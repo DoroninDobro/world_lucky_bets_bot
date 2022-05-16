@@ -15,7 +15,7 @@ from app.view.keyboards import reports as kb_reports
 from app.rendering.balance import render_balance
 from app.services.balance import calculate_balance
 from app.services.rates import OpenExchangeRates
-from app.services.text_utils import parse_numeric
+from app.utils.text_utils import parse_numeric
 from app.services.work_threads import thread_not_found
 from app.models.db import User, WorkThread, Bookmaker
 from app.services.remove_message import delete_message

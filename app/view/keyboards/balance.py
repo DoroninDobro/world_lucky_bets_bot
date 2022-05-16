@@ -6,7 +6,7 @@ from aiogram.utils.callback_data import CallbackData
 from app.models.config.currency import Currency
 
 INCOME = "income"
-EXPENSE = "expense"
+EXPENSE = "outcome"
 SIGNS = {INCOME: f"📈{INCOME}", EXPENSE: f"📉{EXPENSE}"}
 
 cb_sign = CallbackData("transaction_sign", "sign")
