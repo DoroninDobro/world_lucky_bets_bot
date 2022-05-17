@@ -33,6 +33,13 @@ class DataTimeRange:
         return cls.get_month_range(month=today.month, year=today.year)
 
     @classmethod
+    def get_current_week_range(cls):
+        today = datetime.now()
+        start = today - timedelta(days=today.weekday())
+        stop = start + timedelta(days=7)
+        return cls(start, stop)
+
+    @classmethod
     def get_all_time_range(cls):
         first_time = date.min
         last_time = date.max

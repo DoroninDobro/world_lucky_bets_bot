@@ -17,6 +17,7 @@ cb_is_disinformation = CallbackData("send_info", "additional_text", "is_disinfor
 all_time_report = "Отчёт за всё время"
 last_month_report = "Отчёт за прошлый месяц"
 current_moth_report = "Отчёт за этот месяц"
+current_week_report = "Отчёт за эту неделю"
 
 
 def get_work_thread_admin_kb(thread_id: int) -> InlineKeyboardMarkup:
@@ -78,9 +79,10 @@ def get_disinformation_button_name(now_marked_as_disinformation: bool) -> str:
 def get_reply_kb_report() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         resize_keyboard=True,
-        keyboard=[[
-            KeyboardButton(all_time_report),
-            KeyboardButton(last_month_report),
-            KeyboardButton(current_moth_report),
-        ]],
+        keyboard=[
+            [KeyboardButton(all_time_report),
+             KeyboardButton(last_month_report)],
+            [KeyboardButton(current_moth_report),
+             KeyboardButton(current_week_report)],
+        ],
     )
