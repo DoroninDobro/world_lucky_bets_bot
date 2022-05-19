@@ -1,7 +1,8 @@
 from app.models import UserBetsStat, DataTimeRange
 from app.models.config.currency import CurrenciesConfig
-from app.models.db import WorkThread
+from app.models.db import WorkThread, User
 from app.models.statistic.full_user_stats import FullUserStat
+from app.models.statistic.transaction import TransactionStatData
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
 from app.services.reports.common import get_mont_bets, get_month_rates
@@ -9,10 +10,16 @@ from app.services.reports.common import get_mont_bets, get_month_rates
 
 async def generate_user_report(date_range: DataTimeRange, config: CurrenciesConfig) -> dict[int, FullUserStat]:
     user_bets = await generate_user_bets_report(date_range=date_range, config=config)
-    users = {}
+    users: dict[int, list[UserBetsStat]] = {}
     for bet_stat in user_bets:
         users.setdefault(bet_stat.user.id, []).append(bet_stat)
-    return {id_: FullUserStat(bets=bets, transactions=None) for id_, bets in users.items()}
+    result = {}
+    for id_, bets in users.items():
+        if not bets:
+            continue
+        transactions = await generate_user_transactions_report(date_range, bets[0].user)
+        result[id_] = FullUserStat(bets=bets, transactions=transactions)
+    return result
 
 
 async def generate_user_bets_report(date_range: DataTimeRange, config: CurrenciesConfig) -> list[UserBetsStat]:
@@ -46,3 +53,7 @@ async def generate_user_bets_report(date_range: DataTimeRange, config: Currencie
             user_statistics.append(user_stat)
     return user_statistics
 
+
+async def generate_user_transactions_report(date_range: DataTimeRange, user: User) -> list[TransactionStatData]:
+    pass
+    # TODO

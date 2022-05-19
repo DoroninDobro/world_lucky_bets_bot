@@ -95,7 +95,7 @@ class User(Model):
     def fullname(self):
         if self.last_name is not None:
             return ' '.join((self.first_name, self.last_name))
-        return self.first_name or self.username or self.id
+        return self.first_name or self.username or str(self.id)
 
     @property
     def render_salary(self) -> str:

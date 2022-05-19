@@ -10,9 +10,10 @@ from app.models import TotalStatistic, UserBetsStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.full_user_stats import FullUserStat
 from app.models.statistic.thread_users import ThreadUsers
+from app.models.statistic.transaction import TransactionStatData
 from app.models.statistic.user_stats import UserStatCaptions
 from app.services.collections_utils import get_first_dict_value
-from app.services.reports.common import excel_bets_caption_name
+from app.services.reports.common import excel_bets_caption_name, excel_transaction_caption_name
 
 
 @dataclass
@@ -80,11 +81,12 @@ class ExcelWriter:
         for _, report_by_user in sorted(report_data.items(), key=lambda x: x[0]):
             report_by_user: FullUserStat
             self.write_user_bets_report(report_by_user.bets)
+            self.write_user_transaction(report_by_user.transactions)
 
     def write_user_bets_report(self, report_by_user: list[UserBetsStat]):
-        column_count = len(UserStatCaptions.get_captions())
-        if len(report_by_user) == 0:
+        if not report_by_user:
             return
+        column_count = len(UserStatCaptions.get_captions())
         sheet = self.wb.create_sheet(excel_bets_caption_name(report_by_user[0].user))
         _make_auto_width(
             sheet,
@@ -104,6 +106,12 @@ class ExcelWriter:
                     self.user_currencies_columns, {report_row.currency.symbol: self.user_local_currencies_columns})
             )
 
+    def write_user_transaction(self, transactions: list[TransactionStatData]):
+        if not transactions:
+            return
+        sheet = self.wb.create_sheet(excel_transaction_caption_name(transactions[0].user))
+        # TODO
+
     def save(self, destination):
         self.wb.save(destination)
 
@@ -113,45 +121,45 @@ class ExcelWriter:
 
     def format_rows(
             self,
-            ws: Worksheet,
+            sheet: Worksheet,
             first_cell: CellAddress,
             date_columns: Iterable[int],
             currencies: dict[str, Iterable[int]],
     ):
         for i in date_columns:
-            cell = ws.cell(**first_cell.replace(column=i).kwargs)
+            cell = sheet.cell(**first_cell.replace(column=i).kwargs)
             cell.number_format = numbers.FORMAT_DATE_DDMMYY  # noqa
         for currency, columns in currencies.items():
             for i in columns:
-                cell = ws.cell(**first_cell.replace(column=i).kwargs)
+                cell = sheet.cell(**first_cell.replace(column=i).kwargs)
                 cell.number_format = self.number_format.replace("CURRENCY", currency)  # noqa
 
 
 def _make_auto_width(
-        total_ws: Worksheet,
+        sheet: Worksheet,
         count: int,
         date_columns: Iterable[int],
         currencies: dict[str, Iterable[int]],
         names: Iterable[int] = tuple(),
 ):
     for i in range(1, count + 2):
-        total_ws.column_dimensions[get_column_letter(i)].auto_size = True
+        sheet.column_dimensions[get_column_letter(i)].auto_size = True
     for i in date_columns:
-        total_ws.column_dimensions[get_column_letter(i)].width += -3
+        sheet.column_dimensions[get_column_letter(i)].width += -3
     for i in names:
-        total_ws.column_dimensions[get_column_letter(i)].width += 15
-    if "Общая сводка матчей" in total_ws.title:
+        sheet.column_dimensions[get_column_letter(i)].width += 15
+    if "Общая сводка матчей" in sheet.title:
         width_add = 15
     else:
         width_add = 3
     for columns in currencies.values():
         for i in columns:
-            total_ws.column_dimensions[get_column_letter(i)].width += width_add
+            sheet.column_dimensions[get_column_letter(i)].width += width_add
 
 
-def _insert_row(ws: Worksheet, data: list[str], first_cell: CellAddress):
+def _insert_row(sheet: Worksheet, data: list[str], first_cell: CellAddress):
     for i, text in enumerate(data):
-        ws.cell(**first_cell.shift(column=i).kwargs, value=text)
+        sheet.cell(**first_cell.shift(column=i).kwargs, value=text)
 
 
 def update_currency_dictionary(d1: dict[str, Iterable[int]], d2: dict[str, Iterable[int]]):
