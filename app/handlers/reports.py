@@ -32,6 +32,17 @@ async def make_last_month_report(message: types.Message, config: Config):
         )
 
 
+@dp.message_handler(text=kb.current_week_report, is_admin=True)
+async def make_current_mont_report(message: types.Message, config: Config):
+    try:
+        date_range = DataTimeRange.get_current_week_range()
+        await generate_and_send_report(date_range, message, config)
+    except IndexError:
+        await message.reply(
+            "Скорее всего на этой неделе пока ничего не было", protect_content=False,
+        )
+
+
 @dp.message_handler(text=kb.current_moth_report, is_admin=True)
 async def make_current_mont_report(message: types.Message, config: Config):
     try:
