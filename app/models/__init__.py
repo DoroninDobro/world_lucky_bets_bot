@@ -1,7 +1,7 @@
 from .statistic import (
     TotalStatistic,
     ThreadUsers,
-    UserStat,
+    UserBetsStat,
 )
 from .data_range import DataTimeRange
 
@@ -10,7 +10,7 @@ __all__ = [
 
     TotalStatistic,
     ThreadUsers,
-    UserStat,
+    UserBetsStat,
 
     DataTimeRange,
 ]
