@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import numbers
 from openpyxl.worksheet.worksheet import Worksheet
 
-from app.models import TotalStatistic
+from app.models import TotalStatistic, UserBetsStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.full_user_stats import FullUserStat
 from app.models.statistic.thread_users import ThreadUsers
@@ -47,6 +47,11 @@ class ExcelWriter:
         self._remove_all_worksheets()
         self.current_currency = config.default_currency
 
+        self.user_currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
+        self.user_local_currencies_columns = (4, 5, 6)
+        self.user_bookmaker_name_col = 10
+        self.user_names_cols = [self.user_bookmaker_name_col]
+
     def insert_total_report(self, report_data: dict[int, TotalStatistic]):
         total_ws = self.wb.create_sheet("Общая сводка матчей")
         _insert_row(total_ws, get_first_dict_value(report_data).get_captions(), A1)
@@ -72,33 +77,32 @@ class ExcelWriter:
         _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
     def insert_users_reports(self, report_data: dict[int, FullUserStat]):
-        currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
-        local_currencies_columns = (4, 5, 6)
-        bookmaker_name_col = 10
-        names_cols = [bookmaker_name_col]
+        for _, report_by_user in sorted(report_data.items(), key=lambda x: x[0]):
+            report_by_user: FullUserStat
+            self.write_user_bets_report(report_by_user.bets)
+
+    def write_user_bets_report(self, report_by_user: list[UserBetsStat]):
         column_count = len(UserStatCaptions.get_captions())
-        for _, report_user in sorted(report_data.items(), key=lambda x: x[0]):
-            report_user: FullUserStat
-            if len(report_user.bets) > 0:
-                current_user = report_user.bets[0].user
-                current_user_ws = self.wb.create_sheet(excel_bets_caption_name(current_user))
-                _make_auto_width(
-                    current_user_ws,
-                    column_count,
-                    self.date_columns,
-                    currencies=currencies_columns,
-                    names=[*names_cols, *self.name_columns],
-                )
-                _insert_row(current_user_ws, UserStatCaptions.get_captions(), A1)
-                for i, report_row in enumerate(report_user.bets, 1):
-                    _insert_row(current_user_ws, report_row.get_printable(), A1.shift(row=i))
-                    self.format_rows(
-                        current_user_ws,
-                        A1.shift(row=i),
-                        self.date_columns,
-                        currencies=update_currency_dictionary(
-                                currencies_columns, {report_row.currency.symbol: local_currencies_columns})
-                    )
+        if len(report_by_user) == 0:
+            return
+        sheet = self.wb.create_sheet(excel_bets_caption_name(report_by_user[0].user))
+        _make_auto_width(
+            sheet,
+            column_count,
+            self.date_columns,
+            currencies=self.user_currencies_columns,
+            names=[*self.user_names_cols, *self.name_columns],
+        )
+        _insert_row(sheet, UserStatCaptions.get_captions(), A1)
+        for i, report_row in enumerate(report_by_user, 1):
+            _insert_row(sheet, report_row.get_printable(), A1.shift(row=i))
+            self.format_rows(
+                sheet,
+                A1.shift(row=i),
+                self.date_columns,
+                currencies=update_currency_dictionary(
+                    self.user_currencies_columns, {report_row.currency.symbol: self.user_local_currencies_columns})
+            )
 
     def save(self, destination):
         self.wb.save(destination)
