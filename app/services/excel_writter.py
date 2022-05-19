@@ -78,8 +78,11 @@ class ExcelWriter:
         _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
     def insert_users_reports(self, report_data: dict[int, FullUserStat]):
-        for _, report_by_user in sorted(report_data.items(), key=lambda x: x[0]):
-            report_by_user: FullUserStat
+        # sorted by user_id for consistent sheets order
+        # after sorting user_ids (dict key) don't need anymore
+        sorted_reports: Iterable[FullUserStat] = map(lambda x: x[1], sorted(report_data.items(), key=lambda x: x[0]))
+
+        for report_by_user in sorted_reports:
             self.write_user_bets_report(report_by_user.bets)
             self.write_user_transaction(report_by_user.transactions)
 
