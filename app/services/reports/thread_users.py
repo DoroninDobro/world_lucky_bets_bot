@@ -34,10 +34,7 @@ async def load_thread_users(date_range: DataTimeRange) -> dict[int, dict[int, Wo
     for thread in monthly_threads:
         workers: list[WorkerInThread] = thread.workers  # noqa
         for worker in workers:
-            try:
-                users_statistics[thread.id][worker.worker.id] = worker
-            except KeyError:
-                users_statistics[thread.id] = {worker.worker.id: worker}
+            users_statistics.setdefault(thread.id, {})[worker.worker.id] = worker
     return users_statistics
 
 

@@ -5,7 +5,7 @@ from app.models import UserStat
 from app.models.config import Config
 from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
-from app.services.rates.utils import find_rate_and_convert
+from app.services.rates.converter import RateConverter
 from app.services.reports.common import get_thread_bets, get_rates_by_date
 
 
@@ -42,16 +42,15 @@ async def get_user_stats(thread: WorkThread, config: Config):
     rates = await get_rates_by_date(day)
     user_statistics = []
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
+        converter = RateConverter(oer=oer, rates=rates)
         for bet_item in bets_log:
             search_kwargs = dict(
                 currency=bet_item.currency,
                 day=day,
-                oer=oer,
-                rates=rates,
                 currency_to=config.currencies.default_currency.iso_code,
             )
-            bet = await find_rate_and_convert(value=bet_item.bet, **search_kwargs)
-            result = await find_rate_and_convert(value=bet_item.result, **search_kwargs)
+            bet = await converter.find_rate_and_convert(value=bet_item.bet, **search_kwargs)
+            result = await converter.find_rate_and_convert(value=bet_item.result, **search_kwargs)
             user_stat = UserStat(
                 user=bet_item.worker_thread.worker,
                 day=day,

@@ -10,6 +10,7 @@ from app.models import TotalStatistic, UserStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.thread_users import ThreadUsers
 from app.services.collections_utils import get_first_dict_value
+from app.services.reports.common import excel_bets_caption_name, excel_transaction_caption_name
 
 
 @dataclass
@@ -69,6 +70,7 @@ class ExcelWriter:
         _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
     def insert_users_reports(self, report_data: list[UserStat]):
+        report_data = sorted(report_data, key=lambda x: x.user.id)
         currencies_columns = {self.current_currency.symbol: (7, 8, 9)}
         local_currencies_columns = (4, 5, 6)
         bookmaker_name_col = 10
@@ -77,7 +79,7 @@ class ExcelWriter:
         current_user = None
         current_user_ws = None  # it rewrite on first iteration, but linter don't think that
         i = 0  # it rewrite on first iteration, but linter don't think that
-        for report_row in sorted(report_data, key=lambda x: x.user.id):
+        for report_row in report_data:
             if report_row.user != current_user:
                 if current_user_ws is not None:
                     _make_auto_width(
@@ -88,7 +90,8 @@ class ExcelWriter:
                         names=[*names_cols, *self.name_columns],
                     )
                 current_user = report_row.user
-                current_user_ws = self.wb.create_sheet(current_user.excel_caption_name)
+                current_user_ws = self.wb.create_sheet(excel_bets_caption_name(current_user))
+                current_user_transaction_ws = self.wb.create_sheet(excel_transaction_caption_name(current_user))
                 _insert_row(current_user_ws, report_row.get_captions(), A1)
                 i = 1
             _insert_row(current_user_ws, report_row.get_printable(), A1.shift(row=i))

@@ -98,12 +98,6 @@ class User(Model):
         return self.first_name or self.username or self.id
 
     @property
-    def excel_caption_name(self):
-        fullname = self.fullname
-        result = "".join(filter(lambda x: x not in r'\/?*[]:!', fullname)) or self.username or self.id
-        return result[:32]
-
-    @property
     def render_salary(self) -> str:
         result = USER_STATUS_NAME[self.worker_status]
         match self.worker_status:

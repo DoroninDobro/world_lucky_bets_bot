@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.models.db import BetItem, RateItem
+from app.models.db import BetItem, RateItem, User
 from app.models import DataTimeRange
 
 
@@ -44,3 +44,17 @@ async def get_month_rates(date_range: DataTimeRange) -> dict[date: list[RateItem
     return result
 
 
+def clear_name_for_excel(name: str):
+    return "".join(filter(lambda x: x not in r'\/?*[]:!', name))
+
+
+def excel_bets_caption_name(user: User):
+    fullname = user.fullname
+    result = clear_name_for_excel(fullname) or user.username or user.id
+    return result[:32]
+
+
+def excel_transaction_caption_name(user: User):
+    fullname = user.fullname
+    result = clear_name_for_excel(fullname) or user.username or user.id
+    return result[:32]
