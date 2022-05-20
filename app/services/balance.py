@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from aiogram import Bot
 
+from app.models import DataTimeRange
 from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
@@ -46,12 +47,21 @@ async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
     return balance_event
 
 
-async def get_last_balance_events(user: User, limit: int = 12):
+async def get_last_balance_events(user: User, limit: int = 12) -> list[BalanceEvent]:
     return await BalanceEvent\
         .filter(user=user)\
         .filter(at__gt=datetime.combine(date=get_last_month_first_day(), time=time()))\
         .order_by("-at")\
         .limit(limit)\
+        .all()
+
+
+async def get_balance_events(user: User, date_range: DataTimeRange) -> list[BalanceEvent]:
+    return await BalanceEvent \
+        .filter(user=user) \
+        .filter(at__gte=date_range.start) \
+        .filter(at__lte=date_range.stop) \
+        .order_by("-at") \
         .all()
 
 

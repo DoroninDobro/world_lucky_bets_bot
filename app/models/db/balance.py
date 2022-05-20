@@ -73,5 +73,16 @@ class BalanceEvent(Model):
 
     @property
     def is_by_admin(self):
-        # noinspection PyUnresolvedReferences
-        return self.user_id != self.author_id
+        return self.get_user_id() != self.get_author_id()
+
+    # noinspection PyUnresolvedReferences
+    def get_user_id(self):
+        return self.user_id
+
+    # noinspection PyUnresolvedReferences
+    def get_author_id(self):
+        return self.author_id
+
+    # noinspection PyUnresolvedReferences
+    def get_bet_item_id(self):
+        return self.bet_item_id
