@@ -9,6 +9,7 @@ from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
 from app.models.data.transaction import TransactionData
 from app.models.enum.blance_event_type import BalanceEventType
+from app.rendering.balance import render_balance
 from app.services.datetime_utils import get_last_month_first_day
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
@@ -71,3 +72,12 @@ async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, c
             config.user_log,
             text=await balance_event.format_log(),
         )
+
+
+async def notify_new_balance(bot: Bot, config: CurrenciesConfig, user: User):
+    async with OpenExchangeRates(api_key=config.oer_api_token) as oer:
+        balance = await calculate_balance(user, oer, config)
+    await bot.send_message(
+        user.id,
+        f"your new balance is {render_balance(balance, config.default_currency)}",
+    )

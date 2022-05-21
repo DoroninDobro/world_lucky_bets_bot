@@ -3,7 +3,7 @@ from aiogram import Bot
 from app.models.config import Config
 from app.models.data.bet import Bet
 from app.models.db import User, WorkerInThread, BetItem
-from app.services.balance import add_balance_event_and_notify
+from app.services.balance import add_balance_event_and_notify, notify_new_balance
 from app.services.status import create_transactions_by_bet
 from app.utils.exceptions import UserPermissionError
 
@@ -25,6 +25,7 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
     transactions = await create_transactions_by_bet(bet_dto=bet, bet=bet_item)
     for transaction in transactions:
         await add_balance_event_and_notify(transaction, bot, config.app.chats)
+    await notify_new_balance(bot, config.currencies, bet.user)
     return bet_item
 
 
