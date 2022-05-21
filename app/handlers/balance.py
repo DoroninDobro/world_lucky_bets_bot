@@ -8,7 +8,7 @@ from app.models.db import User
 from app.models.config import Config
 from app.models.data.transaction import TransactionData
 from app.models.enum.blance_event_type import BalanceEventType
-from app.services.balance import add_balance_event_and_notify
+from app.services.balance import add_balance_event_and_notify, notify_new_balance
 from app.states import AddTransaction
 from app.view.keyboards import balance as kb_balance
 
@@ -103,7 +103,7 @@ async def save_without_comment(callback_query: types.CallbackQuery, state: FSMCo
 async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment: str = ""):
     saved_data = await state.get_data()
     amount = Decimal(saved_data["amount"])
-    if bool(saved_data["is_income"]):
+    if not bool(saved_data["is_income"]):
         amount = -amount
     transaction_data = TransactionData(
         user_id=saved_data["user_id"],
@@ -115,4 +115,5 @@ async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment:
         comment=comment,
     )
     await add_balance_event_and_notify(transaction_data, bot, config.app.chats)
+    await notify_new_balance(bot, config.currencies, await User.get(id=transaction_data.user_id))
     await state.finish()
