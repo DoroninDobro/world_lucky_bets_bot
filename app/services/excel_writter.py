@@ -114,21 +114,22 @@ class ExcelWriter:
         if not transactions:
             return
         sheet = self.wb.create_sheet(excel_transaction_caption_name(transactions[0].user))
+        columns = TransactionStatCaptions(first_col=1)
         _make_auto_width(
             sheet=sheet,
-            count=TransactionStatCaptions.get_count_columns(),
-            date_columns=TransactionStatCaptions.date_columns,
-            currencies=TransactionStatCaptions.all_currency_columns,
-            names=TransactionStatCaptions.names_columns,
+            count=columns.get_count_columns(),
+            date_columns=columns.get_date_columns(),
+            currencies=columns.get_all_currency_columns(),
+            names=columns.get_names_columns(),
         )
-        _insert_row(sheet, TransactionStatCaptions.get_captions(), A1)
+        _insert_row(sheet, columns.get_captions(), A1)
         for i, transaction in enumerate(transactions, 1):
             _insert_row(sheet, transaction.get_printable(), A1.shift(row=i))
             self.format_rows(
                 sheet=sheet,
                 first_cell=A1.shift(row=i),
-                date_columns=TransactionStatCaptions.date_columns,
-                currencies=TransactionStatCaptions.get_currencies_columns(
+                date_columns=columns.get_date_columns(),
+                currencies=columns.get_currencies_columns(
                     transaction.currency.symbol, self.current_currency.symbol,
                 ),
             )

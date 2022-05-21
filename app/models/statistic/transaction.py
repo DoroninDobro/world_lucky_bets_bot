@@ -51,11 +51,14 @@ class TransactionStatCaptions:
     bet_log_id: str = "ID ставки"
     comment: str = "Комментарий"
 
-    date_columns = (1, )
-    currency_columns = (4, )
-    currency_eur_columns = (5, )
-    all_currency_columns = (*currency_columns, *currency_eur_columns)
-    names_columns = (8, )
+    _date_columns = (1,)
+    _currency_columns = (4,)
+    _currency_eur_columns = (5,)
+    _all_currency_columns = (*_currency_columns, *_currency_eur_columns)
+    _names_columns = (8,)
+
+    def __init__(self, first_col: int = 1):
+        self.offset = first_col - 1
 
     @classmethod
     def get_captions(cls) -> list[str]:
@@ -74,13 +77,33 @@ class TransactionStatCaptions:
     def get_count_columns(cls):
         return len(cls.get_captions())
 
-    @classmethod
-    def get_currencies_columns(cls, symbol: str, eur_symbol: str) -> dict[str, Iterable[int]]:
+    def get_currencies_columns(self, symbol: str, eur_symbol: str) -> dict[str, Iterable[int]]:
         if symbol == eur_symbol:
             return {
-                symbol: cls.all_currency_columns,
+                symbol: self._patch_column_iterable(self._all_currency_columns),
             }
         return {
-            symbol: cls.currency_columns,
-            eur_symbol: cls.currency_eur_columns,
+            symbol: self._patch_column_iterable(self._currency_columns),
+            eur_symbol: self._patch_column_iterable(self._currency_eur_columns),
         }
+
+    def get_date_columns(self):
+        return self._patch_column_iterable(self._date_columns)
+
+    def get_currency_columns(self):
+        return self._patch_column_iterable(self._currency_columns)
+
+    def get_currency_eur_columns(self):
+        return self._patch_column_iterable(self._currency_eur_columns)
+
+    def get_all_currency_columns(self):
+        return self._patch_column_iterable(self._all_currency_columns)
+
+    def get_names_columns(self):
+        return self._patch_column_iterable(self._names_columns)
+
+    def _patch_column_iterable(self, columns: Iterable[int]) -> Iterable[int]:
+        return map(self._patch_column_by_offset, columns)
+
+    def _patch_column_by_offset(self, col: int) -> int:
+        return col + self.offset
