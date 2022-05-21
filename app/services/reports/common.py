@@ -1,6 +1,6 @@
 from datetime import date
 
-from app.models.db import BetItem, RateItem
+from app.models.db import BetItem, RateItem, User
 from app.models import DataTimeRange
 
 
@@ -26,10 +26,6 @@ async def get_thread_bets(thread_id: int) -> list[BetItem]:
         ).all()
 
 
-async def get_rates_by_date(date_: date):
-    return await get_month_rates(DataTimeRange.from_date(date_))
-
-
 async def get_month_rates(date_range: DataTimeRange) -> dict[date: list[RateItem]]:
     rates = await RateItem\
         .filter(at__gte=date_range.start.date())\
@@ -44,3 +40,19 @@ async def get_month_rates(date_range: DataTimeRange) -> dict[date: list[RateItem
     return result
 
 
+def clear_name_for_excel(name: str):
+    return "".join(filter(lambda x: x not in r'\/?*[]:!', name))
+
+
+def excel_bets_caption_name(user: User) -> str:
+    result = clear_name_for_excel(user.fullname) or user.username or str(user.id)
+    return trim_for_excel_caption_len(result)
+
+
+def excel_transaction_caption_name(user: User) -> str:
+    result = clear_name_for_excel(user.fullname) or user.username or str(user.id)
+    return trim_for_excel_caption_len("tra_" + result)
+
+
+def trim_for_excel_caption_len(caption: str) -> str:
+    return caption[:32]

@@ -1,12 +1,12 @@
 import operator
 from functools import reduce
 
-from app.models import UserStat
+from app.models import UserBetsStat, DataTimeRange
 from app.models.config import Config
 from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
-from app.services.rates.utils import find_rate_and_convert
-from app.services.reports.common import get_thread_bets, get_rates_by_date
+from app.services.rates.converter import RateConverter
+from app.services.reports.common import get_thread_bets
 
 
 async def get_thread_report(thread_id: int, config: Config) -> str:
@@ -17,12 +17,12 @@ async def get_thread_report(thread_id: int, config: Config) -> str:
     report_result += f"Итого {total_bets:.2f}€ / "
     total_result = reduce(operator.add, map(lambda x: x.total_result_eur, user_statistics), 0)
     report_result += f"{total_result:.2f}€\n"
-    statistics_by_user: dict[int, list[UserStat]] = {}
+    statistics_by_user: dict[int, list[UserBetsStat]] = {}
     for us in user_statistics:
         user_stats = statistics_by_user.setdefault(us.user.id, [])
         user_stats.append(us)
     for user_stats in statistics_by_user.values():
-        user_stat: UserStat = user_stats[0]
+        user_stat: UserBetsStat = user_stats[0]
         report_result += f"<u>#️⃣{user_stat.user.id}:</u>\n"
         sum_bet = {}
         sum_result = {}
@@ -39,20 +39,18 @@ async def get_thread_report(thread_id: int, config: Config) -> str:
 async def get_user_stats(thread: WorkThread, config: Config):
     day = thread.start.date()
     bets_log = await get_thread_bets(thread.id)
-    rates = await get_rates_by_date(day)
     user_statistics = []
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
+        converter = RateConverter(oer=oer, date_range=DataTimeRange.from_date(day))
         for bet_item in bets_log:
             search_kwargs = dict(
                 currency=bet_item.currency,
                 day=day,
-                oer=oer,
-                rates=rates,
                 currency_to=config.currencies.default_currency.iso_code,
             )
-            bet = await find_rate_and_convert(value=bet_item.bet, **search_kwargs)
-            result = await find_rate_and_convert(value=bet_item.result, **search_kwargs)
-            user_stat = UserStat(
+            bet = await converter.find_rate_and_convert(value=bet_item.bet, **search_kwargs)
+            result = await converter.find_rate_and_convert(value=bet_item.result, **search_kwargs)
+            user_stat = UserBetsStat(
                 user=bet_item.worker_thread.worker,
                 day=day,
                 thread=thread,

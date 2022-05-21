@@ -1,4 +1,5 @@
 from app.models.db import User
+from app.services.reports.common import excel_bets_caption_name
 
 
 def test_excel_caption_name():
@@ -10,4 +11,4 @@ def test_excel_caption_name():
         ("this is wherry long name, so long so it does not have any limit", "this is wherry long name, so lon"),
     )
     for fixture, expected in words_pairs:
-        assert User(first_name=fixture).excel_caption_name == expected
+        assert excel_bets_caption_name(User(first_name=fixture)) == expected

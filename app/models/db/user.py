@@ -95,13 +95,7 @@ class User(Model):
     def fullname(self):
         if self.last_name is not None:
             return ' '.join((self.first_name, self.last_name))
-        return self.first_name or self.username or self.id
-
-    @property
-    def excel_caption_name(self):
-        fullname = self.fullname
-        result = "".join(filter(lambda x: x not in r'\/?*[]:!', fullname)) or self.username or self.id
-        return result[:32]
+        return self.first_name or self.username or str(self.id)
 
     @property
     def render_salary(self) -> str:
