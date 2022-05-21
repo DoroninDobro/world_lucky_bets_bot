@@ -5,7 +5,7 @@ from app.services.datetime_utils import get_last_month_first_day
 
 
 @dataclass
-class DataTimeRange:
+class DatetimeRange:
     start: datetime
     stop: datetime
 

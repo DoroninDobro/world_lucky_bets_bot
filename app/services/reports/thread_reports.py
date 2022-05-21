@@ -1,7 +1,7 @@
 import operator
 from functools import reduce
 
-from app.models import UserBetsStat, DataTimeRange
+from app.models import UserBetsStat, DatetimeRange
 from app.models.config import Config
 from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
@@ -41,7 +41,7 @@ async def get_user_stats(thread: WorkThread, config: Config):
     bets_log = await get_thread_bets(thread.id)
     user_statistics = []
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
-        converter = RateConverter(oer=oer, date_range=DataTimeRange.from_date(day))
+        converter = RateConverter(oer=oer, date_range=DatetimeRange.from_date(day))
         for bet_item in bets_log:
             search_kwargs = dict(
                 currency=bet_item.currency,

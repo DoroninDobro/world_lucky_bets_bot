@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from app.models import DataTimeRange
+from app.models import DatetimeRange
 from app.models.db import RateItem
 from app.services.rates import OpenExchangeRates
 from app.services.reports.common import get_month_rates
@@ -13,7 +13,7 @@ class RateConverter:
             self,
             oer: OpenExchangeRates,
             rates: dict[date: list[RateItem]] = None,
-            date_range: DataTimeRange = None,
+            date_range: DatetimeRange = None,
     ):
         """
         :param oer: - OpenExchangeRates - with that can search not founded rate
