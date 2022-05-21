@@ -1,4 +1,4 @@
-from app.models import TotalStatistic, DataTimeRange
+from app.models import TotalStatistic, DatetimeRange
 from app.models.config.currency import CurrenciesConfig
 from app.models.db import WorkThread
 from app.services.rates.converter import RateConverter
@@ -6,7 +6,7 @@ from app.services.reports.common import get_mont_bets
 
 
 async def generate_total_report(
-        date_range: DataTimeRange,
+        date_range: DatetimeRange,
         converter: RateConverter,
         config: CurrenciesConfig,
 ) -> dict[int, TotalStatistic]:

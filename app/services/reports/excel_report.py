@@ -2,7 +2,7 @@ from time import time
 
 from aiogram.types import InputFile
 
-from app.models import DataTimeRange
+from app.models import DatetimeRange
 from app.models.config import Config
 from app.services.excel_writter import ExcelWriter
 from app.services.rates import OpenExchangeRates
@@ -12,7 +12,7 @@ from app.services.reports.total_report import generate_total_report
 from app.services.reports.user_stat import generate_user_report
 
 
-async def process_report(date_range: DataTimeRange, config: Config) -> InputFile:
+async def process_report(date_range: DatetimeRange, config: Config) -> InputFile:
     config.temp_path.mkdir(exist_ok=True, parents=True)
     excel_writer = ExcelWriter(config.currencies)
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:

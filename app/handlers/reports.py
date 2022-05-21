@@ -3,7 +3,7 @@ from aiogram.dispatcher.handler import SkipHandler
 from loguru import logger
 
 from app.misc import dp
-from app.models import DataTimeRange
+from app.models import DatetimeRange
 from app.view.keyboards import admin as kb
 from app.models.config import Config
 from app.services.reports.excel_report import process_report
@@ -13,7 +13,7 @@ from app.services.reports.thread_reports import get_thread_report
 @dp.message_handler(text=kb.all_time_report, is_admin=True)
 async def make_all_time_report(message: types.Message, config: Config):
     try:
-        date_range = DataTimeRange.get_all_time_range()
+        date_range = DatetimeRange.get_all_time_range()
         await generate_and_send_report(date_range, message, config)
     except IndexError:
         await message.reply(
@@ -24,7 +24,7 @@ async def make_all_time_report(message: types.Message, config: Config):
 @dp.message_handler(text=kb.last_month_report, is_admin=True)
 async def make_last_month_report(message: types.Message, config: Config):
     try:
-        date_range = DataTimeRange.get_last_month_range()
+        date_range = DatetimeRange.get_last_month_range()
         await generate_and_send_report(date_range, message, config)
     except IndexError:
         await message.reply(
@@ -35,7 +35,7 @@ async def make_last_month_report(message: types.Message, config: Config):
 @dp.message_handler(text=kb.current_week_report, is_admin=True)
 async def make_current_mont_report(message: types.Message, config: Config):
     try:
-        date_range = DataTimeRange.get_current_week_range()
+        date_range = DatetimeRange.get_current_week_range()
         await generate_and_send_report(date_range, message, config)
     except IndexError:
         await message.reply(
@@ -46,7 +46,7 @@ async def make_current_mont_report(message: types.Message, config: Config):
 @dp.message_handler(text=kb.current_moth_report, is_admin=True)
 async def make_current_mont_report(message: types.Message, config: Config):
     try:
-        date_range = DataTimeRange.get_current_month_range()
+        date_range = DatetimeRange.get_current_month_range()
         await generate_and_send_report(date_range, message, config)
     except IndexError:
         await message.reply(
@@ -66,7 +66,7 @@ async def match_report(m: types.Message, config: Config):
     await m.reply(await get_thread_report(thread_id, config))
 
 
-async def generate_and_send_report(date_range: DataTimeRange, message: types.Message, config: Config):
+async def generate_and_send_report(date_range: DatetimeRange, message: types.Message, config: Config):
     await message.reply_document(
         await process_report(date_range, config),
         protect_content=False,

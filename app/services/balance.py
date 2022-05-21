@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from aiogram import Bot
 
-from app.models import DataTimeRange
+from app.models import DatetimeRange
 from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
@@ -18,7 +18,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
     balance_sum = Decimal(0)
     for balance_event in await user.balance_events.all():
         balance_event: BalanceEvent
-        converter = RateConverter(oer=oer, date_range=DataTimeRange.from_date(balance_event.at))
+        converter = RateConverter(oer=oer, date_range=DatetimeRange.from_date(balance_event.at))
         balance_sum += await converter.find_rate_and_convert(
             value=balance_event.delta,
             currency=balance_event.currency,
@@ -55,7 +55,7 @@ async def get_last_balance_events(user: User, limit: int = 12) -> list[BalanceEv
         .all()
 
 
-async def get_balance_events(user: User, date_range: DataTimeRange) -> list[BalanceEvent]:
+async def get_balance_events(user: User, date_range: DatetimeRange) -> list[BalanceEvent]:
     return await BalanceEvent \
         .filter(user=user) \
         .filter(at__gte=date_range.start) \

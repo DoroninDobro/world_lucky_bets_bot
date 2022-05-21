@@ -1,4 +1,4 @@
-from app.models import UserBetsStat, DataTimeRange
+from app.models import UserBetsStat, DatetimeRange
 from app.models.config.currency import CurrenciesConfig
 from app.models.db import WorkThread, User
 from app.models.statistic.full_user_stats import FullUserStat
@@ -9,7 +9,7 @@ from app.services.reports.common import get_mont_bets
 
 
 async def generate_user_report(
-        date_range: DataTimeRange,
+        date_range: DatetimeRange,
         converter: RateConverter,
         config: CurrenciesConfig,
 ) -> dict[int, FullUserStat]:
@@ -29,7 +29,7 @@ async def generate_user_report(
 
 
 async def generate_user_bets_report(
-        date_range: DataTimeRange,
+        date_range: DatetimeRange,
         converter: RateConverter,
         config: CurrenciesConfig,
 ) -> list[UserBetsStat]:
@@ -62,7 +62,7 @@ async def generate_user_bets_report(
 
 
 async def generate_user_transactions_report(
-        date_range: DataTimeRange, user: User, converter: RateConverter, config: CurrenciesConfig,
+        date_range: DatetimeRange, user: User, converter: RateConverter, config: CurrenciesConfig,
 ) -> list[TransactionStatData]:
     balance_events = await get_balance_events(user=user, date_range=date_range)
     return [
