@@ -12,14 +12,13 @@ from app.models.enum.blance_event_type import BalanceEventType
 from app.services.datetime_utils import get_last_month_first_day
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
-from app.services.reports.common import get_rates_by_date
 
 
 async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> Decimal:
     balance_sum = Decimal(0)
     for balance_event in await user.balance_events.all():
         balance_event: BalanceEvent
-        converter = RateConverter(oer=oer, rates=await get_rates_by_date(balance_event.at))
+        converter = RateConverter(oer=oer, date_range=DataTimeRange.from_date(balance_event.at))
         balance_sum += await converter.find_rate_and_convert(
             value=balance_event.delta,
             currency=balance_event.currency,
@@ -61,7 +60,7 @@ async def get_balance_events(user: User, date_range: DataTimeRange) -> list[Bala
         .filter(user=user) \
         .filter(at__gte=date_range.start) \
         .filter(at__lte=date_range.stop) \
-        .order_by("-at") \
+        .order_by("at") \
         .all()
 
 

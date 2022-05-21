@@ -1,3 +1,4 @@
+import itertools
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -10,7 +11,7 @@ from app.models import TotalStatistic, UserBetsStat
 from app.models.config.currency import CurrenciesConfig
 from app.models.statistic.full_user_stats import FullUserStat
 from app.models.statistic.thread_users import ThreadUsers
-from app.models.statistic.transaction import TransactionStatData
+from app.models.statistic.transaction import TransactionStatData, TransactionStatCaptions
 from app.models.statistic.user_stats import UserStatCaptions
 from app.services.collections_utils import get_first_dict_value
 from app.services.reports.common import excel_bets_caption_name, excel_transaction_caption_name
@@ -65,7 +66,7 @@ class ExcelWriter:
             total_ws,
             len(get_first_dict_value(report_data).get_printable()),
             self.date_columns,
-            currencies_columns,
+            itertools.chain.from_iterable(currencies_columns.values()),
             self.name_columns,
         )
 
@@ -95,7 +96,7 @@ class ExcelWriter:
             sheet,
             column_count,
             self.date_columns,
-            currencies=self.user_currencies_columns,
+            currencies=itertools.chain.from_iterable(self.user_currencies_columns.values()),
             names=[*self.user_names_cols, *self.name_columns],
         )
         _insert_row(sheet, UserStatCaptions.get_captions(), A1)
@@ -113,7 +114,24 @@ class ExcelWriter:
         if not transactions:
             return
         sheet = self.wb.create_sheet(excel_transaction_caption_name(transactions[0].user))
-        # TODO
+        _make_auto_width(
+            sheet=sheet,
+            count=TransactionStatCaptions.get_count_columns(),
+            date_columns=TransactionStatCaptions.date_columns,
+            currencies=TransactionStatCaptions.all_currency_columns,
+            names=TransactionStatCaptions.names_columns,
+        )
+        _insert_row(sheet, TransactionStatCaptions.get_captions(), A1)
+        for i, transaction in enumerate(transactions, 1):
+            _insert_row(sheet, transaction.get_printable(), A1.shift(row=i))
+            self.format_rows(
+                sheet=sheet,
+                first_cell=A1.shift(row=i),
+                date_columns=TransactionStatCaptions.date_columns,
+                currencies=TransactionStatCaptions.get_currencies_columns(
+                    transaction.currency.symbol, self.current_currency.symbol,
+                ),
+            )
 
     def save(self, destination):
         self.wb.save(destination)
@@ -142,7 +160,7 @@ def _make_auto_width(
         sheet: Worksheet,
         count: int,
         date_columns: Iterable[int],
-        currencies: dict[str, Iterable[int]],
+        currencies: Iterable[int],
         names: Iterable[int] = tuple(),
 ):
     for i in range(1, count + 2):
@@ -155,9 +173,8 @@ def _make_auto_width(
         width_add = 15
     else:
         width_add = 3
-    for columns in currencies.values():
-        for i in columns:
-            sheet.column_dimensions[get_column_letter(i)].width += width_add
+    for i in currencies:
+        sheet.column_dimensions[get_column_letter(i)].width += width_add
 
 
 def _insert_row(sheet: Worksheet, data: list[str], first_cell: CellAddress):

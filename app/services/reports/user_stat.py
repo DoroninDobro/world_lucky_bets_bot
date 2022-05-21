@@ -6,7 +6,7 @@ from app.models.statistic.transaction import TransactionStatData
 from app.services.balance import get_balance_events
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
-from app.services.reports.common import get_mont_bets, get_month_rates
+from app.services.reports.common import get_mont_bets
 
 
 async def generate_user_report(date_range: DataTimeRange, config: CurrenciesConfig) -> dict[int, FullUserStat]:
@@ -25,10 +25,9 @@ async def generate_user_report(date_range: DataTimeRange, config: CurrenciesConf
 
 async def generate_user_bets_report(date_range: DataTimeRange, config: CurrenciesConfig) -> list[UserBetsStat]:
     bets_log = await get_mont_bets(date_range)
-    rates = await get_month_rates(date_range)
     user_statistics = []
     async with OpenExchangeRates(config.oer_api_token) as oer:
-        converter = RateConverter(oer=oer, rates=rates)
+        converter = RateConverter(oer=oer, date_range=date_range)
         for bet_item in bets_log:
             thread: WorkThread = bet_item.worker_thread.work_thread
             day = thread.start.date()
@@ -59,15 +58,25 @@ async def generate_user_transactions_report(
         date_range: DataTimeRange, user: User, config: CurrenciesConfig,
 ) -> list[TransactionStatData]:
     balance_events = await get_balance_events(user=user, date_range=date_range)
-    return [
-        TransactionStatData(
-            user=user,
-            author_id=event.get_author_id(),
-            currency=config.currencies[event.currency],
-            amount=event.delta,
-            bet_log_item_id=event.get_bet_item_id(),
-            balance_event_type=event.type_,
-            comment=event.comment,
-        )
-        for event in balance_events
-    ]
+    async with OpenExchangeRates(config.oer_api_token) as oer:
+        converter = RateConverter(oer=oer, date_range=date_range)
+        return [
+            TransactionStatData(
+                id=event.id,
+                at=event.at,
+                user=user,
+                author_id=event.get_author_id(),
+                currency=config.currencies[event.currency],
+                amount=event.delta,
+                amount_eur=await converter.find_rate_and_convert(
+                    value=event.delta,
+                    currency=event.currency,
+                    day=event.at,
+                    currency_to=config.default_currency.iso_code,
+                ),
+                bet_log_item_id=event.get_bet_item_id(),
+                balance_event_type=event.type_,
+                comment=event.comment,
+            )
+            for event in balance_events
+        ]

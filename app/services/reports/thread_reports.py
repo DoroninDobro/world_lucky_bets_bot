@@ -1,12 +1,12 @@
 import operator
 from functools import reduce
 
-from app.models import UserBetsStat
+from app.models import UserBetsStat, DataTimeRange
 from app.models.config import Config
 from app.models.db import WorkThread
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
-from app.services.reports.common import get_thread_bets, get_rates_by_date
+from app.services.reports.common import get_thread_bets
 
 
 async def get_thread_report(thread_id: int, config: Config) -> str:
@@ -39,10 +39,9 @@ async def get_thread_report(thread_id: int, config: Config) -> str:
 async def get_user_stats(thread: WorkThread, config: Config):
     day = thread.start.date()
     bets_log = await get_thread_bets(thread.id)
-    rates = await get_rates_by_date(day)
     user_statistics = []
     async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
-        converter = RateConverter(oer=oer, rates=rates)
+        converter = RateConverter(oer=oer, date_range=DataTimeRange.from_date(day))
         for bet_item in bets_log:
             search_kwargs = dict(
                 currency=bet_item.currency,

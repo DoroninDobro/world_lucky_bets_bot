@@ -26,10 +26,6 @@ async def get_thread_bets(thread_id: int) -> list[BetItem]:
         ).all()
 
 
-async def get_rates_by_date(date_: date):
-    return await get_month_rates(DataTimeRange.from_date(date_))
-
-
 async def get_month_rates(date_range: DataTimeRange) -> dict[date: list[RateItem]]:
     rates = await RateItem\
         .filter(at__gte=date_range.start.date())\
