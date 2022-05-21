@@ -42,6 +42,7 @@ class UserBetsStat:
 
 
 class UserStatCaptions:
+    """TODO make same like app.models.statistic.transaction.TransactionStatCaptions"""
     day_name = "Дата"
     thread_id_name = "Номер матча"
     thread_name_name = "Название матча"

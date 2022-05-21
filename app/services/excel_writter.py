@@ -14,7 +14,7 @@ from app.models.statistic.thread_users import ThreadUsers
 from app.models.statistic.transaction import TransactionStatData, TransactionStatCaptions
 from app.models.statistic.user_stats import UserStatCaptions
 from app.services.collections_utils import get_first_dict_value
-from app.services.reports.common import excel_bets_caption_name, excel_transaction_caption_name
+from app.services.reports.common import excel_bets_caption_name
 
 
 @dataclass
@@ -84,14 +84,15 @@ class ExcelWriter:
         sorted_reports: Iterable[FullUserStat] = map(lambda x: x[1], sorted(report_data.items(), key=lambda x: x[0]))
 
         for report_by_user in sorted_reports:
-            self.write_user_bets_report(report_by_user.bets)
-            self.write_user_transaction(report_by_user.transactions)
+            user = report_by_user.get_user()
+            if user is None:
+                continue
+            sheet = self.wb.create_sheet(excel_bets_caption_name(user))
+            self.write_user_bets_report(sheet, report_by_user.bets)
+            self.write_user_transaction(sheet, report_by_user.transactions)
 
-    def write_user_bets_report(self, report_by_user: list[UserBetsStat]):
-        if not report_by_user:
-            return
+    def write_user_bets_report(self, sheet: Worksheet, report_by_user: list[UserBetsStat]):
         column_count = len(UserStatCaptions.get_captions())
-        sheet = self.wb.create_sheet(excel_bets_caption_name(report_by_user[0].user))
         _make_auto_width(
             sheet,
             column_count,
@@ -100,6 +101,9 @@ class ExcelWriter:
             names=[*self.user_names_cols, *self.name_columns],
         )
         _insert_row(sheet, UserStatCaptions.get_captions(), A1)
+        if not report_by_user:
+            # even if report is empty - must render header
+            return
         for i, report_row in enumerate(report_by_user, 1):
             _insert_row(sheet, report_row.get_printable(), A1.shift(row=i))
             self.format_rows(
@@ -110,24 +114,26 @@ class ExcelWriter:
                     self.user_currencies_columns, {report_row.currency.symbol: self.user_local_currencies_columns})
             )
 
-    def write_user_transaction(self, transactions: list[TransactionStatData]):
-        if not transactions:
-            return
-        sheet = self.wb.create_sheet(excel_transaction_caption_name(transactions[0].user))
-        columns = TransactionStatCaptions(first_col=1)
+    def write_user_transaction(self, sheet: Worksheet, transactions: list[TransactionStatData]):
+        columns = TransactionStatCaptions(first_col=len(UserStatCaptions.get_captions()) + 3)
+        first_cell = A1.shift(column=columns.offset)
         _make_auto_width(
             sheet=sheet,
             count=columns.get_count_columns(),
             date_columns=columns.get_date_columns(),
             currencies=columns.get_all_currency_columns(),
             names=columns.get_names_columns(),
+            offset=columns.offset,
         )
-        _insert_row(sheet, columns.get_captions(), A1)
+        _insert_row(sheet, columns.get_captions(), first_cell)
+        if not transactions:
+            # even if transactions is empty - must render header
+            return
         for i, transaction in enumerate(transactions, 1):
-            _insert_row(sheet, transaction.get_printable(), A1.shift(row=i))
+            _insert_row(sheet, transaction.get_printable(), first_cell.shift(row=i))
             self.format_rows(
                 sheet=sheet,
-                first_cell=A1.shift(row=i),
+                first_cell=first_cell.shift(row=i),
                 date_columns=columns.get_date_columns(),
                 currencies=columns.get_currencies_columns(
                     transaction.currency.symbol, self.current_currency.symbol,
@@ -163,8 +169,9 @@ def _make_auto_width(
         date_columns: Iterable[int],
         currencies: Iterable[int],
         names: Iterable[int] = tuple(),
+        offset: int = 0,
 ):
-    for i in range(1, count + 2):
+    for i in range(1 + offset, offset + count + 2):
         sheet.column_dimensions[get_column_letter(i)].auto_size = True
     for i in date_columns:
         sheet.column_dimensions[get_column_letter(i)].width += -3

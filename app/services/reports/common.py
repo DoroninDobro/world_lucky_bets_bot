@@ -49,10 +49,5 @@ def excel_bets_caption_name(user: User) -> str:
     return trim_for_excel_caption_len(result)
 
 
-def excel_transaction_caption_name(user: User) -> str:
-    result = clear_name_for_excel(user.fullname) or user.username or str(user.id)
-    return trim_for_excel_caption_len("tra_" + result)
-
-
 def trim_for_excel_caption_len(caption: str) -> str:
     return caption[:32]
