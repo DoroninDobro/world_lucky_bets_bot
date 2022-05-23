@@ -2,6 +2,7 @@ from datetime import datetime, time
 from decimal import Decimal
 
 from aiogram import Bot
+from tortoise.transactions import in_transaction
 
 from app.models import DatetimeRange
 from app.models.config.app_config import ChatsConfig
@@ -15,18 +16,32 @@ from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
 
 
+async def get_balance_sum(user: User) -> dict[str, Decimal]:
+    sql = """
+    select currency, sum(delta) from balance_events
+    where user_id = $1 
+    GROUP BY currency
+    """
+    async with in_transaction() as conn:
+        count, balances = await conn.execute_query(sql, (user.id, ))
+        result = {}
+        for record in balances:
+            result[record["currency"]] = record["sum"]
+        return result
+
+
 async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> Decimal:
+    balances = await get_balance_sum(user)
     balance_sum = Decimal(0)
-    for balance_event in await user.balance_events.all():
-        balance_event: BalanceEvent
-        converter = RateConverter(oer=oer, date_range=DatetimeRange.from_date(balance_event.at))
+    for currency, value in balances.items():
+        converter = RateConverter(oer=oer, date_range=DatetimeRange.today())
         balance_sum += await converter.find_rate_and_convert(
-            value=balance_event.delta,
-            currency=balance_event.currency,
-            day=balance_event.at,
+            value=value,
+            currency=currency,
+            day=datetime.today(),
             currency_to=config.default_currency.iso_code,
         )
-    return balance_sum
+    return balance_sum  # TODO add native currencies to output
 
 
 async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
