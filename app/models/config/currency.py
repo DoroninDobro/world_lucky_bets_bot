@@ -1,7 +1,8 @@
+from __future__ import annotations
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Currency:
     iso_code: str
     symbol: str
@@ -11,6 +12,14 @@ class Currency:
 
     def __repr__(self):
         return f"{self.fullname} {self.symbol}"
+
+    def __eq__(self, other: Currency):
+        if not isinstance(other, Currency):
+            return False
+        return self.iso_code == other.iso_code
+
+    def __hash__(self):
+        return hash(self.iso_code)
 
 
 @dataclass

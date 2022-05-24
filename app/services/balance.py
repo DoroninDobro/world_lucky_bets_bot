@@ -4,7 +4,7 @@ from decimal import Decimal
 from aiogram import Bot
 from tortoise.transactions import in_transaction
 
-from app.models import DatetimeRange
+from app.models import DatetimeRange, data
 from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
@@ -30,8 +30,9 @@ async def get_balance_sum(user: User) -> dict[str, Decimal]:
         return result
 
 
-async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> Decimal:
+async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> data.Balance:
     balances = await get_balance_sum(user)
+    amounts = {}
     balance_sum = Decimal(0)
     for currency, value in balances.items():
         converter = RateConverter(oer=oer, date_range=DatetimeRange.today())
@@ -41,7 +42,8 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
             day=datetime.today(),
             currency_to=config.default_currency.iso_code,
         )
-    return balance_sum  # TODO add native currencies to output
+        amounts[config.currencies[currency]] = value
+    return data.Balance(amount=amounts, amount_eur=balance_sum)
 
 
 async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
