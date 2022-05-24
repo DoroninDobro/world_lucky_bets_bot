@@ -1,4 +1,5 @@
 from aiogram import Bot
+from tortoise.transactions import in_transaction
 
 from app.models.config import Config
 from app.models.data.bet import Bet
@@ -9,22 +10,24 @@ from app.utils.exceptions import UserPermissionError
 
 
 async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
-    worker_in_thread = await WorkerInThread.get(worker=bet.user, work_thread_id=bet.thread_id)
-    bet_item = await BetItem.create(
-        worker_thread=worker_in_thread,
-        bet=bet.bet,
-        result=bet.result_without_salary,
-        currency=bet.currency.iso_code,
-        bookmaker_id=bet.bookmaker_id,
-    )
-    await bot.send_message(
-        config.app.chats.user_log,
-        f"{await bet_item.get_full_printable()} #️⃣{bet.thread_id}",
-        protect_content=False,
-    )
-    transactions = await create_transactions_by_bet(bet_dto=bet, bet=bet_item)
-    for transaction in transactions:
-        await add_balance_event_and_notify(transaction, bot, config.app.chats)
+    async with in_transaction() as conn:
+        worker_in_thread = await WorkerInThread.get(worker=bet.user, work_thread_id=bet.thread_id)
+        bet_item = await BetItem.create(
+            worker_thread=worker_in_thread,
+            bet=bet.bet,
+            result=bet.result_without_salary,
+            currency=bet.currency.iso_code,
+            bookmaker_id=bet.bookmaker_id,
+            using_db=conn,
+        )
+        await bot.send_message(
+            config.app.chats.user_log,
+            f"{await bet_item.get_full_printable()} #️⃣{bet.thread_id}",
+            protect_content=False,
+        )
+        transactions = create_transactions_by_bet(bet_dto=bet, bet=bet_item)
+        for transaction in transactions:
+            await add_balance_event_and_notify(transaction, bot, config.app.chats, conn)
     await notify_new_balance(bot, config.currencies, bet.user)
     return bet_item
 

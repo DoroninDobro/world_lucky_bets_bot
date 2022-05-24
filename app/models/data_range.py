@@ -50,6 +50,10 @@ class DatetimeRange:
         date_as_dt = datetime.combine(date=date_, time=time())
         return cls(start=date_as_dt, stop=date_as_dt)
 
+    @classmethod
+    def today(cls):
+        return cls.from_date(date.today())
+
     def __repr__(self):
         return f"{self.start.date().isoformat()} - " \
                f"{(self.stop.date() - timedelta(days=1)).isoformat()}"

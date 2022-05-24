@@ -2,8 +2,10 @@ from datetime import datetime, time
 from decimal import Decimal
 
 from aiogram import Bot
+from tortoise.backends.base.client import TransactionContext
+from tortoise.transactions import in_transaction
 
-from app.models import DatetimeRange
+from app.models import DatetimeRange, data
 from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
@@ -15,21 +17,37 @@ from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
 
 
-async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> Decimal:
+async def get_balance_sum(user: User) -> dict[str, Decimal]:
+    sql = """
+    select currency, sum(delta) from balance_events
+    where user_id = $1 
+    GROUP BY currency
+    """
+    async with in_transaction() as conn:
+        count, balances = await conn.execute_query(sql, (user.id, ))
+        result = {}
+        for record in balances:
+            result[record["currency"]] = record["sum"]
+        return result
+
+
+async def calculate_balance(user: User, oer: OpenExchangeRates, config: CurrenciesConfig) -> data.Balance:
+    balances = await get_balance_sum(user)
+    amounts = {}
     balance_sum = Decimal(0)
-    for balance_event in await user.balance_events.all():
-        balance_event: BalanceEvent
-        converter = RateConverter(oer=oer, date_range=DatetimeRange.from_date(balance_event.at))
+    for currency, value in balances.items():
+        converter = RateConverter(oer=oer, date_range=DatetimeRange.today())
         balance_sum += await converter.find_rate_and_convert(
-            value=balance_event.delta,
-            currency=balance_event.currency,
-            day=balance_event.at,
+            value=value,
+            currency=currency,
+            day=datetime.today(),
             currency_to=config.default_currency.iso_code,
         )
-    return balance_sum
+        amounts[config.currencies[currency]] = value
+    return data.Balance(amount=amounts, amount_eur=balance_sum)
 
 
-async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
+async def add_balance_event(transaction_data: TransactionData, conn: TransactionContext = None) -> BalanceEvent:
     if bet_log_id := transaction_data.bet_log_item_id:
         bet_item = await BetItem.get(id=bet_log_id)
     else:
@@ -43,7 +61,7 @@ async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
         type_=transaction_data.balance_event_type,
         bet_item=bet_item,
     )
-    await balance_event.save()
+    await balance_event.save(using_db=conn)
     return balance_event
 
 
@@ -65,8 +83,9 @@ async def get_balance_events(user: User, date_range: DatetimeRange) -> list[Bala
         .all()
 
 
-async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, config: ChatsConfig):
-    balance_event = await add_balance_event(transaction)
+async def add_balance_event_and_notify(
+        transaction: TransactionData, bot: Bot, config: ChatsConfig, conn: TransactionContext = None,):
+    balance_event = await add_balance_event(transaction, conn)
     if balance_event.type_ in (BalanceEventType.USER, BalanceEventType.ADMIN):
         await bot.send_message(
             config.user_log,
