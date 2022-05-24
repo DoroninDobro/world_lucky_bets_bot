@@ -6,7 +6,7 @@ from app.models.db import BetItem
 from app.models.enum.blance_event_type import BalanceEventType
 
 
-async def create_transactions_by_bet(bet_dto: Bet, bet: BetItem) -> list[TransactionData]:
+def create_transactions_by_bet(bet_dto: Bet, bet: BetItem) -> list[TransactionData]:
     salary = bet_dto.salary
     transactions = [
         transaction_data_factory(

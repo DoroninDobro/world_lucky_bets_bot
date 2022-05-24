@@ -8,7 +8,7 @@ from app.models.enum.blance_event_type import BalanceEventType
 def render_balance(balance: data.Balance, currency: Currency) -> str:
     result = ", ".join(map(
         lambda x: _render_money(x[1], x[0]),
-        balance.amount.items(),
+        filter(lambda x: x[1] != 0, balance.amount.items()),
     ))
     result += f" (≈{_render_money(balance.amount_eur, currency)})"
     return result

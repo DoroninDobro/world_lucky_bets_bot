@@ -2,6 +2,7 @@ from datetime import datetime, time
 from decimal import Decimal
 
 from aiogram import Bot
+from tortoise.backends.base.client import TransactionContext
 from tortoise.transactions import in_transaction
 
 from app.models import DatetimeRange, data
@@ -46,7 +47,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
     return data.Balance(amount=amounts, amount_eur=balance_sum)
 
 
-async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
+async def add_balance_event(transaction_data: TransactionData, conn: TransactionContext = None) -> BalanceEvent:
     if bet_log_id := transaction_data.bet_log_item_id:
         bet_item = await BetItem.get(id=bet_log_id)
     else:
@@ -60,7 +61,7 @@ async def add_balance_event(transaction_data: TransactionData) -> BalanceEvent:
         type_=transaction_data.balance_event_type,
         bet_item=bet_item,
     )
-    await balance_event.save()
+    await balance_event.save(using_db=conn)
     return balance_event
 
 
@@ -82,8 +83,9 @@ async def get_balance_events(user: User, date_range: DatetimeRange) -> list[Bala
         .all()
 
 
-async def add_balance_event_and_notify(transaction: TransactionData, bot: Bot, config: ChatsConfig):
-    balance_event = await add_balance_event(transaction)
+async def add_balance_event_and_notify(
+        transaction: TransactionData, bot: Bot, config: ChatsConfig, conn: TransactionContext = None,):
+    balance_event = await add_balance_event(transaction, conn)
     if balance_event.type_ in (BalanceEventType.USER, BalanceEventType.ADMIN):
         await bot.send_message(
             config.user_log,
