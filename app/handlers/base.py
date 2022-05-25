@@ -39,7 +39,7 @@ async def get_idchat(message: types.Message):
             f"\nid {hbold(message.reply_to_message.from_user.full_name)}: "
             f"{hpre(message.reply_to_message.from_user.id)}"
         )
-    await message.reply(text, disable_notification=True)
+    await message.reply(text, disable_notification=True, protect_content=False)
 
 
 @dp.message_handler(state='*', commands='cancel')
