@@ -15,7 +15,7 @@ class OpenExchangeRates(Rates):
 
     async def get_updated_date(self) -> datetime:
         latest_res = await self.r.latest()
-        return datetime.fromtimestamp(latest_res['timestamp'])
+        return datetime.fromtimestamp(float(latest_res['timestamp']))
 
     async def get_rate(self, code_to: str, code_from: str) -> Decimal:
         if code_from == code_to:
