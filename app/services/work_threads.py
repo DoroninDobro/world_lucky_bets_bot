@@ -8,6 +8,7 @@ from loguru import logger
 from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
+from app.utils.thread_shadow import shadow_thread_id
 from app.view.keyboards import admin as kb_admin
 from app.view.keyboards import worker as kb_worker
 from app.models.db import WorkThread, WorkerInThread, User, AdditionalText, RateItem
@@ -55,7 +56,7 @@ async def start_new_thread(
         log_chat_message = await bot.send_photo(
             chat_id=config.app.chats.admin_log,
             photo=photo_file_id,
-            caption=f"{created_thread.id}. "
+            caption=f"{shadow_thread_id(created_thread.id)}. "
                     f"Started a new match from {admin.id}",
         )
         transaction_messages.append(log_chat_message)
@@ -63,7 +64,7 @@ async def start_new_thread(
         for_admins_no_usernames_message = await bot.send_photo(
             chat_id=config.app.chats.admins_without_usernames_log,
             photo=photo_file_id,
-            caption=str(created_thread.id)
+            caption=str(shadow_thread_id(created_thread.id)),
         )
         transaction_messages.append(for_admins_no_usernames_message)
 
@@ -254,7 +255,6 @@ async def send_notification_stop(thread: WorkThread, bot: Bot, config: Config):
                                reply_to_message_id=worker.message_id)
         await asyncio.sleep(0.5)
     notify_text = (
-        f"{thread.id}. "
         f"Match {thread.name if thread.name is not None else ''} "
         f"has been successfully completed"
     )
@@ -265,9 +265,11 @@ async def send_notification_stop(thread: WorkThread, bot: Bot, config: Config):
     )
     await bot.send_message(
         chat_id=config.app.chats.user_log,
-        text=notify_text,
+        text=f"{thread.id}. {notify_text}",
+
     )
     await bot.send_message(
         chat_id=config.app.chats.admins_without_usernames_log,
         text=notify_text,
+        reply_to_message_id=thread.log_chat_for_admins_without_usernames_message_id,
     )

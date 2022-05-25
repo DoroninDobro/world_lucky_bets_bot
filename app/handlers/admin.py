@@ -166,7 +166,7 @@ async def process_mailing(
 async def update_handler(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
-        user: User
+        user: User,
 ):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
