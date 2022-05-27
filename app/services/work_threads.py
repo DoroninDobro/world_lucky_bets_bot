@@ -77,17 +77,16 @@ async def start_new_thread(
     return created_thread
 
 
-async def save_daily_rates(config: Config, using_db=None):
-    async with OpenExchangeRates(config.currencies.oer_api_token) as oer:
-        with suppress(IntegrityError):
-            for currency in config.currencies.currencies:
-                rate = RateItem(
-                    at=(await oer.get_updated_date()).date(),
-                    currency=currency,
-                    to_eur=await oer.get_rate("EUR", currency),
-                    to_usd=await oer.get_rate("USD", currency),
-                )
-                await rate.save(using_db=using_db)
+async def save_daily_rates(config: Config, oer: OpenExchangeRates, using_db=None):
+    with suppress(IntegrityError):
+        for currency in config.currencies.currencies:
+            rate = RateItem(
+                at=(await oer.get_updated_date()).date(),
+                currency=currency,
+                to_eur=await oer.get_rate("EUR", currency),
+                to_usd=await oer.get_rate("USD", currency),
+            )
+            await rate.save(using_db=using_db)
 
 
 async def get_thread(message_id: int) -> WorkThread:

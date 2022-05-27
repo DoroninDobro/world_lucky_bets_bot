@@ -35,7 +35,7 @@ class RateConverter:
             self,
             value: Decimal,
             currency: str,
-            day: date,
+            day: date | None,
             currency_to: str,
     ) -> Decimal:
         """

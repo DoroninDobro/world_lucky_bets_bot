@@ -9,6 +9,7 @@ from app.models.config import Config
 from app.models.data.transaction import TransactionData
 from app.models.enum.blance_event_type import BalanceEventType
 from app.services.balance import add_balance_event_and_notify, notify_new_balance
+from app.services.rates import OpenExchangeRates
 from app.states import AddTransaction
 from app.view.keyboards import balance as kb_balance
 
@@ -87,20 +88,25 @@ async def save_amount(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=AddTransaction.comment)
-async def save_with_comment(message: types.Message, state: FSMContext, config: Config):
+async def save_with_comment(message: types.Message, state: FSMContext, config: Config, oer: OpenExchangeRates):
     comment = message.text
-    await save_transaction(state, config, message.bot, comment)
+    await save_transaction(state, config, message.bot, oer, comment)
     await message.answer("Saved!")
 
 
 @dp.callback_query_handler(kb_balance.cb_complete.filter(), state=AddTransaction.comment)
-async def save_without_comment(callback_query: types.CallbackQuery, state: FSMContext, config: Config):
+async def save_without_comment(
+        callback_query: types.CallbackQuery,
+        state: FSMContext,
+        config: Config,
+        oer: OpenExchangeRates,
+):
     await callback_query.answer()
-    await save_transaction(state, config, callback_query.bot)
+    await save_transaction(state, config, callback_query.bot, oer)
     await callback_query.message.edit_text("Have no comments for this transaction")
 
 
-async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment: str = ""):
+async def save_transaction(state: FSMContext, config: Config, bot: Bot, oer: OpenExchangeRates, comment: str = ""):
     saved_data = await state.get_data()
     amount = Decimal(saved_data["amount"])
     if not bool(saved_data["is_income"]):
@@ -115,5 +121,5 @@ async def save_transaction(state: FSMContext, config: Config, bot: Bot, comment:
         comment=comment,
     )
     await add_balance_event_and_notify(transaction_data, bot, config.app.chats)
-    await notify_new_balance(bot, config.currencies, await User.get(id=transaction_data.user_id))
+    await notify_new_balance(bot, config.currencies, await User.get(id=transaction_data.user_id), oer)
     await state.finish()

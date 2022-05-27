@@ -40,7 +40,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
         balance_sum += await converter.find_rate_and_convert(
             value=value,
             currency=currency,
-            day=datetime.today(),
+            day=None,
             currency_to=config.default_currency.iso_code,
         )
         amounts[config.currencies[currency]] = value
@@ -93,9 +93,8 @@ async def add_balance_event_and_notify(
         )
 
 
-async def notify_new_balance(bot: Bot, config: CurrenciesConfig, user: User):
-    async with OpenExchangeRates(api_key=config.oer_api_token) as oer:
-        balance = await calculate_balance(user, oer, config)
+async def notify_new_balance(bot: Bot, config: CurrenciesConfig, user: User, oer: OpenExchangeRates):
+    balance = await calculate_balance(user, oer, config)
     await bot.send_message(
         user.id,
         f"your new balance is {render_balance(balance, config.default_currency)}",

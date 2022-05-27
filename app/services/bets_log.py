@@ -5,11 +5,12 @@ from app.models.config import Config
 from app.models.data.bet import Bet
 from app.models.db import User, WorkerInThread, BetItem
 from app.services.balance import add_balance_event_and_notify, notify_new_balance
+from app.services.rates import OpenExchangeRates
 from app.services.status import create_transactions_by_bet
 from app.utils.exceptions import UserPermissionError
 
 
-async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
+async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config, oer: OpenExchangeRates):
     async with in_transaction() as conn:
         worker_in_thread = await WorkerInThread.get(worker=bet.user, work_thread_id=bet.thread_id)
         bet_item = await BetItem.create(
@@ -28,7 +29,7 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config):
         transactions = create_transactions_by_bet(bet_dto=bet, bet=bet_item)
         for transaction in transactions:
             await add_balance_event_and_notify(transaction, bot, config.app.chats, conn)
-    await notify_new_balance(bot, config.currencies, bet.user)
+    await notify_new_balance(bot, config.currencies, bet.user, oer)
     return bet_item
 
 

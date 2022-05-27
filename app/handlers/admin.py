@@ -12,6 +12,7 @@ from tortoise.exceptions import DoesNotExist
 
 from app.handlers.errors import errors_handler
 from app.misc import dp
+from app.services.rates import OpenExchangeRates
 
 from app.services.work_threads import (
     start_new_thread,
@@ -55,7 +56,7 @@ async def cmd_start(message: types.Message):
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
                     content_types=types.ContentType.PHOTO)
-async def new_send(message: types.Message, user: User, config: Config):
+async def new_send(message: types.Message, user: User, config: Config, oer: OpenExchangeRates):
     photo_file_id = message.photo[-1].file_id
     try:
         thread = await start_new_thread(photo_file_id, user, message.bot, config)
@@ -72,7 +73,7 @@ async def new_send(message: types.Message, user: User, config: Config):
     logger.info("admin {user} start new thread {thread}",
                 user=message.from_user.id, thread=thread.id)
     await delete_message(message)
-    await save_daily_rates(config)
+    await save_daily_rates(config, oer)
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=True)

@@ -208,7 +208,14 @@ async def send_check_data(message: types.Message, state: FSMContext, config: Con
     chat_type=types.ChatType.PRIVATE,
     state=Report.ok
 )
-async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: User, config: Config):
+@dp.throttled(rate=3)
+async def saving(
+        callback_query: types.CallbackQuery,
+        state: FSMContext,
+        user: User,
+        config: Config,
+        oer: OpenExchangeRates,
+):
     try:
         state_data = await state.get_data()
         currency: Currency = config.currencies.currencies[state_data.pop('currency')]
@@ -220,11 +227,12 @@ async def saving(callback_query: types.CallbackQuery, state: FSMContext, user: U
             ),
             bot=callback_query.bot,
             config=config,
+            oer=oer,
         )
 
         await callback_query.message.edit_text(f"Successfully saved\n{betting_item}")
         await state.finish()
-        await callback_query.answer()
+        return await callback_query.answer()
     except Exception:
         logger.warning("error by saving report by user {user}", user=user.id)
         await callback_query.answer("An error occurred", show_alert=True)
@@ -262,11 +270,10 @@ async def register_user(message: types.Message):
 
 
 @dp.message_handler(commands="status")
-async def get_status(message: types.Message, user: User, config: Config):
+async def get_status(message: types.Message, user: User, config: Config, oer: OpenExchangeRates):
     logger.info("user {user} ask balance", user=user.id)
-    async with OpenExchangeRates(api_key=config.currencies.oer_api_token) as oer:
-        balance = await calculate_balance(user, oer, config.currencies)
-        await message.reply(
-            f"Your balance is {render_balance(balance, config.currencies.default_currency)}\n"
-            f"Salary type: {user.render_salary}"
-        )
+    balance = await calculate_balance(user, oer, config.currencies)
+    await message.reply(
+        f"Your balance is {render_balance(balance, config.currencies.default_currency)}\n"
+        f"Salary type: {user.render_salary}"
+    )
