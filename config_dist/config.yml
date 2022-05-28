@@ -12,6 +12,13 @@ bot:
   superusers:
     - 46866565
   enable_logging_middleware: True
+storage:
+  type: redis
+  # type: memory
+  redis:
+    url: http://localhost
+    port: 6379
+    db: 1
 currencies:
   oer_api_token: "token"
   base: EUR

@@ -7,6 +7,7 @@ from dateutil import tz
 from app.models.config.app_config import AppConfig
 from app.models.config.currency import CurrenciesConfig
 from app.models.config.db import DBConfig
+from app.models.config.storage import StorageConfig
 
 
 @dataclass
@@ -14,6 +15,7 @@ class Config:
     paths: Paths
     db: DBConfig
     bot: BotConfig
+    storage: StorageConfig
     currencies: CurrenciesConfig
     app: AppConfig
     tz_view = tz.gettz('Europe/Moscow')
