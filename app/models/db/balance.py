@@ -58,18 +58,30 @@ class BalanceEvent(Model):
 
     async def format_history(self, currencies: CurrenciesConfig):
         await self.fetch_related("author", "user")
-        result = ""
-        result += f"{self.at.strftime('%d.%m.%Y')} "
+        result = f"{self.at.strftime('%d.%m.%Y')} "
         if self.is_by_admin:
             result += f"📌"
         else:
             result += ""
         result += (
-            f"{self.delta:.0f}{currencies.currencies[self.currency].symbol} "
+            f"{self.delta:.0f} {currencies.currencies[self.currency].symbol} "
             f"type: {self.type_.name} "
             f"{self.comment}"
         )
         return result
+
+    def format_user(self, currencies: CurrenciesConfig):
+        if self.type_ == BalanceEventType.SALARY:
+            return (
+                f"Your salary for that bet is "
+                f"{-self.delta:.0f} {currencies.currencies[self.currency].symbol} "
+            )
+        else:
+            return (
+                f"{self.delta:.0f} {currencies.currencies[self.currency].symbol} "
+                f"type: {self.type_.name} "
+                f"{self.comment}"
+            )
 
     @property
     def is_by_admin(self):

@@ -84,12 +84,22 @@ async def get_balance_events(user: User, date_range: DatetimeRange) -> list[Bala
 
 
 async def add_balance_event_and_notify(
-        transaction: TransactionData, bot: Bot, config: ChatsConfig, conn: TransactionContext = None,):
+        transaction: TransactionData,
+        bot: Bot,
+        config: ChatsConfig,
+        currencies: CurrenciesConfig,
+        conn: TransactionContext = None,
+):
     balance_event = await add_balance_event(transaction, conn)
     if balance_event.type_ in (BalanceEventType.USER, BalanceEventType.ADMIN):
         await bot.send_message(
             config.user_log,
             text=await balance_event.format_log(),
+        )
+    if balance_event.type_ == BalanceEventType.SALARY:
+        await bot.send_message(
+            transaction.user_id,
+            balance_event.format_user(currencies)
         )
 
 

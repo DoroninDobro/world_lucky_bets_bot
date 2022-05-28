@@ -42,7 +42,7 @@ class BetItem(Model):
         return (
             f"bet ID {self.id} by {user.mention_link}. "
             f"Book \"{bookmaker.name if bookmaker else 'unknown'}\": "
-            f"{self.bet:.2f}{self.currency} → {self.result:.2f} {self.currency}"
+            f"{self.bet:.2f} {self.currency} → {self.result:.2f} {self.currency}"
         )
 
     @property

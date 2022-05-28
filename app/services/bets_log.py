@@ -28,7 +28,7 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config, oer: OpenExch
         )
         transactions = create_transactions_by_bet(bet_dto=bet, bet=bet_item)
         for transaction in transactions:
-            await add_balance_event_and_notify(transaction, bot, config.app.chats, conn)
+            await add_balance_event_and_notify(transaction, bot, config.app.chats, config.currencies, conn)
     await notify_new_balance(bot, config.currencies, bet.user, oer)
     return bet_item
 

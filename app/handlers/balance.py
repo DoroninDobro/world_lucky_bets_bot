@@ -122,6 +122,6 @@ async def save_transaction(state: FSMContext, config: Config, bot: Bot, oer: Ope
         balance_event_type=BalanceEventType[saved_data["balance_event_type"]],
         comment=comment,
     )
-    await add_balance_event_and_notify(transaction_data, bot, config.app.chats)
+    await add_balance_event_and_notify(transaction_data, bot, config.app.chats, config.currencies)
     await notify_new_balance(bot, config.currencies, await User.get(id=transaction_data.user_id), oer)
     await state.finish()
