@@ -88,6 +88,7 @@ async def save_amount(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=AddTransaction.comment)
+@dp.throttled(rate=3)
 async def save_with_comment(message: types.Message, state: FSMContext, config: Config, oer: OpenExchangeRates):
     comment = message.text
     await save_transaction(state, config, message.bot, oer, comment)
@@ -95,6 +96,7 @@ async def save_with_comment(message: types.Message, state: FSMContext, config: C
 
 
 @dp.callback_query_handler(kb_balance.cb_complete.filter(), state=AddTransaction.comment)
+@dp.throttled(rate=3)
 async def save_without_comment(
         callback_query: types.CallbackQuery,
         state: FSMContext,
