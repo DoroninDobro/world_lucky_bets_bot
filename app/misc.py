@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram_dialog import DialogRegistry
 from loguru import logger
 
@@ -11,7 +10,6 @@ from app.config import load_config
 from app.dialogs.panel import setup_dialogs
 from app.models.config import Config
 from app.models.config.main import Paths
-
 
 paths = Paths(Path(__file__).parent.parent, os.getenv("BOT_NAME"))
 config = load_config(paths)
@@ -22,7 +20,7 @@ bot = Bot(
     disable_web_page_preview=True,
     protect_content=True,
 )
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=config.storage.create_storage())
 registry = DialogRegistry(dp)
 
 

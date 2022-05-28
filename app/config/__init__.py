@@ -9,6 +9,7 @@ from .app_config import load_app_config
 from .bot import load_bot_config
 from .currency import load_currency, load_currencies
 from .db_config import load_db_config
+from .storage import load_storage
 
 
 def load_config(paths: Paths) -> Config:
@@ -20,5 +21,6 @@ def load_config(paths: Paths) -> Config:
         currencies=load_currencies(dct_config["currencies"]),
         bot=load_bot_config(dct_config["bot"]),
         app=load_app_config(dct_config["app"]),
+        storage=load_storage(dct_config["storage"])
     )
 
