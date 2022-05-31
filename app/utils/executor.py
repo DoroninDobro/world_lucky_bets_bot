@@ -1,4 +1,5 @@
 # partially from https://github.com/aiogram/bot
+import asyncio
 from contextlib import suppress
 from functools import partial
 
@@ -42,6 +43,7 @@ async def set_commands(dispatcher: Dispatcher, chats: set[int]):
     )
     for chat_id in chats:
         with suppress(BadRequest):
+            await asyncio.sleep(0.3)
             await dispatcher.bot.set_my_commands(
                 [
                     BotCommand("start", "start bot"),

@@ -46,4 +46,4 @@ async def register_worker(user: User):
 
 
 async def get_registered() -> list[User]:
-    return await User.filter(registered=True).all()
+    return await User.filter(registered=True).order_by("id").all()
