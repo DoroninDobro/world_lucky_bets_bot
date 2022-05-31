@@ -252,7 +252,7 @@ async def discard_saving(callback_query: types.CallbackQuery, state: FSMContext)
     await state.finish()
 
 
-@dp.message_handler(commands=REGISTRATION_COMMAND, is_admin=False)
+@dp.message_handler(commands=REGISTRATION_COMMAND.command, is_admin=False)
 async def register_user(message: types.Message, user: User, config: Config):
     first_time_reg = await register_worker(user)
     if not first_time_reg:
@@ -265,12 +265,12 @@ async def register_user(message: types.Message, user: User, config: Config):
     await message.reply("Registration was successfully")
 
 
-@dp.message_handler(commands=REGISTRATION_COMMAND, is_admin=True)
+@dp.message_handler(commands=REGISTRATION_COMMAND.command, is_admin=True)
 async def register_user(message: types.Message):
     await message.reply("Admin can't be registered")
 
 
-@dp.message_handler(commands=STATUS_COMMAND)
+@dp.message_handler(commands=STATUS_COMMAND.command)
 async def get_status(message: types.Message, user: User, config: Config, oer: OpenExchangeRates):
     logger.info("user {user} ask balance", user=user.id)
     balance = await calculate_balance(user, oer, config.currencies)
