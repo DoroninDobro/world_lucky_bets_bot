@@ -3,6 +3,7 @@ from contextlib import suppress
 from functools import partial
 
 from aiogram import Dispatcher
+from aiogram.types import BotCommand
 from aiogram.utils.exceptions import TelegramAPIError
 from aiogram.utils.executor import Executor
 from loguru import logger
@@ -29,8 +30,19 @@ async def on_startup_notify(dispatcher: Dispatcher, config: Config):
         logger.info("Notified superusers about bot is started.")
 
 
+async def set_commands(dispatcher: Dispatcher):
+    await dispatcher.bot.set_my_commands(
+        [
+            BotCommand("start", "start bot"),
+            BotCommand("registration", "registration in users"),
+            BotCommand("transaction", "add a new transaction"),
+        ],
+    )
+
+
 def setup(config: Config):
     logger.info("Configure executor...")
     db.setup(runner, config.db)
     runner.on_startup(on_startup_webhook, webhook=True, polling=False)
     runner.on_startup(partial(on_startup_notify, config=config))
+    runner.on_startup(set_commands)
