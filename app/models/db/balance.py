@@ -42,13 +42,13 @@ class BalanceEvent(Model):
         if self.is_by_admin:
             result += (
                 f"📌 admin {self.author.mention_link} "
-                f"add transaction of type {self.type_.value} "
+                f"add transaction "
                 f"for user {self.user.mention_link} "
             )
         else:
             result += (
                 f"{self.user.mention_link} "
-                f"add transaction of type {self.type_.value} "
+                f"add transaction "
             )
         result += (
             f"{self.delta:+.2f} {self.currency} "
