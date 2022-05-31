@@ -3,10 +3,12 @@ from typing import Any
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import DialogManager
+from loguru import logger
 
 from app.models.db import User
 from app.models.enum.salary_type import SalaryType
 from app.models.enum.blance_event_type import BalanceEventType
+from app.services.workers import unregister_worker
 from app.view.keyboards import balance as kb_balance
 from app.states import Panel, AddTransaction
 
@@ -36,6 +38,16 @@ async def add_transaction_start(c: CallbackQuery, button: Any, manager: DialogMa
         text="Please select type of transaction:",
         reply_markup=kb_balance.get_transaction_sign(),
     )
+
+
+async def unregister_user(c: CallbackQuery, button: Any, manager: DialogManager):
+    user_id = manager.current_context().dialog_data["active_user"]
+    logger.info(
+        "admin {} unregistered user {user_id}",
+        users_id=user_id, admin=manager.data["user"].id,
+    )
+    await unregister_worker(user_id)
+    await c.answer("User removed")
 
 
 async def select_salary_type(c: CallbackQuery, widget: Any, manager: DialogManager, item_id):

@@ -5,7 +5,8 @@ from aiogram_dialog.widgets.kbd import ScrollingGroup, Select, SwitchTo, Button
 from aiogram_dialog.widgets.text import Const, Format
 
 from app.dialogs.panel.getters import get_users, get_user, get_salary_types, get_selected_salary_type
-from app.dialogs.panel.handlers import select_user, add_transaction_start, select_salary_type, input_salary
+from app.dialogs.panel.handlers import select_user, add_transaction_start, select_salary_type, input_salary, \
+    unregister_user
 from app.states import Panel
 
 panel = Dialog(
@@ -43,6 +44,11 @@ panel = Dialog(
             Const("Change salary"),
             state=Panel.change_salary,
             id="change_salary"
+        ),
+        Button(
+            Const("Remove from list"),
+            on_click=unregister_user,
+            id="remove_user"
         ),
         SwitchTo(
             Const("Back to users"),

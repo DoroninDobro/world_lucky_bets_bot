@@ -45,5 +45,11 @@ async def register_worker(user: User):
     return not was_registered
 
 
+async def unregister_worker(user_id: int):
+    user = await User.get(id=user_id)
+    user.registered = False
+    await user.save()
+
+
 async def get_registered() -> list[User]:
     return await User.filter(registered=True).order_by("id").all()
