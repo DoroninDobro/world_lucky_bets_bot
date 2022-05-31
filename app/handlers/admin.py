@@ -6,11 +6,13 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.utils.exceptions import MessageNotModified, BadRequest
+from aiogram_dialog import DialogManager, StartMode
 from loguru import logger
 from tortoise.exceptions import DoesNotExist
 
 from app.handlers.errors import errors_handler
 from app.misc import dp
+from app.services.rates import OpenExchangeRates
 
 from app.services.work_threads import (
     start_new_thread,
@@ -23,22 +25,25 @@ from app.services.work_threads import (
     rename_thread,
     save_daily_rates,
 )
-from app import config, keyboards as kb
-from app.models import User, AdditionalText, WorkThread
-from ..services.additional_text import (
+from app.utils.commands import START_COMMAND, USERS_COMMAND
+from app.view.keyboards import admin as kb
+from app.models.db import User, AdditionalText, WorkThread
+from app.models.config import Config
+from app.services.additional_text import (
     get_workers,
     change_disinformation,
     change_worker,
 )
-from ..services.remove_message import delete_message
-from ..utils.exceptions import ThreadStopped
+from app.services.remove_message import delete_message
+from app.states import Panel
+from app.utils.exceptions import ThreadStopped
 
 
 class RenameThread(StatesGroup):
     name = State()
 
 
-@dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=True)
+@dp.message_handler(commands=START_COMMAND.command, commands_prefix='!/', is_admin=True)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
     """For start handler for not admin see base.py """
@@ -50,12 +55,13 @@ async def cmd_start(message: types.Message):
     )
 
 
-@dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False,
-                    content_types=types.ContentType.PHOTO)
-async def new_send(message: types.Message, user: User):
+@dp.message_handler(
+    is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=False, content_types=types.ContentType.PHOTO,
+)
+async def new_send(message: types.Message, user: User, config: Config, oer: OpenExchangeRates):
     photo_file_id = message.photo[-1].file_id
     try:
-        thread = await start_new_thread(photo_file_id, user, message.bot)
+        thread = await start_new_thread(photo_file_id, user, message.bot, config)
     except Exception:
         await message.reply(
             "Something went wrong, we wrote down the problem",
@@ -69,7 +75,7 @@ async def new_send(message: types.Message, user: User):
     logger.info("admin {user} start new thread {thread}",
                 user=message.from_user.id, thread=thread.id)
     await delete_message(message)
-    await save_daily_rates()
+    await save_daily_rates(config, oer)
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=True)
@@ -130,18 +136,22 @@ async def get_additional_text(callback_query: types.CallbackQuery, callback_data
 
 
 @dp.callback_query_handler(kb.cb_send_now.filter())
-async def send_new_info_now(callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User):
+async def send_new_info_now(
+        callback_query: types.CallbackQuery, callback_data: typing.Dict[str, str], user: User, config: Config,
+):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
     asyncio.create_task(
-        process_mailing(callback_query, a_t, callback_query.bot, thread=thread)
+        process_mailing(callback_query, a_t, callback_query.bot, thread=thread, config=config)
     )
     await callback_query.answer(cache_time=1)
 
 
-async def process_mailing(callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread):
+async def process_mailing(
+        callback_query: types.CallbackQuery, a_text: AdditionalText, bot: Bot, thread: WorkThread, config: Config
+):
     logger.info("start sending additional info {a_t}", a_t=a_text.id)
     try:
-        await start_mailing(a_text, bot, thread=thread)
+        await start_mailing(a_text, bot, thread=thread, config=config)
     except ThreadStopped:
         return await callback_query.message.reply(
             "This match is over! Can't process mailing",
@@ -159,7 +169,7 @@ async def process_mailing(callback_query: types.CallbackQuery, a_text: Additiona
 async def update_handler(
         callback_query: types.CallbackQuery,
         callback_data: typing.Dict[str, str],
-        user: User
+        user: User,
 ):
     a_t, thread = await get_additional_text(callback_query, callback_data, user)
 
@@ -224,7 +234,8 @@ async def change_addressee_workers(
 @dp.callback_query_handler(kb.cb_stop.filter(), is_admin=True)
 async def stop_work_thread(
         callback_query: types.CallbackQuery,
-        callback_data: typing.Dict[str, str]
+        callback_data: typing.Dict[str, str],
+        config: Config,
 ):
     thread_id = int(callback_data['thread_id'])
     try:
@@ -255,14 +266,14 @@ async def stop_work_thread(
     try:
         # edit message in workers chat
         await callback_query.bot.edit_message_caption(
-            chat_id=config.WORKERS_CHAT_ID,
+            chat_id=config.app.chats.workers,
             message_id=thread.workers_chat_message_id,
             caption=caption,
             reply_markup=None,
         )
     except BadRequest as e:
         logger.exception(e)
-    await send_notification_stop(thread, callback_query.bot)
+    await send_notification_stop(thread, callback_query.bot, config)
 
 
 @dp.callback_query_handler(kb.cb_rename_thread.filter(), is_admin=True)
@@ -283,3 +294,8 @@ async def save_new_name_process(message: types.Message, state: FSMContext):
     await rename_thread((await state.get_data())['thread_id'], message.text)
     await state.finish()
     await message.reply("Saved!")
+
+
+@dp.message_handler(is_admin=True, commands=USERS_COMMAND.command)
+async def get_users_list(_: types.Message, dialog_manager: DialogManager):
+    await dialog_manager.start(Panel.users, mode=StartMode.RESET_STACK)

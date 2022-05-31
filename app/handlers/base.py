@@ -5,9 +5,10 @@ from loguru import logger
 
 from app.misc import dp
 from app.models.db.chat import Chat
+from app.utils.commands import START_COMMAND
 
 
-@dp.message_handler(commands=["start"], commands_prefix='!/', is_admin=False)
+@dp.message_handler(commands=START_COMMAND.command, commands_prefix='!/', is_admin=False)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
     """For start handler for admin see admin.py """
@@ -39,7 +40,7 @@ async def get_idchat(message: types.Message):
             f"\nid {hbold(message.reply_to_message.from_user.full_name)}: "
             f"{hpre(message.reply_to_message.from_user.id)}"
         )
-    await message.reply(text, disable_notification=True)
+    await message.reply(text, disable_notification=True, protect_content=False)
 
 
 @dp.message_handler(state='*', commands='cancel')

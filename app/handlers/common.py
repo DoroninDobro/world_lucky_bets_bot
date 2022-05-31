@@ -2,13 +2,14 @@ from aiogram import types
 from tortoise.exceptions import DoesNotExist
 
 from app.misc import dp
-from app.models import User
+from app.models.db import User
+from app.models.config import Config
 from app.services.bets_log import remove_bet_item
 from app.utils.exceptions import UserPermissionError
 
 
 @dp.message_handler(commands="del", commands_prefix="/!")
-async def remove_bet_item_command(message: types.Message, user: User):
+async def remove_bet_item_command(message: types.Message, user: User, config: Config):
     try:
         _, args = message.text.split(maxsplit=1)
         bet_item_id = int(args)
@@ -18,7 +19,7 @@ async def remove_bet_item_command(message: types.Message, user: User):
             "you want to delete"
         )
     try:
-        bet_item = await remove_bet_item(bet_item_id, user)
+        bet_item = await remove_bet_item(bet_item_id, user, config)
     except UserPermissionError:
         return await message.reply("Not have permission to remove")
     except DoesNotExist:

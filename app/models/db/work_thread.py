@@ -12,9 +12,13 @@ class WorkThread(Model):
     start = fields.DatetimeField(generated=True)
     start_photo_file_id = fields.CharField(128)
     start_message_id = fields.IntField(null=True)
+    """message in PM admin"""
     log_chat_message_id = fields.IntField(null=True)
+    """message in admin log"""
     log_chat_for_admins_without_usernames_message_id = fields.IntField(null=True)
+    """message in admin without usernames log"""
     workers_chat_message_id = fields.IntField(null=True)
+    """message in channel with "plus" button"""
     admin: fields.ForeignKeyRelation[User] = fields.ForeignKeyField('models.User', related_name='admin_threads')
     workers: fields.ReverseRelation['WorkerInThread']  # noqa F821
     additional_texts: fields.ReverseRelation['AdditionalText']  # noqa F821

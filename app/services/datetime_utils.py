@@ -1,12 +1,8 @@
-from datetime import datetime
-
-from app import config
+from datetime import datetime, date
 
 
-def get_current_datetime_in_format() -> str:
-    now = datetime.now(tz=config.tz_view)
-    return now.strftime("%d %B\n%H:%M")
-
-
-if __name__ == '__main__':
-    print(get_current_datetime_in_format())
+def get_last_month_first_day():
+    today = datetime.now()
+    if today.month > 1:
+        return date(day=1, month=today.month - 1, year=today.year)
+    return date(day=1, month=12, year=today.year - 1)

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Union
 
-from app.models import WorkThread
+from app.models.db import WorkThread
 
 convert = {True: "+", False: "-", None: "?"}
 

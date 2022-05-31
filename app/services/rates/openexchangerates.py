@@ -15,13 +15,7 @@ class OpenExchangeRates(Rates):
 
     async def get_updated_date(self) -> datetime:
         latest_res = await self.r.latest()
-        return datetime.fromtimestamp(latest_res['timestamp'])
-
-    async def _convert(self, code_from: str, code_to: str, value: Decimal = Decimal(1)) -> Decimal:
-        if code_from == code_to:
-            return value
-        else:
-            return value * await self.get_rate(code_from, code_to)
+        return datetime.fromtimestamp(float(latest_res['timestamp']))
 
     async def get_rate(self, code_to: str, code_from: str) -> Decimal:
         if code_from == code_to:
@@ -34,11 +28,10 @@ class OpenExchangeRates(Rates):
             self, code_from: str, code_to: str, value: Decimal = Decimal(1), day: date = None
     ) -> Decimal:
         if day is None:
-            return await self._convert(code_from, code_to, value)
-        if code_from == code_to:
-            return value
+            rate = await self.get_rate(code_from=code_from, code_to=code_to)
         else:
-            return value * await self.get_rate_historical(code_from, code_to, day)
+            rate = await self.get_rate_historical(code_from=code_from, code_to=code_to, day=day)
+        return value * rate
 
     async def get_rate_historical(self, code_to: str, code_from: str, day: date) -> Decimal:
         if code_from == code_to:

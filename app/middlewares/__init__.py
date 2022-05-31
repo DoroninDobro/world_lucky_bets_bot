@@ -1,23 +1,18 @@
 # partially from https://github.com/aiogram/bot
-import json
-
 from aiogram import Dispatcher
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from loguru import logger
 
-from app.middlewares.acl import ACLMiddleware
-from app.middlewares.access_control import AccessControlMiddleware
-from app import config
+from app.middlewares.db_middleware import DbMiddleware
+from app.models.config import Config
+from app.services.rates import OpenExchangeRates
 
 
-def setup(dispatcher: Dispatcher):
+def setup(dispatcher: Dispatcher, config: Config):
     logger.info("Configure middlewares...")
-    dispatcher.middleware.setup(ACLMiddleware())
-    if config.ENABLE_ALLOW_LIST:
-        with open(config.allow_list_path) as f:
-            allow_list = set(json.load(f))
-        dispatcher.middleware.setup(AccessControlMiddleware(allow_list))
-    if config.ENABLE_LOGGING_MIDDLEWARE:
+    oer = OpenExchangeRates(api_key=config.currencies.oer_api_token)
+    dispatcher.middleware.setup(DbMiddleware(config, oer=oer))
+    if config.bot.enable_logging_middleware:
         logging_middleware = LoggingMiddleware()
         logging_middleware.logger = logger
         dispatcher.middleware.setup(logging_middleware)

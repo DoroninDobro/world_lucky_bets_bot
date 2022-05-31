@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from datetime import date, timedelta, datetime, time
 
+from app.services.datetime_utils import get_last_month_first_day
+
 
 @dataclass
-class DataTimeRange:
+class DatetimeRange:
     start: datetime
     stop: datetime
 
@@ -22,15 +24,20 @@ class DataTimeRange:
 
     @classmethod
     def get_last_month_range(cls):
-        today = datetime.now()
-        if today.month > 1:
-            return cls.get_month_range(month=today.month - 1, year=today.year)
-        return cls.get_month_range(month=12, year=today.year - 1)
+        last_month = get_last_month_first_day()
+        return cls.get_month_range(month=last_month.month, year=last_month.year)
 
     @classmethod
     def get_current_month_range(cls):
         today = datetime.now()
         return cls.get_month_range(month=today.month, year=today.year)
+
+    @classmethod
+    def get_current_week_range(cls):
+        today = datetime.now()
+        start = today - timedelta(days=today.weekday())
+        stop = start + timedelta(days=7)
+        return cls(start, stop)
 
     @classmethod
     def get_all_time_range(cls):
@@ -42,6 +49,10 @@ class DataTimeRange:
     def from_date(cls, date_: date):
         date_as_dt = datetime.combine(date=date_, time=time())
         return cls(start=date_as_dt, stop=date_as_dt)
+
+    @classmethod
+    def today(cls):
+        return cls.from_date(date.today())
 
     def __repr__(self):
         return f"{self.start.date().isoformat()} - " \

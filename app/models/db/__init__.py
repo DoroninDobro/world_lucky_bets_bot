@@ -1,12 +1,13 @@
-from .chat import Chat, ChatType
-from .user import User
-from .workers_in_threads import WorkerInThread
-from .work_thread import WorkThread
-from .bets_log import BetItem
 from .additional_text import AdditionalText
-from .send_to_workers import SendWorkers
-from .rate import RateItem
+from .balance import BalanceEvent
+from .bets_log import BetItem
 from .bookmaker import Bookmaker
+from .chat import Chat, ChatType
+from .rate import RateItem
+from .send_to_workers import SendWorkers
+from .user import User
+from .work_thread import WorkThread
+from .workers_in_threads import WorkerInThread
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     SendWorkers,
     RateItem,
     Bookmaker,
+    BalanceEvent,
 ]

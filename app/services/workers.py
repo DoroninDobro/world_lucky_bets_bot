@@ -2,20 +2,22 @@ from datetime import datetime
 
 from aiogram import Bot
 
-from app import config
-from app.models import User, WorkThread, WorkerInThread
+from app.models.db import User, WorkThread, WorkerInThread
+from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
 
 OLD_MESSAGE_SEPARATOR = "\n.\n"
 
 
 @check_thread_running
-async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread: WorkThread) -> WorkerInThread:
+async def add_worker_to_thread(
+        user: User, message_id: int, bot: Bot, *, thread: WorkThread, config: Config
+) -> WorkerInThread:
     worker_in_thread = await WorkerInThread.create(
         work_thread=thread, worker=user, message_id=message_id,
     )
     await bot.send_message(
-        config.USER_LOG_CHAT_ID,
+        config.app.chats.user_log,
         f"{datetime.now(tz=config.tz_view).strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"{user.mention_link} joined to {thread.id}",
         protect_content=False,
@@ -33,3 +35,21 @@ async def add_worker_to_thread(user: User, message_id: int, bot: Bot, *, thread:
 
 async def get_worker_in_thread(message_id: int, user: User):
     return await WorkerInThread.get(worker=user, message_id=message_id)
+
+
+async def register_worker(user: User):
+    was_registered = user.registered
+    if not was_registered:
+        user.registered = True
+        await user.save()
+    return not was_registered
+
+
+async def unregister_worker(user_id: int):
+    user = await User.get(id=user_id)
+    user.registered = False
+    await user.save()
+
+
+async def get_registered() -> list[User]:
+    return await User.filter(registered=True).order_by("id").all()

@@ -3,47 +3,34 @@ from aiogram.dispatcher.handler import SkipHandler
 from loguru import logger
 
 from app.misc import dp
-from app.models import DataTimeRange
-from app import keyboards as kb
+from app.models import DatetimeRange
+from app.services.rates import OpenExchangeRates
+from app.view.keyboards import admin as kb
+from app.models.config import Config
 from app.services.reports.excel_report import process_report
 from app.services.reports.thread_reports import get_thread_report
 
+KB_RANGES = {
+    kb.all_time_report: DatetimeRange.get_all_time_range,
+    kb.last_month_report: DatetimeRange.get_last_month_range,
+    kb.current_week_report: DatetimeRange.get_current_week_range,
+    kb.current_moth_report: DatetimeRange.get_current_month_range,
+}
 
-@dp.message_handler(text=kb.all_time_report, is_admin=True)
-async def make_all_time_report(message: types.Message):
+
+@dp.message_handler(text=KB_RANGES, is_admin=True)
+async def make_all_time_report(message: types.Message, config: Config, oer: OpenExchangeRates):
     try:
-        date_range = DataTimeRange.get_all_time_range()
-        await generate_and_send_report(date_range, message)
+        date_range = KB_RANGES[message.text]()
+        await generate_and_send_report(date_range, message, config, oer)
     except IndexError:
         await message.reply(
-            "Скорее всего за всё время ничего не было", protect_content=False,
-        )
-
-
-@dp.message_handler(text=kb.last_month_report, is_admin=True)
-async def make_last_month_report(message: types.Message):
-    try:
-        date_range = DataTimeRange.get_last_month_range()
-        await generate_and_send_report(date_range, message)
-    except IndexError:
-        await message.reply(
-            "Скорее всего в прошедшем месяце ничего не было", protect_content=False,
-        )
-
-
-@dp.message_handler(text=kb.current_moth_report, is_admin=True)
-async def make_current_mont_report(message: types.Message):
-    try:
-        date_range = DataTimeRange.get_current_month_range()
-        await generate_and_send_report(date_range, message)
-    except IndexError:
-        await message.reply(
-            "Скорее всего в этом месяце пока ничего не было", protect_content=False,
+            "Скорее всего за данный промежуток ничего не было", protect_content=False,
         )
 
 
 @dp.message_handler(commands="lumos")
-async def match_report(m: types.Message):
+async def match_report(m: types.Message, config: Config, oer: OpenExchangeRates):
     try:
         _, args = m.text.split(maxsplit=1)
         thread_id = int(args)
@@ -51,13 +38,13 @@ async def match_report(m: types.Message):
     except ValueError as e:
         logger.info("user {user} ask report for thread but {e}", user=m.from_user.id, e=e)
         raise SkipHandler
-    await m.reply(await get_thread_report(thread_id))
+    await m.reply(await get_thread_report(thread_id, config, oer))
 
 
-async def generate_and_send_report(date_range: DataTimeRange, message: types.Message):
+async def generate_and_send_report(
+        date_range: DatetimeRange, message: types.Message, config: Config, oer: OpenExchangeRates,
+):
     await message.reply_document(
-        await process_report(date_range),
+        await process_report(date_range, config, oer),
         protect_content=False,
     )
-
-

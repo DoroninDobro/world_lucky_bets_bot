@@ -1,11 +1,11 @@
+from decimal import Decimal
+
 from tortoise import fields
 from tortoise.models import Model
 
+from .common import DECIMAL_CONFIG
 from .workers_in_threads import WorkerInThread
 from .bookmaker import Bookmaker
-
-
-DECIMAL_CONFIG = dict(max_digits=12, decimal_places=4)
 
 
 class BetItem(Model):
@@ -18,7 +18,9 @@ class BetItem(Model):
     result = fields.DecimalField(**DECIMAL_CONFIG)
     currency = fields.CharField(max_length=16)
     bookmaker: fields.ForeignKeyRelation[Bookmaker] = fields.ForeignKeyField(
-        'models.Bookmaker', related_name='bets')
+        'models.Bookmaker', related_name='bets',
+    )
+    balance_events: fields.ReverseRelation['BalanceEvents']  # noqa F821
 
     class Meta:
         table = "bets_log"
@@ -38,8 +40,15 @@ class BetItem(Model):
         user = self.worker_thread.worker
         bookmaker = await self.bookmaker
         return (
-            f"bet ID {self.id} от {user.mention_link} "
-            f"at the bookmaker \"{bookmaker.name if bookmaker else 'unknown'}\": "
-            f"{self.bet:.2f} {self.currency}, "
-            f"result: {self.result:.2f} {self.currency}"
+            f"bet ID {self.id} by {user.mention_link}. "
+            f"Book \"{bookmaker.name if bookmaker else 'unknown'}\": "
+            f"{self.bet:.2f} {self.currency} → {self.result:.2f} {self.currency}"
         )
+
+    @property
+    def is_win(self) -> bool:
+        return self.profit > 0
+
+    @property
+    def profit(self) -> Decimal:
+        return self.result - self.bet

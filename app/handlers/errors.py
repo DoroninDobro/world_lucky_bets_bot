@@ -5,7 +5,7 @@ from aiogram.utils.exceptions import CantParseEntities, BotBlocked, BadRequest
 from aiogram.utils.markdown import quote_html
 from loguru import logger
 
-from app import config
+from app.misc import config as global_config
 from app.misc import dp, bot
 
 
@@ -24,7 +24,7 @@ async def errors_handler(update: types.Update, exception: Exception):
 
     with suppress(BadRequest):
         await bot.send_message(
-            config.TECH_LOG_CHAT_ID,
+            global_config.app.chats.tech_log,
             f"Exception {quote_html(exception)}\n"
             f"was received while processing an update {quote_html(update)}\n"
             f"{quote_html(exception.args)}"

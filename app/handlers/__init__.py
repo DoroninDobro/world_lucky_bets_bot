@@ -6,8 +6,7 @@ from . import admin
 from . import reports
 from . import workers
 from . import common
-# last one
-from . import last
+from . import balance
 
 
 __all__ = [
@@ -18,6 +17,6 @@ __all__ = [
     "admin",
     "reports",
     "workers",
+    "balance",
     "common",
-    "last",
 ]

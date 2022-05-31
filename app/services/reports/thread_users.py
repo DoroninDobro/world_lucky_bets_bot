@@ -1,10 +1,10 @@
-from app.models import WorkThread, WorkerInThread, DataTimeRange
+from app.models.db import WorkThread, WorkerInThread
 from app.models.statistic.thread_users import ThreadUsers
 from app.services.collections_utils import get_first_dict_value
-from app.models.data_range import date_to_datetime
+from app.models.data_range import date_to_datetime, DatetimeRange
 
 
-async def generate_thread_users(date_range: DataTimeRange) -> list[ThreadUsers]:
+async def generate_thread_users(date_range: DatetimeRange) -> list[ThreadUsers]:
     loaded_data = await load_thread_users(date_range)
     users = {
         user_id: worker_in_thread.worker
@@ -28,20 +28,17 @@ async def generate_thread_users(date_range: DataTimeRange) -> list[ThreadUsers]:
     return thread_users
 
 
-async def load_thread_users(date_range: DataTimeRange) -> dict[int, dict[int, WorkerInThread]]:
+async def load_thread_users(date_range: DatetimeRange) -> dict[int, dict[int, WorkerInThread]]:
     monthly_threads = await get_mont_threads(date_range)
     users_statistics = {}
     for thread in monthly_threads:
         workers: list[WorkerInThread] = thread.workers  # noqa
         for worker in workers:
-            try:
-                users_statistics[thread.id][worker.worker.id] = worker
-            except KeyError:
-                users_statistics[thread.id] = {worker.worker.id: worker}
+            users_statistics.setdefault(thread.id, {})[worker.worker.id] = worker
     return users_statistics
 
 
-async def get_mont_threads(date_range: DataTimeRange) -> list[WorkThread]:
+async def get_mont_threads(date_range: DatetimeRange) -> list[WorkThread]:
     return await WorkThread \
         .filter(start__gte=date_to_datetime(date_range.start)) \
         .filter(start__lte=date_to_datetime(date_range.stop)) \

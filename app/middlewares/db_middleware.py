@@ -6,15 +6,19 @@ from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from loguru import logger
 
+from app.models.config import Config
 from app.models.db.chat import Chat
 from app.models.db.user import User
+from app.services.rates import OpenExchangeRates
 from app.utils.lock_factory import LockFactory
 
 
-class ACLMiddleware(BaseMiddleware):
-    def __init__(self):
-        super(ACLMiddleware, self).__init__()
+class DbMiddleware(BaseMiddleware):
+    def __init__(self, config: Config, oer: OpenExchangeRates):
+        super(DbMiddleware, self).__init__()
         self.lock_factory = LockFactory()
+        self.config = config
+        self.oer = oer
 
     async def setup_chat(self, data: dict, user: types.User, chat: Optional[types.Chat] = None):
         try:
@@ -28,6 +32,8 @@ class ACLMiddleware(BaseMiddleware):
             raise e
         data["user"] = user
         data["chat"] = chat
+        data["config"] = self.config
+        data["oer"] = self.oer
 
     async def on_pre_process_message(self, message: types.Message, data: dict):
         await self.setup_chat(data, message.from_user, message.chat)

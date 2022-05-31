@@ -1,18 +1,18 @@
-from dataclasses import dataclass
+from typing import Any
+
+from app.models.config.currency import Currency, CurrenciesConfig
 
 
-@dataclass
-class Currency:
-    iso_code: str
-    symbol: str
-    fullname: str
-    plural_name: str
-    short_name: str
+def load_currencies(dct: dict[str, Any]) -> CurrenciesConfig:
+    currencies_config = CurrenciesConfig(
+        currencies=load_currency(dct["currency"]),
+        oer_api_token=dct["oer_api_token"],
+        base=dct["base"],
+    )
 
-    def __repr__(self):
-        return f"{self.fullname} {self.symbol}"
-
-    __str__ = __repr__
+    from app import constants
+    constants.BASE_CURRENCY = currencies_config.base
+    return currencies_config
 
 
 def load_currency(dumped: dict) -> dict[str, Currency]:
