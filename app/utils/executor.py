@@ -36,6 +36,7 @@ async def set_commands(dispatcher: Dispatcher, chats: set[int]):
             BotCommand("start", "start bot"),
             BotCommand("registration", "registration in users"),
             BotCommand("transaction", "add a new transaction"),
+            BotCommand("status", "my balance and salary"),
         ],
         scope=BotCommandScopeDefault(),
     )
