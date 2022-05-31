@@ -1,7 +1,9 @@
 from aiogram import types
+from aiogram.types import Message
 
 from app.misc import bot, dp
 from app.models.config import Config
+from app.utils.commands import set_commands
 from app.utils.send_text_file import send_log_files
 
 
@@ -29,3 +31,8 @@ async def generate_logchat_link(message: types.Message, config: Config):
 @dp.throttled(rate=30)
 async def cmd_exception(_: types.Message):
     raise Exception('user press /exception')
+
+
+@dp.message_handler(is_superuser=True, commands="reload_commands")
+async def reload_commands(m: Message, config: Config):
+    await set_commands(m.bot, config.app.admins)

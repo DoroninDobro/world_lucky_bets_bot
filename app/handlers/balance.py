@@ -11,10 +11,13 @@ from app.models.enum.blance_event_type import BalanceEventType
 from app.services.balance import add_balance_event_and_notify, notify_new_balance
 from app.services.rates import OpenExchangeRates
 from app.states import AddTransaction
+from app.utils.commands import TRANSACTION_COMMAND
 from app.view.keyboards import balance as kb_balance
 
 
-@dp.message_handler(commands="transaction", is_admin=False, chat_type=types.ChatType.PRIVATE)
+@dp.message_handler(
+    commands=TRANSACTION_COMMAND.command, is_admin=False, chat_type=types.ChatType.PRIVATE,
+)
 async def add_transaction_start(message: types.Message, state: FSMContext, user: User):
     await state.set_state(AddTransaction.sign)
     await state.update_data(
@@ -28,7 +31,7 @@ async def add_transaction_start(message: types.Message, state: FSMContext, user:
     )
 
 
-@dp.message_handler(commands="transaction", is_admin=True)
+@dp.message_handler(commands=TRANSACTION_COMMAND.command, is_admin=True)
 async def add_transaction_start(message: types.Message):
     await message.answer(
         text="You are an admin. This command only for workers.",
