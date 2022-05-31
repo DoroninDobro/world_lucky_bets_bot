@@ -23,7 +23,7 @@ class TransactionData:
         else:
             result = f"User {self.user_id} add transaction\n"
         result += (
-            f"{self.amount:.2f} {self.currency.symbol} "
+            f"{self.amount:+.2f} {self.currency.symbol} "
             f"{self.comment}"
         )
         return result

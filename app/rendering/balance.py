@@ -15,7 +15,7 @@ def render_balance(balance: data.Balance, currency: Currency) -> str:
 
 
 def _render_money(amount: Decimal, currency: Currency) -> str:
-    return f"{amount:.2f} {currency.symbol}"
+    return f"{amount:+.2f} {currency.symbol}"
 
 
 def render_balance_type(balance_type: BalanceEventType) -> str:

@@ -51,7 +51,7 @@ class BalanceEvent(Model):
                 f"add transaction of type {self.type_.value} "
             )
         result += (
-            f"{self.delta:.2f} {self.currency} "
+            f"{self.delta:+.2f} {self.currency} "
             f"{self.comment} "
         )
         return result
@@ -64,7 +64,7 @@ class BalanceEvent(Model):
         else:
             result += ""
         result += (
-            f"{self.delta:.0f} {currencies.currencies[self.currency].symbol} "
+            f"{self.delta:+.0f} {currencies.currencies[self.currency].symbol} "
             f"type: {self.type_.name} "
             f"{self.comment}"
         )
@@ -74,11 +74,11 @@ class BalanceEvent(Model):
         if self.type_ == BalanceEventType.SALARY:
             return (
                 f"Your salary for that bet is "
-                f"{-self.delta:.0f} {currencies.currencies[self.currency].symbol} "
+                f"{-self.delta:+.0f} {currencies.currencies[self.currency].symbol} "
             )
         else:
             return (
-                f"{self.delta:.0f} {currencies.currencies[self.currency].symbol} "
+                f"{self.delta:+.0f} {currencies.currencies[self.currency].symbol} "
                 f"type: {self.type_.name} "
                 f"{self.comment}"
             )
