@@ -5,7 +5,7 @@ from loguru import logger
 
 from app.misc import dp
 from app.models.db.chat import Chat
-from app.utils.commands import START_COMMAND
+from app.utils.commands import START_COMMAND, CANCEL_COMMAND
 
 
 @dp.message_handler(commands=START_COMMAND.command, commands_prefix='!/', is_admin=False)
@@ -43,7 +43,7 @@ async def get_idchat(message: types.Message):
     await message.reply(text, disable_notification=True, protect_content=False)
 
 
-@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(state='*', commands=CANCEL_COMMAND.command)
 @dp.throttled(rate=3)
 async def cancel_state(message: types.Message, state: FSMContext):
     current_state = await state.get_state()

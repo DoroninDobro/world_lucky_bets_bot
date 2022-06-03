@@ -8,6 +8,7 @@ from aiogram.utils.exceptions import BadRequest
 
 REGISTRATION_COMMAND = BotCommand("registration", "registration in users")
 START_COMMAND = BotCommand("start", "start bot")
+CANCEL_COMMAND = BotCommand("cancel", "cancel current dialog")
 USERS_COMMAND = BotCommand("users", "get list of users")
 STATUS_COMMAND = BotCommand("status", "my balance and salary")
 TRANSACTION_COMMAND = BotCommand("transaction", "add a new transaction")
@@ -17,6 +18,7 @@ async def set_commands(bot: Bot, admins: set[int]):
     await bot.set_my_commands(
         [
             START_COMMAND,
+            CANCEL_COMMAND,
             REGISTRATION_COMMAND,
             TRANSACTION_COMMAND,
             STATUS_COMMAND,
@@ -29,6 +31,7 @@ async def set_commands(bot: Bot, admins: set[int]):
             await bot.set_my_commands(
                 [
                     START_COMMAND,
+                    CANCEL_COMMAND,
                     USERS_COMMAND,
                 ],
                 scope=BotCommandScopeChat(chat_id=chat_id),

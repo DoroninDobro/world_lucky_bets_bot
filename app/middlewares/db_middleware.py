@@ -4,7 +4,6 @@ from typing import Optional
 
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
-from loguru import logger
 
 from app.models.config import Config
 from app.models.db.chat import Chat
@@ -21,15 +20,11 @@ class DbMiddleware(BaseMiddleware):
         self.oer = oer
 
     async def setup_chat(self, data: dict, user: types.User, chat: Optional[types.Chat] = None):
-        try:
-            async with self.lock_factory.get_lock(f"{user.id}"):
-                user = await User.get_or_create_from_tg_user(user)
-            async with self.lock_factory.get_lock(f"{chat.id}"):
-                chat = await Chat.get_or_create_from_tg_chat(chat)
+        async with self.lock_factory.get_lock(f"{user.id}"):
+            user = await User.get_or_create_from_tg_user(user)
+        async with self.lock_factory.get_lock(f"{chat.id}"):
+            chat = await Chat.get_or_create_from_tg_chat(chat)
 
-        except Exception as e:
-            logger.error("troubles with db")
-            raise e
         data["user"] = user
         data["chat"] = chat
         data["config"] = self.config
@@ -40,3 +35,11 @@ class DbMiddleware(BaseMiddleware):
 
     async def on_pre_process_callback_query(self, query: types.CallbackQuery, data: dict):
         await self.setup_chat(data, query.from_user, query.message.chat if query.message else None)
+
+    async def on_pre_process_channel_post(self, channel_post: types.Message, data: dict):
+        async with self.lock_factory.get_lock(f"{channel_post.chat.id}"):
+            chat = await Chat.get_or_create_from_tg_chat(channel_post.chat)
+        data["chat"] = chat
+        data["config"] = self.config
+        data["oer"] = self.oer
+
