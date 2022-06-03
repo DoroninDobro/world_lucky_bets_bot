@@ -34,14 +34,21 @@ async def save_new_betting_odd(bet: Bet, bot: Bot, config: Config, oer: OpenExch
 
 
 async def remove_bet_item(bet_item_id: int, removing_by_user: User, config: Config):
-    bet_item = await BetItem.get(id=bet_item_id)
-    if removing_by_user.id in config.app.admins:
-        await bet_item.delete()
-        return bet_item
-    await bet_item.fetch_related("worker_thread")
-    # noinspection PyUnresolvedReferences
-    if bet_item.worker_thread.worker_id == removing_by_user.id:
-        await bet_item.delete()
-        return bet_item
+    async with in_transaction() as conn:
+        bet_item = await BetItem.get(id=bet_item_id)
+        if removing_by_user.id in config.app.admins:
+            return await remove_bet_item_cascade(bet_item, conn)
+        await bet_item.fetch_related("worker_thread", using_db=conn)
+        # noinspection PyUnresolvedReferences
+        if bet_item.worker_thread.worker_id == removing_by_user.id:
+            return await remove_bet_item_cascade(bet_item, conn)
     raise UserPermissionError("You must be author or admin for remove that bet item")
+
+
+async def remove_bet_item_cascade(bet_item: BetItem, conn) -> BetItem:
+    await bet_item.fetch_related("balance_events", using_db=conn)
+    for event in bet_item.balance_events:
+        await event.delete(using_db=conn)
+    await bet_item.delete(using_db=conn)
+    return bet_item
 
