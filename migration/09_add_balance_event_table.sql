@@ -1,7 +1,7 @@
 CREATE TABLE balance_events(
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    author_id INTEGER NOT NULL,
+    user_id BIGINT NOT NULL,
+    author_id BIGINT NOT NULL,
     at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     delta NUMERIC(20, 10),
     currency VARCHAR,
