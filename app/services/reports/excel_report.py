@@ -1,6 +1,7 @@
 from time import time
 
 from aiogram.types import InputFile
+from loguru import logger
 
 from app.models import DatetimeRange
 from app.models.config import Config
@@ -13,6 +14,7 @@ from app.services.reports.user_stat import generate_user_report
 
 
 async def process_report(date_range: DatetimeRange, config: Config, oer: OpenExchangeRates) -> InputFile:
+    logger.info("processing report for date_range {}", date_range)
     config.temp_path.mkdir(exist_ok=True, parents=True)
     excel_writer = ExcelWriter(config.currencies)
     converter = RateConverter(oer=oer, date_range=date_range)

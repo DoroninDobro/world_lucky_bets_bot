@@ -43,8 +43,8 @@ async def add_transaction_start(c: CallbackQuery, button: Any, manager: DialogMa
 async def unregister_user(c: CallbackQuery, button: Any, manager: DialogManager):
     user_id = manager.current_context().dialog_data["active_user"]
     logger.info(
-        "admin {} unregistered user {user_id}",
-        users_id=user_id, admin=manager.data["user"].id,
+        "admin {admin} unregistered user {user_id}",
+        user_id=user_id, admin=manager.data["user"].id,
     )
     await unregister_worker(user_id)
     await c.answer("User removed")

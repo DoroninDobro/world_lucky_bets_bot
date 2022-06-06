@@ -22,7 +22,10 @@ KB_RANGES = {
 async def make_all_time_report(message: types.Message, config: Config, oer: OpenExchangeRates):
     try:
         date_range = KB_RANGES[message.text]()
-        await generate_and_send_report(date_range, message, config, oer)
+        await message.reply_document(
+            await process_report(date_range, config, oer),
+            protect_content=False,
+        )
     except IndexError:
         await message.reply(
             "Скорее всего за данный промежуток ничего не было", protect_content=False,
@@ -39,12 +42,3 @@ async def match_report(m: types.Message, config: Config, oer: OpenExchangeRates)
         logger.info("user {user} ask report for thread but {e}", user=m.from_user.id, e=e)
         raise SkipHandler
     await m.reply(await get_thread_report(thread_id, config, oer))
-
-
-async def generate_and_send_report(
-        date_range: DatetimeRange, message: types.Message, config: Config, oer: OpenExchangeRates,
-):
-    await message.reply_document(
-        await process_report(date_range, config, oer),
-        protect_content=False,
-    )
