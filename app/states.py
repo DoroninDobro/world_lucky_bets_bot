@@ -13,6 +13,7 @@ class Panel(StatesGroup):
     user_main = State()
     change_salary = State()
     change_salary_value = State()
+    remove_user = State()
 
 
 class AddTransaction(StatesGroup):

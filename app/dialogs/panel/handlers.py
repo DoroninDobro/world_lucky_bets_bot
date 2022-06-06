@@ -47,6 +47,7 @@ async def unregister_user(c: CallbackQuery, button: Any, manager: DialogManager)
         user_id=user_id, admin=manager.data["user"].id,
     )
     await unregister_worker(user_id)
+    await manager.switch_to(Panel.users)
     await c.answer("User removed")
 
 

@@ -45,10 +45,10 @@ panel = Dialog(
             state=Panel.change_salary,
             id="change_salary"
         ),
-        Button(
+        SwitchTo(
             Const("Remove from list"),
-            on_click=unregister_user,
-            id="remove_user"
+            state=Panel.remove_user,
+            id="remove_user",
         ),
         SwitchTo(
             Const("Back to users"),
@@ -57,6 +57,21 @@ panel = Dialog(
         ),
         getter=get_user,
         state=Panel.user_main,
+    ),
+    Window(
+        Format("Remove {user}\n<b>Are you sure?</b>"),
+        Button(
+            Const("Remove"),
+            on_click=unregister_user,
+            id="remove_user",
+        ),
+        SwitchTo(
+            Const("No! Cancel!"),
+            state=Panel.user_main,
+            id="to_user",
+        ),
+        getter=get_user,
+        state=Panel.remove_user,
     ),
     Window(
         Format("select type of salary for {user}:"),
