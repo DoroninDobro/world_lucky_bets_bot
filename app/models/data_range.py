@@ -37,7 +37,10 @@ class DatetimeRange:
         today = datetime.now()
         start = today - timedelta(days=today.weekday())
         stop = start + timedelta(days=7)
-        return cls(start, stop)
+        return cls(
+            start.replace(hour=0, minute=0, second=0, microsecond=0),
+            stop.replace(hour=23, minute=59, second=59, microsecond=999999)
+        )
 
     @classmethod
     def get_all_time_range(cls):
