@@ -26,8 +26,8 @@ async def remove_transaction_cmd(message: types.Message, user: User, config: Con
     transaction_id = await get_command_int_arg_or_notify(message)
     try:
         transaction = await remove_transaction(transaction_id, user, config)
-    except UserPermissionError:
-        return await message.reply("Not have permission to remove")
+    except UserPermissionError as e:
+        return await message.reply("Not have permission to remove\n" + e.text)
     except DoesNotExist:
         return await message.reply("No such entry was found")
     await message.reply(f"Deleted: {transaction.id}")

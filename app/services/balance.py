@@ -117,6 +117,13 @@ async def remove_transaction(transaction_id: int, removed_by: User, config: Conf
     if removed_by.id not in config.app.admins:
         raise UserPermissionError("only for admins!")
     transaction = await BalanceEvent.get(id=transaction_id)
+    if transaction.type_ not in (BalanceEventType.USER, BalanceEventType.ADMIN):
+        raise UserPermissionError(
+            text=(
+                f"no one can delete automatic transaction. "
+                f"Please delete bet item {transaction.get_bet_item_id()} instead"
+            )
+        )
     result = TransactionData.from_db(transaction, config.currencies)
     await transaction.delete()
     return result

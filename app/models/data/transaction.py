@@ -15,6 +15,7 @@ class TransactionData:
     bet_log_item_id: int | None
     balance_event_type: BalanceEventType
     comment: str
+    id: int | None = None
 
     def print_(self):
         if self.is_by_admin:
@@ -47,4 +48,5 @@ class TransactionData:
             bet_log_item_id=db.get_bet_item_id(),
             balance_event_type=db.type_,
             comment=db.comment,
+            id=db.id
         )
