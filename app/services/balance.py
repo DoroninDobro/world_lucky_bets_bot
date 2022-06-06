@@ -6,6 +6,7 @@ from tortoise.backends.base.client import TransactionContext
 from tortoise.transactions import in_transaction
 
 from app.models import DatetimeRange, data
+from app.models.config import Config
 from app.models.config.app_config import ChatsConfig
 from app.models.db import User, BalanceEvent, BetItem
 from app.models.config.currency import CurrenciesConfig
@@ -15,6 +16,7 @@ from app.rendering.balance import render_balance
 from app.services.datetime_utils import get_last_month_first_day
 from app.services.rates import OpenExchangeRates
 from app.services.rates.converter import RateConverter
+from app.utils.exceptions import UserPermissionError
 
 
 async def get_balance_sum(user: User) -> dict[str, Decimal]:
@@ -109,3 +111,12 @@ async def notify_new_balance(bot: Bot, config: CurrenciesConfig, user: User, oer
         user.id,
         f"your new balance is {render_balance(balance, config.default_currency)}",
     )
+
+
+async def remove_transaction(transaction_id: int, removed_by: User, config: Config):
+    if removed_by.id not in config.app.admins:
+        raise UserPermissionError("only for admins!")
+    transaction = await BalanceEvent.get(id=transaction_id)
+    result = TransactionData.from_db(transaction, config.currencies)
+    await transaction.delete()
+    return result

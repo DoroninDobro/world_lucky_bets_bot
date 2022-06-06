@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-from app.models.config.currency import Currency
+from app.models.config.currency import Currency, CurrenciesConfig
+from app.models.db import BalanceEvent
 from app.models.enum.blance_event_type import BalanceEventType
 
 
@@ -35,3 +36,15 @@ class TransactionData:
     @property
     def is_income(self):
         return self.amount > 0
+
+    @classmethod
+    def from_db(cls, db: BalanceEvent, config: CurrenciesConfig):
+        return cls(
+            user_id=db.get_user_id(),
+            author_id=db.get_author_id(),
+            currency=config.currencies[db.currency],
+            amount=db.delta,
+            bet_log_item_id=db.get_bet_item_id(),
+            balance_event_type=db.type_,
+            comment=db.comment,
+        )
