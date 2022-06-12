@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from aiogram import types, Bot
 from aiogram.dispatcher import FSMContext
@@ -80,7 +80,7 @@ async def save_currency(
 async def save_amount(message: types.Message, state: FSMContext):
     try:
         amount = Decimal(message.text)
-    except ValueError:
+    except (InvalidOperation, ValueError):
         return await message.reply(text="sorry but it is not correct value")
     await state.update_data(amount=amount)
     await state.set_state(AddTransaction.comment)
