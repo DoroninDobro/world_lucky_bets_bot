@@ -40,7 +40,7 @@ async def get_user_stats(thread: WorkThread, config: Config, oer: OpenExchangeRa
     day = thread.start.date()
     bets_log = await get_thread_bets(thread.id)
     user_statistics = []
-    converter = RateConverter(oer=oer, date_range=DatetimeRange.from_date(day))
+    converter = RateConverter(config=config.currencies, oer=oer, date_range=DatetimeRange.from_date(day))
     for bet_item in bets_log:
         search_kwargs = dict(
             currency=bet_item.currency,

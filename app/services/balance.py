@@ -38,7 +38,7 @@ async def calculate_balance(user: User, oer: OpenExchangeRates, config: Currenci
     amounts = {}
     balance_sum = Decimal(0)
     for currency, value in balances.items():
-        converter = RateConverter(oer=oer, date_range=DatetimeRange.today())
+        converter = RateConverter(config=config, oer=oer, date_range=DatetimeRange.today())
         balance_sum += await converter.find_rate_and_convert(
             value=value,
             currency=currency,

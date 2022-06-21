@@ -1,17 +1,15 @@
 import asyncio
 import typing
-from contextlib import suppress
 from datetime import datetime
 
 from aiogram import Bot, types
 from loguru import logger
-from tortoise.exceptions import IntegrityError
 from tortoise.transactions import in_transaction
 
 from app.utils.thread_shadow import shadow_thread_id
 from app.view.keyboards import admin as kb_admin
 from app.view.keyboards import worker as kb_worker
-from app.models.db import WorkThread, WorkerInThread, User, AdditionalText, RateItem
+from app.models.db import WorkThread, WorkerInThread, User, AdditionalText
 from app.models.config import Config
 from app.models.db.work_thread import check_thread_running
 from app.services.additional_text import (
@@ -21,7 +19,6 @@ from app.services.additional_text import (
     get_workers
 )
 from app.services.msg_cleaner_on_fail import msg_cleaner
-from app.services.rates import OpenExchangeRates
 from app.utils.text_utils import remove_usernames
 
 thread_results = typing.List[typing.Tuple[User, int, float]]
@@ -75,18 +72,6 @@ async def start_new_thread(
         await created_thread.save(using_db=connection)
 
     return created_thread
-
-
-async def save_daily_rates(config: Config, oer: OpenExchangeRates, using_db=None):
-    with suppress(IntegrityError):
-        for currency in config.currencies.currencies:
-            rate = RateItem(
-                at=(await oer.get_updated_date()).date(),
-                currency=currency,
-                to_eur=await oer.get_rate("EUR", currency),
-                to_usd=await oer.get_rate("USD", currency),
-            )
-            await rate.save(using_db=using_db)
 
 
 async def get_thread(message_id: int) -> WorkThread:

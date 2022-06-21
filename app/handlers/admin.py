@@ -23,8 +23,8 @@ from app.services.work_threads import (
     send_notification_stop,
     add_info_to_thread,
     rename_thread,
-    save_daily_rates,
 )
+from app.services.rates.converter import save_daily_rates
 from app.utils.commands import START_COMMAND, USERS_COMMAND
 from app.view.keyboards import admin as kb
 from app.models.db import User, AdditionalText, WorkThread
@@ -75,7 +75,7 @@ async def new_send(message: types.Message, user: User, config: Config, oer: Open
     logger.info("admin {user} start new thread {thread}",
                 user=message.from_user.id, thread=thread.id)
     await delete_message(message)
-    await save_daily_rates(config, oer)
+    await save_daily_rates(config.currencies, oer)
 
 
 @dp.message_handler(is_admin=True, chat_type=types.ChatType.PRIVATE, is_reply=True)

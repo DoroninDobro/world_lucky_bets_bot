@@ -17,7 +17,7 @@ async def process_report(date_range: DatetimeRange, config: Config, oer: OpenExc
     logger.info("processing report for date_range {}", date_range)
     config.temp_path.mkdir(exist_ok=True, parents=True)
     excel_writer = ExcelWriter(config.currencies)
-    converter = RateConverter(oer=oer, date_range=date_range)
+    converter = RateConverter(config=config.currencies, oer=oer, date_range=date_range)
     excel_writer.insert_total_report(await generate_total_report(date_range, converter, config.currencies))
     excel_writer.insert_thread_users(await generate_thread_users(date_range))
     excel_writer.insert_users_reports(await generate_user_report(date_range, converter, config.currencies))
