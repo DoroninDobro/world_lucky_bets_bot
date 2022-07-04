@@ -103,7 +103,7 @@ class TransactionStatCaptions:
         return self._patch_column_iterable(self._names_columns)
 
     def _patch_column_iterable(self, columns: Iterable[int]) -> Iterable[int]:
-        return map(self._patch_column_by_offset, columns)
+        return map(self.patch_column_by_offset, columns)
 
-    def _patch_column_by_offset(self, col: int) -> int:
+    def patch_column_by_offset(self, col: int) -> int:
         return col + self.offset

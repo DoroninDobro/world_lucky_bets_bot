@@ -20,7 +20,7 @@ async def process_report(date_range: DatetimeRange, config: Config, oer: OpenExc
     converter = RateConverter(config=config.currencies, oer=oer, date_range=date_range)
     excel_writer.insert_total_report(await generate_total_report(date_range, converter, config.currencies))
     excel_writer.insert_thread_users(await generate_thread_users(date_range))
-    excel_writer.insert_users_reports(await generate_user_report(date_range, converter, config.currencies))
+    excel_writer.insert_users_reports(await generate_user_report(date_range, converter, config.currencies), config.currencies)
     filename = config.temp_path / f"rez{date_range}___{time()}.xlsx"
     excel_writer.save(filename)
     return InputFile(filename, f"{date_range}.xlsx")

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import itertools
 from dataclasses import dataclass
 from typing import Iterable
@@ -26,7 +27,7 @@ class CellAddress:
     def kwargs(self, ):
         return dict(row=self.row, column=self.column)
 
-    def shift(self, *, row: int = 0, column: int = 0):
+    def shift(self, *, row: int = 0, column: int = 0) -> CellAddress:
         return CellAddress(row=self.row + row, column=self.column + column)
 
     def replace(self, *, row: int = None, column: int = None):
@@ -37,6 +38,9 @@ class CellAddress:
 
 
 A1 = CellAddress(1, 1)
+TRANSACTION_FIRST_ROW = 1
+"""from 0"""
+TRANSACTION_FIRST_COL_SHIFT = 1
 
 
 class ExcelWriter:
@@ -78,7 +82,7 @@ class ExcelWriter:
             self.format_rows(thread_users_ws, A1.shift(row=i), self.date_columns, {})
         _make_auto_width(thread_users_ws, len(report_data[0].get_printable()), self.date_columns, {}, self.name_columns)
 
-    def insert_users_reports(self, report_data: dict[int, FullUserStat]):
+    def insert_users_reports(self, report_data: dict[int, FullUserStat], config: CurrenciesConfig):
         # sorted by user_id for consistent sheets order
         # after sorting user_ids (dict key) don't need anymore
         sorted_reports: Iterable[FullUserStat] = map(lambda x: x[1], sorted(report_data.items(), key=lambda x: x[0]))
@@ -89,7 +93,7 @@ class ExcelWriter:
                 continue
             sheet = self.wb.create_sheet(excel_bets_caption_name(user))
             self.write_user_bets_report(sheet, report_by_user.bets)
-            self.write_user_transaction(sheet, report_by_user.transactions)
+            self.write_user_transaction(sheet, report_by_user.transactions, config)
 
     def write_user_bets_report(self, sheet: Worksheet, report_by_user: list[UserBetsStat]):
         column_count = len(UserStatCaptions.get_captions())
@@ -114,9 +118,11 @@ class ExcelWriter:
                     self.user_currencies_columns, {report_row.currency.symbol: self.user_local_currencies_columns})
             )
 
-    def write_user_transaction(self, sheet: Worksheet, transactions: list[TransactionStatData]):
+    def write_user_transaction(
+        self, sheet: Worksheet, transactions: list[TransactionStatData], config: CurrenciesConfig,
+    ):
         columns = TransactionStatCaptions(first_col=len(UserStatCaptions.get_captions()) + 3)
-        first_cell = A1.shift(column=columns.offset)
+        first_cell = A1.shift(column=columns.offset, row=TRANSACTION_FIRST_ROW)
         _make_auto_width(
             sheet=sheet,
             count=columns.get_count_columns(),
@@ -139,6 +145,24 @@ class ExcelWriter:
                     transaction.currency.symbol, self.current_currency.symbol,
                 ),
             )
+        sums = {
+            cur: sum(
+                map(
+                    lambda t: t.amount,
+                    filter(lambda t: t.currency.iso_code, transactions)
+                )
+            ) for cur in sorted({t.currency.iso_code for t in transactions})
+        }
+        sum_eur = sum(map(lambda t: t.amount_eur, transactions))
+
+        first_balance_cell = first_cell.shift(row=-1, column=1)
+        _insert_row(sheet, [f"Баланс в {config.default_currency.iso_code}", sum_eur], first_balance_cell)
+        self.format_rows(
+            sheet,
+            first_balance_cell,
+            [],
+            {config.default_currency.symbol: [columns.patch_column_by_offset(2 + TRANSACTION_FIRST_COL_SHIFT)]},
+        )
 
     def save(self, destination):
         self.wb.save(destination)
