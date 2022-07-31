@@ -42,13 +42,13 @@ class BalanceEvent(Model):
         if self.is_by_admin:
             result += (
                 f"📌 admin {self.author.mention_link} "
-                f"add transaction "
+                f"add transaction ID{self.id} "
                 f"for user {self.user.mention_link} "
             )
         else:
             result += (
                 f"{self.user.mention_link} "
-                f"add transaction "
+                f"add transaction ID{self.id} "
             )
         result += (
             f"{self.delta:+.2f} {self.currency} "
@@ -58,7 +58,7 @@ class BalanceEvent(Model):
 
     async def format_history(self, currencies: CurrenciesConfig):
         await self.fetch_related("author", "user")
-        result = f"{self.at.strftime('%d.%m.%Y')} "
+        result = f"{self.at.strftime('%d.%m.%Y')} ID{self.id} "
         if self.is_by_admin:
             result += f"📌"
         else:
