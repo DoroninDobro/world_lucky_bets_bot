@@ -16,7 +16,7 @@ from app.view.keyboards import balance as kb_balance
 
 
 @dp.message_handler(
-    commands=TRANSACTION_COMMAND.command, is_admin=False, chat_type=types.ChatType.PRIVATE,
+    commands=TRANSACTION_COMMAND, is_admin=False, chat_type=types.ChatType.PRIVATE,
 )
 async def add_transaction_start(message: types.Message, state: FSMContext, user: User):
     await state.set_state(AddTransaction.sign)
@@ -31,7 +31,7 @@ async def add_transaction_start(message: types.Message, state: FSMContext, user:
     )
 
 
-@dp.message_handler(commands=TRANSACTION_COMMAND.command, is_admin=True)
+@dp.message_handler(commands=TRANSACTION_COMMAND, is_admin=True)
 async def add_transaction_start(message: types.Message):
     await message.answer(
         text="You are an admin. This command only for workers.",

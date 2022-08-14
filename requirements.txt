@@ -2,7 +2,7 @@ aiohttp~=3.8.1
 loguru~=0.5.3
 tortoise-orm
 python-dateutil~=2.8.1
-git+https://github.com/bomzheg/aiogram@dev-2.x-default-protected-content
+aiogram~=2.22.1
 git+https://github.com/bomzheg/openexchangerates@master
 pyyaml~=6.0
 openpyxl~=3.0.6

@@ -43,7 +43,7 @@ class RenameThread(StatesGroup):
     name = State()
 
 
-@dp.message_handler(commands=START_COMMAND.command, commands_prefix='!/', is_admin=True)
+@dp.message_handler(commands=START_COMMAND, commands_prefix='!/', is_admin=True)
 @dp.throttled(rate=3)
 async def cmd_start(message: types.Message):
     """For start handler for not admin see base.py """
@@ -296,6 +296,6 @@ async def save_new_name_process(message: types.Message, state: FSMContext):
     await message.reply("Saved!")
 
 
-@dp.message_handler(is_admin=True, commands=USERS_COMMAND.command)
+@dp.message_handler(is_admin=True, commands=USERS_COMMAND)
 async def get_users_list(_: types.Message, dialog_manager: DialogManager):
     await dialog_manager.start(Panel.users, mode=StartMode.RESET_STACK)
